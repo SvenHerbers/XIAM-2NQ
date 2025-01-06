@@ -97,7 +97,7 @@ XIAM-2NQ uses 2I as input for control parameter 'spin', it also uses 2F as input
 XIAM_mod parameters: The additional empirical disortion parameters (Dc3K and Dc3-) available in 
                      XIAM_mod are also available in XIAM-NQ.
 Internal rotation overall - rotation distortion operator in XIAM_mod:
-
+<pre>
   Hird =  2 Dpi2J (p_alpha - rho P_r)**2 P**2
          + Dpi2K [(p_alpha - rho P_r)**2 P_z**2 
                                   + P_z**2 (p_alpha - rho P_r)**2]
@@ -106,9 +106,10 @@ Internal rotation overall - rotation distortion operator in XIAM_mod:
          + Dc3J  cos(3alpha) P**2
          + Dc3K  cos(3alpha) P_z**2         
          + Dc3-  cos(3alpha) (P_x**2 - P_y**2)
+</pre> 
 
 -----------------------------------------------------------------------------
-
+<pre>
   Program XIAM                   (Holger Hartwig, 15.November 1996)
                                  (email: hartwig@phc.uni-kiel.de  )
   Version 2.5e                   (email: phc25@rz.uni-kiel.d400.de)
