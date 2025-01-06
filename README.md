@@ -1,5 +1,5 @@
 # XIAM-2NQ
-XIAM-2NQ is a spectral fitting code that handles up to two quadrupolar nuclei and 4 internal rotors. It is an extension of the original XIAM code by Hartwig, available at the PROSPE website.
+XIAM-2NQ is a spectral fitting code that handles up to two quadrupolar nuclei and 4 internal rotors. It is an extension of the original XIAM code by Hartwig, available at the PROSPE (http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.
 The repository contains all source files which can be compiled using the make file to create a linux applications. Alternatively, the files can be compiled in steps using the ifortran compiler by intel.
 XIAMi2NQ.exe is a compiled executable using the Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32 (Version 2021.13.1).
 Compilation was carried out using the following command line entries: <br/> 
