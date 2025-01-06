@@ -1,0 +1,10 @@
+C ---------------------------------------------------------------------
+      character*8 parstr(MAXPAR) !Herbers2024
+      integer     parfit(MAXPAR)
+      character*6 ctlstr(DIMCINT+DIMCPAR)
+      character*5 qnostr(DIMQC)
+      integer q_q(DIMQC),qul(DIMQC)
+      character*5 gamstr(2*MAXTOP)
+      common /str1/ qnostr,gamstr,parstr,ctlstr
+      common /str2/ parfit,q_q,qul
+

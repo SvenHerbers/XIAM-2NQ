@@ -1,0 +1,32 @@
+C	common declaration for mgetx level 0
+      character*255 buf         ! the input buffer
+      integer bp                ! input buffer pointer
+      integer bl                ! input buffer overall length 
+      integer bpf               ! input buffer pointer to the begin of a substring (buffer_pointer_first)
+      integer bpl               ! input buffer pointer to the end of a substring (buffer_pointer_last)
+      integer del_ss            ! delimiter of a substring
+
+      character*1 CMT1a,CMT1b,CMT2,CMT3,QUOT
+      parameter (CMT1a='{')
+      parameter (CMT1b='}')
+      parameter (CMT2 ='!')
+      parameter (CMT3 ='\\')    ! char(92)   Backslash
+      parameter (QUOT ='''')    ! char(39)   prime 
+
+      common /cget0/bl,bp,bpf,bpl,del_ss
+      save   /cget0/
+      common /cgetc/buf
+      save   /cgetc/
+
+C	common declaration for mgetx debug options (level 0)
+      integer rdldbg
+      common /cgetd/rdldbg
+      save   /cgetd/
+
+C	common declaration for mgetx buffer pointer stack
+      integer dimbpst
+      parameter (dimbpst=128)
+      integer bpsp,bp_stack(dimbpst)
+      common /cgetst/bpsp,bp_stack
+      save   /cgetst/
+       
