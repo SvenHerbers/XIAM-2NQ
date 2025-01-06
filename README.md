@@ -2,37 +2,38 @@
 XIAM-2NQ is a spectral fitting code that handles up to two quadrupolar nuclei and 4 internal rotors. It is an extension of the original XIAM code by Hartwig, available at the PROSPE website.
 The repository contains all source files which can be compiled using the make file to create a linux applications. Alternatively, the files can be compiled in steps using the ifortran compiler by intel.
 XIAMi2NQ.exe is a compiled executable using the Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32 (Version 2021.13.1).
-Compilation was carried out using the following command line entries:
-ifort -c iamint.f
-ifort -c iamio.f
-ifort -c mgetx.f
-ifort -c iamv.f
-ifort -c iamlib.f
-ifort -c iamfit.f
-ifort -c iamv2.f
-ifort -c iamadj.f
-ifort -c iamm.f
-ifort -c iamsys.f
-ifort -c iam.f
+Compilation was carried out using the following command line entries: <br/> 
+ifort -c iamint.f <br/> 
+ifort -c iamio.f <br/> 
+ifort -c mgetx.f <br/> 
+ifort -c iamv.f <br/> 
+ifort -c iamlib.f <br/> 
+ifort -c iamfit.f <br/> 
+ifort -c iamv2.f <br/> 
+ifort -c iamadj.f <br/> 
+ifort -c iamm.f <br/> 
+ifort -c iamsys.f <br/> 
+ifort -c iam.f <br/> 
 
-ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f
+ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f <br/> 
 
 ----------------------------------------------------------------------------
   XIAM-2NQ v0.23 -  Sven Herbers, 6-Jan-2024, Sven.Herbers@web.de
   
   This is an updated version of XIAM-NQ with severale changes, the most important one
 being the implementation of exact quadrupole coupling for two nuclei. The changes come with 
-new control parameters. The go-to citations for this version aer: 
-...to be published...
-and
-  S. Herbers, J. Mol. Spectrosc., 2024, 405, 111950, DOI: 10.1016/j.jms.2024.111950 
+new control parameters. The go-to citations for this version are: <br/> 
+...to be published... <br/> 
+and <br/> 
+  S. Herbers, J. Mol. Spectrosc., 2024, 405, 111950, DOI: 10.1016/j.jms.2024.111950  <br/> 
 It follows a list of changes, the original documentation by Hartwig is printed below 
-for completeness.
+for completeness.<br/> 
 
 
 New control parameters:  
+
      ctrl (default 3)    If spin is not 0 this switches exact quadrupole coupling on (3) or off (0) 
-                           by discarding matrix elements off-diagonal in J. 
+                           by discarding matrix elements off-diagonal in J.                       
      ctrl 0 : Switches to XIAM_mod - matrix elements off-diagonal in J are ignored. It allows for 
                 analytical gradients for rigid rotor parameters and an increase in the torsional basis 
                 if DIMVV > 1 is used pre-compilation.
@@ -41,9 +42,7 @@ New control parameters:
      ctrl 2 : not used                      
      ctrl 3 : Exact quadrupole treatment, analytical gradients not implemented, increase in torsional 
                 basis (e.g. "V 0 1  V 1 0") not implemented.
-     
      qsum    (default 1000) partition function for SPCAT-type intensities.
-
      fsort   (default 3) This controls at which stage the F1 quantum number is assigned, relevant only
              for the two nuclei case. Case I: Separate by blocks of even and odd K as well as Wang signs
              first. Case II: use only separte blocks of even and odd K.
@@ -54,11 +53,11 @@ New control parameters:
      altering fsort might help if quantum number confusions are encounter (not uncommon in cases where 
      F1 is far from being a good quantum number)
 
-New fit parameters:
+New fit parameters:<br/> 
      Several new parameters, unrelated to the quadrupole treatment, have been implemented into the code. 
      These parameters are still being tested and will be described in a later version.
      
-Intensity calculations
+Intensity calculations <br/> 
      Previous XIAM versions did not implement intensity calculations for hyperfine components. An 
      approximation based on equation (15.142) from W. Gordy and R. L. Cook, Microwave Molecular Spectra, 
      3rd ed. (Wiley, New York, 1984), Vol. 18. has been implemented in XIAM-2NQ. 
@@ -67,7 +66,7 @@ Intensity calculations
      This approximations assumes that F1 and F are good quantum numbers. To loosen the restrictions
      on F1 a little, the F1 eigenvector components are used instead of the assigned F1 quantum number
      on ground and excited state. For each possible combination of F1 and F1' the expression is then  
-     calculated and multiplied with the probability of the combination.
+     calculated and multiplied with the probability of the combination. <br/> <br/> 
      
      To evaluate the 6j symbols, a function from the wigner.f90 module, written by O. C. Gorton 
      (https://github.com/ogorton/, ogorton@sdsu.edu), was rewritten into subroutines and integrated 
@@ -268,28 +267,28 @@ To get the '!', '{' or '\' characters without special meaning use
 from the other by an empty line. One block can not contain an empty line.
 Each block has a special meaning:
 
-1. Block: Title and Comments. 
-   This block will be written into the output file without any changes.
-
-2. Block: Control parameters.
-   In this block basic numbers are given, e.g. the number of internal rotors,
-   the nuclear spin I ...
-
-3. Block: Molecular parameters.
-   Here the initial values of the parameters of the Hamiltonian are given.
-
-4. Block: Parameters to fit.
-   The parameters (or linear combination of parameters) which are to be
-   fitted are declared here.
-
-5. Block: Symmetry labeling.
-   The symmetry species of the internal rotation (A, E) are defined here.
-
-6. Block: Torsional states.
-   The torsional basis functions for the matrix are defined.
-
-7. Block: Transitions
-   The quantum numbers and frequencies (if already known) are typed here.
+  1. Block: Title and Comments. 
+     This block will be written into the output file without any changes.
+  
+  2. Block: Control parameters.
+     In this block basic numbers are given, e.g. the number of internal rotors,
+     the nuclear spin I ...
+  
+  3. Block: Molecular parameters.
+     Here the initial values of the parameters of the Hamiltonian are given.
+  
+  4. Block: Parameters to fit.
+     The parameters (or linear combination of parameters) which are to be
+     fitted are declared here.
+  
+  5. Block: Symmetry labeling.
+     The symmetry species of the internal rotation (A, E) are defined here.
+  
+  6. Block: Torsional states.
+     The torsional basis functions for the matrix are defined.
+  
+  7. Block: Transitions
+     The quantum numbers and frequencies (if already known) are typed here.
 
 Block 5 and 6 can be omitted if only a rigid rotor is calculated.
 
@@ -303,74 +302,75 @@ has a special meaning (e.g. woods and adj).
 1. Block: (no keyword)
 
 2. Block:
-ncyc (or nzyk)
-        maximum number of iteration cycles for the fit            C_NZYK   
-print   controls the output amount. (0)                          C_PRINT
-aprint  fine control of output amount (for debugging) 
-xprint  fine control of output amount (for debugging) 
-ints        intensity calculation                                     C_INTS 
-        0: no intensities 
-        1: intensities  of the transitions in the input-list
-        2: output of all transitions whose frequencies are
-           in the region 'freq_l'  to 'freq_h' and have intensities 
-           more than 'limit'. 
-           Output for low barrier molecules (sorted acc. symmetry label) 
-        3: same as 2: but with a different sorting scheme.
-           better suited for high barrier cases.
-reduc   type of reduction (0: Watson A, 1: Watson S, 2: van Eijck-Typke)
-freq_l  low boundary for int = 2 and 3 
-freq_h  upper boundary for int = 2 and 3 
-limit   intensity -limit for int = 2 and 3 
-temp    temperature for the Boltzmann distribution intensities 
-orger   use the given freqency errors to calculate the errors    C_ORGER
-        of the parameters (1) or calculate weights of the 
-        frequency errors and use obs.-calc. to calculate the 
-        standard deviation of the parameters (0)  
-eval    create a file 'eval.out' containing the eigenvalues       C_EVAL 
-        (0: no  1:yes)
-dfrq        create a file 'dfreq.out' containing the derivatives      C_DFRQ 
-        of the frequencies (0: no  1:yes)
-maxm    number of basis functions for all tops. (8)
-        2*maxm+1 functions will be used in the matrix 
-        of operator Hi
-woods   controls the treatment of torsional integrals (abbr. TI) 
-        <v_k sigma|v'_k' sigma'> for all sets.
-        sum of binary values: 
-        1:  calculate TI (required for the following terms)
-        2:  normalize TI 
-        4:  use TI in the transformation of one top (exact)
-        8:  use TI in the transformation of all other tops
-       32:  use TI in the rigid rotor part
-       64:  use TI in the transformation of one top 
-                                           (approximation Vacherand)
-        if woods 0 is used TI's are completely ignored.
-        normally good results can be obtained 
-        with woods 33 (= 32 + 1)
-ndata       number of transitions to be read (normally not used)      C_NDATA
-nfold   potential barrier fold  (normally 3 for methyl tops)      C_NFOLD
-spin    twice nuclear spin of quadrupole coupling nucleus        C_SPIN 
-        Nitrogen-14 : spin 2
-ntop    number of internal rotating tops                         C_NTOP 
-adjf    controls the value of F, F12, rho depending on the       C_ADJF 
-        geometry (the values of rho and the angles)
-        sum of binary values:
-        1:  calculate F from rho, beta, and gamma each iteration
-        2:  calculate F12 from rho, beta, and gamma each iteration
-        4:  calculate F in a single top mode always (w/o F12)
-        8:  calculate rho from F0, beta and gamma 
-       16:  calculate rho, delta and epsilon from F0, beta and gamma 
-           adfj is automatically calculated if not specified in the input.
-rofit   robust fitting control (0:off       )                 C_ROFIT
-defer       default frequency error                                 C_DEFER
-eps         tolerance limit in the SVD fit                          C_EPS  
-weigf       not used 
-convg       convergence limit (0.99 to 0.999999)                    C_CNVG 
-lambda  initial value of lambda in the Marquardt fit            C_LMBDA
-fitscl  scale the design matrix (1:no 0:yes)                    C_FITSC
-svderr  calculate the errors including all parameters  (1:no 0:yes)   
-        (including parameters rejected by the SVD-fit)
 
-3. Block
+  ncyc (or nzyk)
+          maximum number of iteration cycles for the fit            C_NZYK   
+  print   controls the output amount. (0)                          C_PRINT
+  aprint  fine control of output amount (for debugging) 
+  xprint  fine control of output amount (for debugging) 
+  ints        intensity calculation                                     C_INTS 
+          0: no intensities 
+          1: intensities  of the transitions in the input-list
+          2: output of all transitions whose frequencies are
+             in the region 'freq_l'  to 'freq_h' and have intensities 
+             more than 'limit'. 
+             Output for low barrier molecules (sorted acc. symmetry label) 
+          3: same as 2: but with a different sorting scheme.
+             better suited for high barrier cases.
+  reduc   type of reduction (0: Watson A, 1: Watson S, 2: van Eijck-Typke)
+  freq_l  low boundary for int = 2 and 3 
+  freq_h  upper boundary for int = 2 and 3 
+  limit   intensity -limit for int = 2 and 3 
+  temp    temperature for the Boltzmann distribution intensities 
+  orger   use the given freqency errors to calculate the errors    C_ORGER
+          of the parameters (1) or calculate weights of the 
+          frequency errors and use obs.-calc. to calculate the 
+          standard deviation of the parameters (0)  
+  eval    create a file 'eval.out' containing the eigenvalues       C_EVAL 
+          (0: no  1:yes)
+  dfrq        create a file 'dfreq.out' containing the derivatives      C_DFRQ 
+          of the frequencies (0: no  1:yes)
+  maxm    number of basis functions for all tops. (8)
+          2*maxm+1 functions will be used in the matrix 
+          of operator Hi
+  woods   controls the treatment of torsional integrals (abbr. TI) 
+          <v_k sigma|v'_k' sigma'> for all sets.
+          sum of binary values: 
+          1:  calculate TI (required for the following terms)
+          2:  normalize TI 
+          4:  use TI in the transformation of one top (exact)
+          8:  use TI in the transformation of all other tops
+         32:  use TI in the rigid rotor part
+         64:  use TI in the transformation of one top 
+                                             (approximation Vacherand)
+          if woods 0 is used TI's are completely ignored.
+          normally good results can be obtained 
+          with woods 33 (= 32 + 1)
+  ndata       number of transitions to be read (normally not used)      C_NDATA
+  nfold   potential barrier fold  (normally 3 for methyl tops)      C_NFOLD
+  spin    twice nuclear spin of quadrupole coupling nucleus        C_SPIN 
+          Nitrogen-14 : spin 2
+  ntop    number of internal rotating tops                         C_NTOP 
+  adjf    controls the value of F, F12, rho depending on the       C_ADJF 
+          geometry (the values of rho and the angles)
+          sum of binary values:
+          1:  calculate F from rho, beta, and gamma each iteration
+          2:  calculate F12 from rho, beta, and gamma each iteration
+          4:  calculate F in a single top mode always (w/o F12)
+          8:  calculate rho from F0, beta and gamma 
+         16:  calculate rho, delta and epsilon from F0, beta and gamma 
+             adfj is automatically calculated if not specified in the input.
+  rofit   robust fitting control (0:off       )                 C_ROFIT
+  defer       default frequency error                                 C_DEFER
+  eps         tolerance limit in the SVD fit                          C_EPS  
+  weigf       not used 
+  convg       convergence limit (0.99 to 0.999999)                    C_CNVG 
+  lambda  initial value of lambda in the Marquardt fit            C_LMBDA
+  fitscl  scale the design matrix (1:no 0:yes)                    C_FITSC
+  svderr  calculate the errors including all parameters  (1:no 0:yes)   
+          (including parameters rejected by the SVD-fit)
+
+4. Block
 
 This block defines the initial values of the parameters in the Hamiltonian.
 If different sets of rotational constants are used, the keywords contain
@@ -378,64 +378,64 @@ additional numbers in parenthesis, e.g. BJ(2) is the BJ value for the second
 set of constants (noted as B 2 in the transition list).
 If no number is given, the parameter is equal for all sets of constants. 
 
-BJ  *    0.5 (B_x + B_y)       B_x,y,z are the cartesian rotational constants
-BK  *    B_z - 0.5 (B_x + B_y) The representation must be chosen with the 
-B-  *    0.5 (B_x - B_y)       initial values of BJ, BK, B-.
-
-DJ  *    4th order centrifugal distortion  
-DJK *  
-DK  *  
-dj  *  
-dk or R6  *    choose R6 for van Eijck Typke's reduction. 
-
-H_J *    6th order centrifugal distortion  
-HJK *  
-HKJ *  
-H_K *  
-h_j *  
-hjk *  
-h_k *  
-       
-chi_zz *   \chi zz     Quadrupole coupling constants
-chi-   *   \chi minus
-chi_xy *    
-chi_xz *  
-chi_yz *  
-
-C+  * = C_x + C_y      Spin Rotation coupling
-C_z *
-C-  * = C_x - C_y
-
-F12     Top Top interaction constants
-Vss    
-Vcc    
+  BJ  *    0.5 (B_x + B_y)       B_x,y,z are the cartesian rotational constants
+  BK  *    B_z - 0.5 (B_x + B_y) The representation must be chosen with the 
+  B-  *    0.5 (B_x - B_y)       initial values of BJ, BK, B-.
+  
+  DJ  *    4th order centrifugal distortion  
+  DJK *  
+  DK  *  
+  dj  *  
+  dk or R6  *    choose R6 for van Eijck Typke's reduction. 
+  
+  H_J *    6th order centrifugal distortion  
+  HJK *  
+  HKJ *  
+  H_K *  
+  h_j *  
+  hjk *  
+  h_k *  
          
-V1n_1    V1n_2       internal rotation parameters for each top. a third top 
-V2n_1        V2n_2       can be calculated if the matrix dimensions are set  
-F_1          F_2         properly in the 'iam.fi' file before compilation.
-rho_1        rho_2  
-beta_1       beta_2 
-gamma_1      gamma_2
-Dpi2J_1      Dpi2J_2 
-Dpi2K_1      Dpi2K_2
-Dpi2-_1      Dpi2-_2
-Dc3J_1       Dc3J_2
-F0_1         F0_2       The inverse value of I_alpha in GHz (F0 = 505.379/I_alpha) 
-delta_1  delta_2    The angle between the internal rotation axis and the 
-                    principal axis z (radiant: 0...2Pi).
-epsil_1  epsil_2    The angle between the principal axis x and the projection
-                    of the internal rotation axis onto xy-plane.
-             The delta and epsilon angles are the polar-coordinates 
-             of the internal rotation axis in the principal axes system.
-             lambda_z = cos(delta)
-             lambda_x = sqrt((1-cos(delta)^2)) * cos(epsilon) 
-             lambda_y = sqrt((1-cos(delta)^2)) * sin(epsilon) 
-         cos(epsilon) = lambda_x * sign(lambda_y)/ SQRT(lambda_x^2 + lambda_y^2)   
-                                                 ! SQRT correction: Mark Marshall 31.08.2021
-
-mu_x  Dipole moment components for intensity calculation.   
-mu_y  can not be fitted.
-mu_z
+  chi_zz *   \chi zz     Quadrupole coupling constants
+  chi-   *   \chi minus
+  chi_xy *    
+  chi_xz *  
+  chi_yz *  
+  
+  C+  * = C_x + C_y      Spin Rotation coupling
+  C_z *
+  C-  * = C_x - C_y
+  
+  F12     Top Top interaction constants
+  Vss    
+  Vcc    
+           
+  V1n_1    V1n_2       internal rotation parameters for each top. a third top 
+  V2n_1        V2n_2       can be calculated if the matrix dimensions are set  
+  F_1          F_2         properly in the 'iam.fi' file before compilation.
+  rho_1        rho_2  
+  beta_1       beta_2 
+  gamma_1      gamma_2
+  Dpi2J_1      Dpi2J_2 
+  Dpi2K_1      Dpi2K_2
+  Dpi2-_1      Dpi2-_2
+  Dc3J_1       Dc3J_2
+  F0_1         F0_2       The inverse value of I_alpha in GHz (F0 = 505.379/I_alpha) 
+  delta_1  delta_2    The angle between the internal rotation axis and the 
+                      principal axis z (radiant: 0...2Pi).
+  epsil_1  epsil_2    The angle between the principal axis x and the projection
+                      of the internal rotation axis onto xy-plane.
+               The delta and epsilon angles are the polar-coordinates 
+               of the internal rotation axis in the principal axes system.
+               lambda_z = cos(delta)
+               lambda_x = sqrt((1-cos(delta)^2)) * cos(epsilon) 
+               lambda_y = sqrt((1-cos(delta)^2)) * sin(epsilon) 
+           cos(epsilon) = lambda_x * sign(lambda_y)/ SQRT(lambda_x^2 + lambda_y^2)   
+                                                   ! SQRT correction: Mark Marshall 31.08.2021
+  
+  mu_x  Dipole moment components for intensity calculation.   
+  mu_y  can not be fitted.
+  mu_z
 
 Note: often the value of I_alpha is predicted by the geometry (methyl top
       I_alpha = 3.18 - 3.2 uAA). To fix this value in the fit one must  
