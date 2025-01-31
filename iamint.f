@@ -40,6 +40,7 @@ C----------------------------------------------------------------------
       integer sizeup(DIMSIZ),sizelo(DIMSIZ)
       integer qvkup(DIMTOT,Q_K:Q_V+DIMTOP),qvklo(DIMTOT,Q_K:Q_V+DIMTOP)
       integer qup(DIMQLP),qlo(DIMQLP) 
+      integer qmkup(DIMTOT,DIMQLP), qmklo(DIMTOT,DIMQLP)
       real*8  vrup(DIMTOT),vrlo(DIMTOT),viup(DIMTOT),vilo(DIMTOT)
 C
       real*8 eup,elo
@@ -121,9 +122,9 @@ C     $            ,qvklo,vrlo,vilo,elo,qlo,F1slo,nF1slo)
 C        call rdvecQ(jup,tup,sup,fup,bup,f1up,sizeup
 C     $            ,qvkup,vrup,viup,eup,qup,F1sup,nF1sup)
         call rdmatQ(jup,sup,fup,bup,f1up,sizeup
-     $            ,qvkup,hrup,hiup,eupM,qup,F1sup,nF1sup)
+     $            ,qvkup,hrup,hiup,eupM,qmkup,F1sup,nF1sup)
         call rdmatQ(jlo,slo,flo,blo,f1lo
-     $             ,sizelo,qvklo,hrlo,hilo,eloM,qlo,F1slo,nF1slo)
+     $             ,sizelo,qvklo,hrlo,hilo,eloM,qmklo,F1slo,nF1slo)
      
       sjsum=0.0
       sj2sum=0.0
@@ -392,22 +393,22 @@ C ----------------------------------------------------------------------
 C      write(0,*) if1, int(if1/10), mod(if1,10)
       if (if.ge.0) then
        if (if1.ge.0) then 
-        write(binfname,'(A,2I1,A,2I1,A,2I1,A,I1,A,2I1)')!h2024
-     $       'j',int(ij/10),mod(ij,10),           !h2024
-     $       'f',int(if/10),mod(if,10),           !h2024
-     $       'f1',int(if1/10),mod(if1,10),        !h2024
+        write(binfname,'(A,3I1,A,3I1,A,3I1,A,I1,A,2I1)')!h2024
+     $       'j',int(ij/100),mod(int(ij/10),10),mod(ij,10),
+     $       'f',int(if/100),mod(int(if/10),10),mod(if,10),           !h2024
+     $       'f1',int(if1/100),mod(int(if1/10),10),mod(if1,10),        !h2024
      $       'b',ib,                              !h2024
      $       '.s',int(gam/10),mod(gam,10)         !h2024
        else
-              write(binfname,'(A,2I1,A,2I1,A,I1,A,2I1)')
-     $       'j',int(ij/10),mod(ij,10),
-     $       'f',int(if/10),mod(if,10),
+              write(binfname,'(A,3I1,A,3I1,A,I1,A,2I1)')
+     $       'j',int(ij/100),mod(int(ij/10),10),mod(ij,10),
+     $       'f',int(if/100),mod(int(if/10),10),mod(if,10),
      $       'b',ib,
      $       '.s',int(gam/10),mod(gam,10)
        end if
       else
-        write(binfname,'(A,2I1,A,I1,A,2I1)')
-     $       'j',int(ij/10),mod(ij,10),
+        write(binfname,'(A,3I1,A,I1,A,2I1)')
+     $       'j',int(ij/100),mod(int(ij/10),10),mod(ij,10),
      $       'b',ib,
      $       '.s',int(gam/10),mod(gam,10)
       end if
@@ -431,7 +432,6 @@ C ----------------------------------------------------------------------
       call getfu(bu)
       if (myand(ctlint(C_PRI),AP_ST).ne.0)
      $     write(*,*)' Writing ',binfname
-      
       open(bu,file=binfname,status='unknown',err=99,iostat=ios
      $     ,form='unformatted')
       write(bu,err=99,iostat=ios) (size(ie),ie=1,DIMSIZ)
@@ -507,7 +507,6 @@ C ----------------------------------------------------------------------
       character*30 binfname     
 
       call getfu(bu)
-c      write(0,*)'rdmat',bu
       call binnam(ij,is,if,ib,if1,binfname)
       open(bu,file=binfname,status='unknown',form='unformatted')
       read(bu) (mysize(ie),ie=1,DIMSIZ)
@@ -786,6 +785,8 @@ C      character*6 fno
       enull=0.0
       fup=-1
       flo=-1
+      f1lo=-1
+      f1up=-1
       isf=1
 c      if (ctlint(C_NTOP).eq.0) isf=0
       do blo=1,size(S_NB) ! run over all B
@@ -1291,8 +1292,8 @@ C     real*8  vrup(DIMTOT),vrlo(DIMTOT),viup(DIMTOT),vilo(DIMTOT)
       real*8  hrup(DIMTOT,DIMTOT),hrlo(DIMTOT,DIMTOT)
       real*8  hiup(DIMTOT,DIMTOT),hilo(DIMTOT,DIMTOT)
       integer jup,jlo
-      integer checkjjff(0:DIMJ,0:DIMJ,0:DIMJ+(DIMQ+1)/2
-     $  ,0:DIMJ+(DIMQ+1)/2)
+C      integer checkjjff(0:DIMJ,0:DIMJ,0:DIMJ+(DIMQ+1)/2
+C     $  ,0:DIMJ+(DIMQ+1)/2)
       integer j1,j2,km1,km2,kp1,kp2,k1,k2,t1,t2,i,f1,f2
       integer f11,f12 !herbers2024
       integer fup,flo,tup,tlo,sup,slo,bup,blo,vup,vlo,isf
@@ -1357,7 +1358,7 @@ C     real*8  vrup(DIMTOT),vrlo(DIMTOT),viup(DIMTOT),vilo(DIMTOT)
           vup=vlo
           do slo=isf,size(S_G)
             sup=slo
-            checkjjff=-1
+C            checkjjff=-1
             
               if ((ctlint(C_DW).eq.3).and.(ctlint(C_SPIN).ne.0)) then
                runf1=ctlint(C_SPIN)
@@ -1431,7 +1432,6 @@ C     real*8  vrup(DIMTOT),vrlo(DIMTOT),viup(DIMTOT),vilo(DIMTOT)
             end if !END-CHECK-EXIST-SPIN
             
             if (skip.ne.1) then!IF-SKIP
-
             if (((ctlint(C_SPIN).ne.0).and.(ctlint(C_SPIN2).ne.0))
      $          .and.((flo.ne.-1).and.(fup.ne.-1))) then
             call rdmatQ(jup,sup,fup,bup,f1up,sizeup

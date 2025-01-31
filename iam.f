@@ -71,8 +71,8 @@ C     real*8  ab(DIMPAR)
 C      write(*,'(A,$)') ' Calculation date and time: '
       call mydate()
       write(*,*)
-      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.23 -' 
-     $                  ,'By Sven Herbers 05-Jan-2025' 
+      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.24 -' 
+     $                  ,'By Sven Herbers 31-Jan-2025' 
       write(*,*) 'sven_herbers@web.de'
       write(*,*) 'Cite: S. Herbers, J. Mol. Spectrosc., 2024, '
      $         ,'405, 111950, DOI: 10.1016/j.jms.2024.111950 ' 
