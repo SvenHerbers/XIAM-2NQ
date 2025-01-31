@@ -20,9 +20,10 @@ ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f i
 ----------------------------------------------------------------------------
   XIAM-2NQ v0.24 - Sven Herbers, 31-Jan-2024  
 
-  A small update to fix some issue if int 3 predictions not working when spins are 0.
-  In addition modifications were made to allow for intensitiy predictions with J>100, if iam.fi 
-  is modified accordingly.
+  A small update to the iamint.f file:
+  - An error was fixed that caused int 3 predictions to not work if no spin was present.
+  - Modifications were made to allow for intensitiy predictions with J>100, if iam.fi 
+    is modified accordingly and XIAM is recompiled. 
 
   XIAM-2NQ v0.23 -  Sven Herbers, 6-Jan-2024 
   
