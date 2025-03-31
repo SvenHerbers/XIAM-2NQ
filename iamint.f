@@ -17,12 +17,12 @@ C                    ! strlg is the intensity given in cat
 C                    ! elow is energy of lower state
 C                    ! fac = (4.16231e-5) / qrot
 C                    ! frq = frequency
-C                    ! tmq = tmc / (Temperature * cmc)
+C                    ! tmq = tmc / (Temperature * elow/cmc,spcat)
 C                    ! tmql = tmq * 0.43429448
 C                    !
 C                    !Params defined above:
 C                    ! tmc = -1.43878
-C                    ! cmc = 29979.2458
+C                    ! elow/cmc,spcat = 29979.2458
 C                    !
 C                    ! intensities following picketts definition will be written as 
 C                    ! spcat (name in code "spcat"
@@ -798,8 +798,9 @@ c      if (ctlint(C_NTOP).eq.0) isf=0
         write(*,*) 'difference, based on qsum'
         write(*,*)
         write(*,*) ' spcat is intensity as expected from spcat'
-        write(*,'(A,I2,28X,2A12,A12,4A12)') '-- B',blo,'Freq','Split  '
+        write(*,'(A,I2,28X,7A12,A13)') '-- B',blo,'Freq','Split  '
      $       ,'log10_str**2','log10_total','stat.w.','d_pop.','spcat'
+     $       ,'elow(cm-1)'
         call rdtori(tori,blo) !calculate tori for B
         bup=blo               !bup = blo by default in  intensity calculations 
         do vlo=1,size(S_VV)   !Run over all V
@@ -1168,56 +1169,58 @@ C                    end if
                     if (ctlint(C_SPIN2).ne.0) then !START-SPIN-2
                     if ((t02.eq.t2).and.(t01.eq.t1).and.(sup.gt.isf))!START-t !Both SPINS are present.
      $                   then
-             write(*,'(39X,(A,I2),10X,F13.6,F10.4,5F12.4,2(A,2I3))')
+             write(*,'(39X,(A,I2),10X,F13.6,F10.4,5F12.4,F13.6,
+     $                 2(A,2I3))')
      $               '  S',sup
      $               ,freq,(freq-sfrq)*1000.0,log10(ints),bolt,statw !Herbers2023 this is int 3
-     $               ,log10(popl),spcat,'  K',k1,k2,'  t',t1,t2
+     $               ,log10(popl),spcat,elow/cmc,'  K',k1,k2,'  t',t1,t2
                     else !ELSE-t
                       if (sup.gt.0) then !START-S
              write(*,'(2(3I3,1X),A4,2I3,A3,2I3,3(A,I2),
-     $                F13.6,10X,5F12.4,2(A,2I3))')
+     $                F13.6,10X,5F12.4,F13.6,2(A,2I3))')
      $                 j1 ,km1, kp1,j2 ,km2, kp2,' F1 ', f11, f12
      $               ,' F ', f1, f2
      $               ,'  S',sup,'  V',vup,'  B',bup
      $               ,freq                   ,log10(ints),bolt,statw !Herbers2023
-     $               ,log10(popl),spcat,'  K',k1,k2,'  t',t1,t2
+     $               ,log10(popl),spcat,elow/cmc,'  K',k1,k2,'  t',t1,t2
                       end if !END-S
                     end if!END-t
                     if (sup.eq.0) then!START-S
              write(*,'(2(3I3,1X),A4,2I3,A3,2I3,A15,F13.6,
-     $                  10X,5F12.4,2(A,2I3))')
+     $                  10X,5F12.4,F13.6,2(A,2I3))')
      $                 j1 ,km1, kp1,j2 ,km2, kp2,' F1 ', f11, f12,' F '
      $               , f1, f2,
      $               '  rigid  '
      $               ,freq                   ,log10(ints),bolt,statw !Herbers2023
-     $               ,log10(popl),spcat,'  K',k1,k2,'  t',t1,t2
+     $               ,log10(popl),spcat,elow/cmc,'  K',k1,k2,'  t',t1,t2
                     end if!END-S
                     
                     else ! ELSE-SPIN2
                     
                     if ((t02.eq.t2).and.(t01.eq.t1).and.(sup.gt.isf))!START-t
      $                   then
-             write(*,'(30X,(A,I2),10X,F13.6,F10.4,5F12.4,2(A,2I3))')
+             write(*,'(30X,(A,I2),10X,F13.6,F10.4,5F12.4,F13.6,
+     $                2(A,2I3))')
      $               '  S',sup
      $               ,freq,(freq-sfrq)*1000.0,log10(ints),bolt,statw !Herbers2023 this is int 3
-     $               ,log10(popl),spcat,'  K',k1,k2,'  t',t1,t2
+     $               ,log10(popl),spcat,elow/cmc,'  K',k1,k2,'  t',t1,t2
                     else !ELSE-t
                       if (sup.gt.0) then !START-S
              write(*,'(2(3I3,1X),A3,2I3,3(A,I2),
-     $                F13.6,10X,5F12.4,2(A,2I3))')
+     $                F13.6,10X,5F12.4,F13.6,2(A,2I3))')
      $                 j1 ,km1, kp1,j2 ,km2, kp2,' F ', f11, f12,
      $               '  S',sup,'  V',vup,'  B',bup
      $               ,freq                   ,log10(ints),bolt,statw !Herbers2023
-     $               ,log10(popl),spcat,'  K',k1,k2,'  t',t1,t2
+     $               ,log10(popl),spcat,elow/cmc,'  K',k1,k2,'  t',t1,t2
                       end if !END-S
                     end if!END-t
                     if (sup.eq.0) then!START-S
              write(*,'(2(3I3,1X),A3,2I3,A15,F13.6,
-     $                  10X,5F12.4,2(A,2I3))')
+     $                  10X,5F12.4,F13.6,2(A,2I3))')
      $                 j1 ,km1, kp1,j2 ,km2, kp2,' F ', f11, f12, 
      $               '  rigid  '
      $               ,freq                   ,log10(ints),bolt,statw !Herbers2023
-     $               ,log10(popl),spcat,'  K',k1,k2,'  t',t1,t2
+     $               ,log10(popl),spcat,elow/cmc,'  K',k1,k2,'  t',t1,t2
                     end if!END-S
                     
                     end if !END-SPIN2
@@ -1227,25 +1230,28 @@ C                    end if
                      
                     if ((t02.eq.t2).and.(t01.eq.t1).and.(sup.gt.isf)) !No hyperfine
      $                   then
-             write(*,'(20X,(A,I2),10X,F13.6,F10.4,5F12.4,2(A,2I3))')
+             write(*,'(20X,(A,I2),10X,F13.6,F10.4,5F12.4,F13.6,
+     $             2(A,2I3))')
      $               '  S',sup
      $               ,freq,(freq-sfrq)*1000.0,log10(ints),bolt,statw !Herbers2023 this is int 3
-     $               ,log10(popl),spcat,'  K',k1,k2,'  t',t1,t2
+     $               ,log10(popl),spcat,elow/cmc,'  K',k1,k2,'  t',t1,t2
                     else
                       if (sup.gt.0) then
-             write(*,'(2(3I3,1X),3(A,I2),F13.6,10X,5F12.4,2(A,2I3))')
+             write(*,'(2(3I3,1X),3(A,I2),F13.6,10X,5F12.4,F13.6,
+     $             2(A,2I3))')
      $                 j1 ,km1, kp1,j2 ,km2, kp2,
      $               '  S',sup,'  V',vup,'  B',bup
      $               ,freq                   ,log10(ints),bolt,statw !Herbers2023
-     $               ,log10(popl),spcat,'  K',k1,k2,'  t',t1,t2
+     $               ,log10(popl),spcat,elow/cmc,'  K',k1,k2,'  t',t1,t2
                       end if
                     end if
                     if (sup.eq.0) then
-             write(*,'(2(3I3,1X),A15    ,F13.6,10X,5F12.4,2(A,2I3))')
+             write(*,'(2(3I3,1X),A15    ,F13.6,10X,5F12.4,F13.6,
+     $             2(A,2I3))')
      $                 j1 ,km1, kp1,j2 ,km2, kp2,
      $               '  rigid  '
      $               ,freq                   ,log10(ints),bolt,statw !Herbers2023
-     $               ,log10(popl),spcat,'  K',k1,k2,'  t',t1,t2
+     $               ,log10(popl),spcat,elow/cmc,'  K',k1,k2,'  t',t1,t2
                     end if
                     
                     
@@ -1341,15 +1347,15 @@ C     $  ,0:DIMJ+(DIMQ+1)/2)
         write(*,*)        
         write(*,*) ' spcat is intensity as expected from spcat'
         if ((ctlint(C_SPIN).ne.0).and.(ctlint(C_SPIN2).ne.0)) then  ! Depending on the number of spins the space before Freq is printed is larger
-        write(*,'(A,I2,44X,A12,5A12)') '-- B',blo,'Freq ','log10_str**2'
-     $       ,'log10_total','stat.w.','d_pop','spcat'
+        write(*,'(A,I2,44X,6A12,A13)') '-- B',blo,'Freq ','log10_str**2'
+     $       ,'log10_total','stat.w.','d_pop','spcat','elow(cm-1)'
         else 
          if ((ctlint(C_SPIN).ne.0).and.(ctlint(C_DW).eq.3)) then
-        write(*,'(A,I2,34X,A12,5A12)') '-- B',blo,'Freq ','log10_str**2'
-     $       ,'log10_total','stat.w.','d_pop','spcat'
+        write(*,'(A,I2,34X,6A12,A13)') '-- B',blo,'Freq ','log10_str**2'
+     $       ,'log10_total','stat.w.','d_pop','spcat','elow(cm-1)'
          else
-        write(*,'(A,I2,25X,A12,5A12)') '-- B',blo,'Freq ','log10_str**2'
-     $       ,'log10_total','stat.w.','d_pop','spcat'
+        write(*,'(A,I2,25X,6A12,A13)') '-- B',blo,'Freq ','log10_str**2'
+     $       ,'log10_total','stat.w.','d_pop','spcat','elow(cm-1)'
          end if
         end if
         bup=blo
@@ -1645,51 +1651,53 @@ C                    end if
           if (ctlint(C_SPIN2).ne.0) then !START SPIN2
            if (.false.) then !START-GAM (gamma(sup,0).eq.0) then   ! deactivated the -K prints because I cant figure out what to use them for.
          write(*,'(2(I3,A3,I3,1X),A4,I3,I3,A3,I3,I3,2(A,I2)
-     $   ,F13.6,5F12.4,A,I2,2(A,2I3))')
+     $   ,F13.6,5F12.4,F13.6,A,I2,2(A,2I3))')
      $                  j1 ,' K ', k1, j2 ,' K ',k2,' F1 ', f11 , f12 
      $                       ,' F ', f1 , f2 
      $                     ,'  S',sup,'  V',vup
-     $                    ,freq,log10(ints),bolt,statw,log10(popl)!Herbers2023
-     $                     ,spcat,'  B',bup,'  K',k1,k2,'  t',t1,t2
+     $                   ,freq,log10(ints),bolt,statw,log10(popl)!Herbers2023
+     $               ,spcat,elow/cmc,'  B',bup,'  K',k1,k2,'  t',t1,t2
            else! ELSE-GAM
           write(*,'(2(3I3,1X),A4,I3,I3,A3,I3,I3,2(A,I2)
-     $    ,F13.6,5F12.4,A,I2,2(A,2I3))')
+     $    ,F13.6,5F12.4,F13.6,A,I2,2(A,2I3))')
      $                       j1 ,km1, kp1, j2 ,km2, kp2,' F1 ', f11 
      $                      , f12, ' F ', f1 , f2      
      $                      ,'  S',sup,'  V',vup
      $                    ,freq,log10(ints),bolt,statw,log10(popl),spcat!Herbers2023
-     $                     ,'  B',bup,'  K',k1,k2,'  t',t1,t2
+     $                     ,elow/cmc,'  B',bup,'  K',k1,k2,'  t',t1,t2
            end if !END-GAM
           else           !ELSE SPIN 2
            if (.false.) then !START_GAM(gamma(sup,0).eq.0) then   ! deactivated the -K prints because I cant figure out what to use them for.
          write(*,'(2(I3,A3,I3,1X),A3,I3,I3,2(A,I2)
-     $   ,F13.6,5F12.4,A,I2,2(A,2I3))')
+     $   ,F13.6,5F12.4,F13.6,A,I2,2(A,2I3))')
      $                  j1 ,' K ', k1, j2 ,' K ',k2,' F ', f11 , f12 
      $                      ,'  S',sup,'  V',vup
      $                    ,freq,log10(ints),bolt,statw,log10(popl),spcat!Herbers2023
-     $                     ,'  B',bup,'  K',k1,k2,'  t',t1,t2
+     $                     ,elow/cmc,'  B',bup,'  K',k1,k2,'  t',t1,t2
            else!ELSE-GAM
           write(*,'(2(3I3,1X),A3,I3,I3,2(A,I2)
-     $    ,F13.6,5F12.4,A,I2,2(A,2I3))')
+     $    ,F13.6,5F12.4,F13.6,A,I2,2(A,2I3))')
      $                       j1 ,km1, kp1, j2 ,km2, kp2,' F ', f11  
      $                      , f12,'  S',sup,'  V',vup
      $                    ,freq,log10(ints),bolt,statw,log10(popl),spcat!Herbers2023
-     $                     ,'  B',bup,'  K',k1,k2,'  t',t1,t2
+     $                     ,elow/cmc,'  B',bup,'  K',k1,k2,'  t',t1,t2
           end if !END-IF-GAM
          end if !END-SPIN2
          else !ELSE-SPIN1
           if (.false.) then !START-GAM(gamma(sup,0).eq.0) then ! deactivated the -K prints because I cant figure out what to use them for.
-          write(*,'(2(I3,A3,I3,1X),2(A,I2),F13.6,5F12.4,A,I2,2(A,2I3))')
+          write(*,'(2(I3,A3,I3,1X),2(A,I2),F13.6,5F12.4,F13.6,
+     $          A,I2,2(A,2I3))')
      $                       j1 ,' K ', k1,j2 ,' K ',k2,
      $                       '  S',sup,'  V',vup
      $                    ,freq,log10(ints),bolt,statw,log10(popl),spcat!Herbers2023
-     $                     ,'  B',bup,'  K',k1,k2,'  t',t1,t2
+     $                     ,elow/cmc,'  B',bup,'  K',k1,k2,'  t',t1,t2
           else!ELSE-GAM
-          write(*,'(2(3I3,1X),2(A,I2),F13.6,5F12.4,A,I2,2(A,2I3))')
+          write(*,'(2(3I3,1X),2(A,I2),F13.6,5F12.4,F13.6,
+     $          A,I2,2(A,2I3))')
      $                       j1 ,km1, kp1,j2 ,km2, kp2,
      $                       '  S',sup,'  V',vup
      $                    ,freq,log10(ints),bolt,statw,log10(popl),spcat!Herbers2023
-     $                     ,'  B',bup,'  K',k1,k2,'  t',t1,t2
+     $                     ,elow/cmc,'  B',bup,'  K',k1,k2,'  t',t1,t2
           end if!END-GAM
           end if!END-SPIN1
                     end if!END-INTENSITY CONDITION
