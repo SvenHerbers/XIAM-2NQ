@@ -23,8 +23,8 @@ C   maximal internal rotation symmetry number sigma for one top
 C   maximal number of basis funcions for the pure internal rotation 
 C   Hamiltonian 
       integer DIMM
-C       parameter (DIMM=31)   
-        parameter (DIMM=31) !reducing frmo 71 to 31 improves computation time by 5%
+       parameter (DIMM=71)   !keep more DIMM (for higher K), 5% is not much
+C        parameter (DIMM=31) !reducing frmo 71 to 31 improves computation time by 5%
 
 C   maximum number of v basis funktions for one top
       integer DIMV
@@ -33,7 +33,7 @@ C   maximum number of v basis funktions for one top
 C   maximum number of transitions 
       integer DIMLIN
 C       parameter (DIMLIN=500)
-        parameter (DIMLIN=15000)
+        parameter (DIMLIN=99999)  ! more lines. mm-wave
 
 C   maximum number of different sets of paramaters 
       integer DIMVB
