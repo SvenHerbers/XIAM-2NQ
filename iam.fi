@@ -4,8 +4,8 @@ C   Important array dimensions, to be set before compiling
 C
 C	maximal J quantum number
       integer DIMJ
-C       parameter (DIMJ=30)
-        parameter (DIMJ=41) ! 22,23 works 19,21 works not if you encounter segfault in the new quadrupole coupling version, try doubling this value.
+       parameter (DIMJ=99)  ! Let do more !
+C        parameter (DIMJ=41) ! 22,23 works 19,21 works not if you encounter segfault in the new quadrupole coupling version, try doubling this value.
 
 C   maximal number of v-blocks in the last diagonalisation.
 C   the size of the matrix is (2*DIMJ+1)*DIMVV
