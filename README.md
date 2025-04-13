@@ -18,14 +18,14 @@ ifort -c iam.f <br/>
 ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f <br/> 
 
 ----------------------------------------------------------------------------
-  XIAM-2NQ v0.24 - Sven Herbers, 31-Jan-2024  
+  XIAM-2NQ v0.24 - Sven Herbers, 31-Jan-2025 
 
   A small update to the iamint.f file:
   - An error was fixed that caused int 3 predictions to not work if no spin was present.
   - Modifications were made to allow for intensitiy predictions with J>100, if iam.fi 
     is modified accordingly and XIAM is recompiled. 
 
-  XIAM-2NQ v0.23 -  Sven Herbers, 6-Jan-2024 
+  XIAM-2NQ v0.23 -  Sven Herbers, 6-Jan-2025
   
   This is an updated version of XIAM-NQ with severale changes, the most important one
 being the implementation of exact quadrupole coupling for two nuclei. The changes come with 
