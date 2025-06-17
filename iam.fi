@@ -5,7 +5,7 @@ C
 C	maximal J quantum number
       integer DIMJ
 C       parameter (DIMJ=30)
-        parameter (DIMJ=41) ! 22,23 works 19,21 works not if you encounter segfault in the new quadrupole coupling version, try doubling this value.
+        parameter (DIMJ=41)  
 
 C   maximal number of v-blocks in the last diagonalisation.
 C   the size of the matrix is (2*DIMJ+1)*DIMVV
@@ -23,7 +23,6 @@ C   maximal internal rotation symmetry number sigma for one top
 C   maximal number of basis funcions for the pure internal rotation 
 C   Hamiltonian 
       integer DIMM
-C       parameter (DIMM=31)   
         parameter (DIMM=31) !reducing frmo 71 to 31 improves computation time by 5%
 
 C   maximum number of v basis funktions for one top
@@ -43,7 +42,7 @@ C Number that defines the matrix size of the exact quadrupole treatment
       integer DIMQ
         parameter(DIMQ=6) ! Set at least 2*I+1 else program might crash - segementation fault
       integer DIMQ2
-        parameter(DIMQ2=6) ! for the second nucleus, default also up spin of 5/2 with DIMQ2=6.
+        parameter(DIMQ2=6) ! for the second nucleus, 6 means Iodine is ok
         
 C Number that defines the matrix size of the double well treatment
       integer DIMDW

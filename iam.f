@@ -71,11 +71,11 @@ C     real*8  ab(DIMPAR)
 C      write(*,'(A,$)') ' Calculation date and time: '
       call mydate()
       write(*,*)
-      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.24 -' 
-     $                  ,'By Sven Herbers 31-Jan-2025' 
+      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.24b -' 
+     $                  ,'By Sven Herbers 17-June-2025' 
       write(*,*) 'sven_herbers@web.de'
-      write(*,*) 'Cite: S. Herbers, J. Mol. Spectrosc., 2024, '
-     $         ,'405, 111950, DOI: 10.1016/j.jms.2024.111950 ' 
+      write(*,*) 'Cite: J. Chem. Phys., 2025, '
+     $         ,'162, 234304, DOI: 10.1063/5.0267651 ' 
       write(*,*)
       write(*,'(A)') ' Type help now for the list of parameters : '
       call parinp(a,palc,pali,ifit,dfit,npar,nfit)
