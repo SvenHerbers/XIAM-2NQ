@@ -18,6 +18,11 @@ ifort -c iam.f <br/>
 ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f <br/> 
 
 ----------------------------------------------------------------------------
+  XIAM-2NQ v0.24b - Sven Herbers, 17-June-2025 
+
+  - The XIAM-NQ2 Publication is out! Updated go-to citation to J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
+  - Removed some unnecessary comments from iam.fi
+
   XIAM-2NQ v0.24 - Sven Herbers, 31-Jan-2025 
 
   A small update to the iamint.f file:
