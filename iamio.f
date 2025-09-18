@@ -1991,28 +1991,28 @@ C ---------------------------------------------------------------------
 
       if (dabs(a).gt.0.0d0) then
         aexp=int(log10(dabs(a)))
+        if (aexp.ge.3) then
+          write(astr,'(F15.6)') a
+          write(dstr,'(F12.6)') d
+        else if ((aexp.lt.3).and.(aexp.ge.0)) then
+          write(astr,'(F15.9)') a
+          write(dstr,'(F12.9)') d
+        else if ((aexp.lt.0).and.(aexp.ge.-3)) then
+          write(astr,'(F12.6,A)') a*1.d3,'E-3'
+          write(dstr,'(F9.6,A)') d*1.d3,'E-3'
+        else if ((aexp.lt.-3).and.(aexp.ge.-6)) then
+          write(astr,'(F12.6,A)') a*1.d6,'E-6'
+          write(dstr,'(F9.6,A)') d*1.d6,'E-6'
+        else if ((aexp.lt.-6).and.(aexp.ge.-9)) then 
+          write(astr,'(F12.6,A)') a*1.d9,'E-9'
+          write(dstr,'(F9.6,A)') d*1.d9,'E-9'
+        else 
+          write(astr,'(F11.5,A)') a*1.d12,'E-12'
+          write(dstr,'(F8.5,A)') d*1.d12,'E-12'
+        end if 
       else
-        aexp=-9
-      end if
-      if (aexp.ge.3) then
-        write(astr,'(F15.6)') a
-        write(dstr,'(F12.6)') d
-      end if
-      if ((aexp.lt.3).and.(aexp.ge.-3)) then
-        write(astr,'(F15.9)') a
-        write(dstr,'(F12.9)') d
-      end if
-      if ((aexp.lt.-3).and.(aexp.ge.-6)) then !Sven2023
-        write(astr,'(F12.6,A)') a*1.d6,'E-6' !Sven2023
-        write(dstr,'(F9.6,A)')  d*1.d6,'E-6' !Sven2023
-      end if                                 !Sven2023
-      if ((aexp.lt.-6).and.(aexp.ge.-9)) then !Sven2023
-        write(astr,'(F12.6,A)') a*1.d9,'E-9' !Sven2023
-        write(dstr,'(F9.6,A)')  d*1.d9,'E-9' !Sven2023
-      end if                                   !Sven2023
-      if (aexp.lt.-9) then                    !Sven2023
-        write(astr,'(F12.6,A)') a*1.d9,'E-9' !Sven2023
-        write(dstr,'(F9.6,A)')  d*1.d9,'E-9' !Sven2023
+        write(astr,'(F15.9)') 0.0d0
+        write(dstr,'(F12.9)') 0.0d0
       end if
       return
       end
