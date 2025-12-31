@@ -18,6 +18,11 @@ ifort -c iam.f <br/>
 ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f <br/> 
 
 ----------------------------------------------------------------------------
+  XIAM-2NQ v0.25 - Sven Herbers, 31-December-2025 
+
+  - Added parameters ``DFK2`` and ``DFM2`` replacing ``F`` with ``(F+DFK2*K**2+DFM2*M**2)`` in the free-rotor-basis RAS representation of Hir.
+  - Added Example-Methylformate to demonstrate useage of new parameters on a subset (v=0, Jmax=30, Kmax=10) of lines from the much larger dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM on this subset is 76 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset.
+
   XIAM-2NQ v0.24b - Sven Herbers, 17-June-2025 
 
   - The XIAM-2NQ Publication is out! Updated go-to citation to J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
