@@ -1,0 +1,531 @@
+C   INCLUDE FILE FOR XIAM   H.Hartwig  Feb. 1994 - Jul. 1996
+C     
+C   Important array dimensions, to be set before compiling
+C
+C	maximal J quantum number
+      integer DIMJ
+C       parameter (DIMJ=30)
+        parameter (DIMJ=41)  
+
+C   maximal number of v-blocks in the last diagonalisation.
+C   the size of the matrix is (2*DIMJ+1)*DIMVV
+      integer DIMVV
+        parameter (DIMVV=1) ! not included with exact quadrupole coupling yet
+
+C   maximal number of internal rotors (max. 3, see MAXTOP)
+      integer DIMTOP
+        parameter (DIMTOP=2)
+
+C   maximal internal rotation symmetry number sigma for one top
+      integer DIMSIG
+        parameter (DIMSIG=1)
+
+C   maximal number of basis funcions for the pure internal rotation 
+C   Hamiltonian 
+      integer DIMM
+        parameter (DIMM=31) !reducing frmo 71 to 31 improves computation time by 5%
+
+C   maximum number of v basis funktions for one top
+      integer DIMV
+        parameter (DIMV=5)
+
+C   maximum number of transitions 
+      integer DIMLIN
+C       parameter (DIMLIN=500)
+        parameter (DIMLIN=15000)
+
+C   maximum number of different sets of paramaters 
+      integer DIMVB
+        parameter(DIMVB=5)
+        
+C Number that defines the matrix size of the exact quadrupole treatment
+      integer DIMQ
+        parameter(DIMQ=6) ! Set at least 2*I+1 else program might crash - segementation fault
+      integer DIMQ2
+        parameter(DIMQ2=6) ! for the second nucleus, 6 means Iodine is ok
+        
+C Number that defines the matrix size of the double well treatment
+      integer DIMDW
+        parameter(DIMDW=2)  
+C -------------------------------------------------------------------
+C  please change the following parameters only if you really know what you 
+C  are doing !
+C -------------------------------------------------------------------
+
+C     max. allowed number of tops
+      integer MAXTOP
+        parameter (MAXTOP=4)
+ 
+      integer DIMTOT,DIM2J1
+        parameter (DIM2J1=2*DIMJ+1)
+        parameter (DIMTOT=DIM2J1 * DIMVV)
+
+      integer DIMGAM
+        parameter (DIMGAM=(3**DIMTOP)/2+1)
+      integer gamma(DIMGAM,0:DIMTOP)
+
+C     array dimensions for data
+      integer DIMPRR, DIMPIR, DIMPAR, DIMPM, MAXPAR
+        parameter (DIMPRR=84)  !Herbers2024 33->84
+        parameter (DIMPIR=19)  !Herbers2018 Herbers2024, Herbers2026
+        parameter (DIMPAR=DIMPRR + DIMPIR*DIMTOP)
+        parameter (MAXPAR=DIMPRR + DIMPIR*MAXTOP)
+
+C    see also DIMLMF (=DIMFIT) in 'iamfit.f' 
+      integer DIMFIT, DIMPLC
+        parameter (DIMFIT=75, DIMPLC=DIMTOP*DIMVB)!Herbers2024  
+
+C  Quantum Number Array for transitions
+      integer Q_UP, Q_LO  
+        parameter (Q_UP=1)
+        parameter (Q_LO=2)
+      integer Q_K,Q_T,Q_V1,Q_V2,Q_B,Q_K2,Q_GK,Q_J,Q_S,Q_STAT,Q_F
+      integer Q_F1
+      integer Q_REF,Q_AVG,Q_V,Q_TJ
+        parameter (Q_J=1)
+        parameter (Q_K=2)
+        parameter (Q_V1=3)
+        parameter (Q_V=Q_V1-1)
+        parameter (Q_V2=4)
+        parameter (Q_B=5)
+        parameter (Q_S=6)
+        parameter (Q_F=7)
+        parameter (Q_T=8)
+        parameter (Q_TJ=9)
+        parameter (Q_STAT=10)
+        parameter (Q_K2=11)
+        parameter (Q_GK=12)
+        parameter (Q_REF=13)
+        parameter (Q_AVG=14)
+        parameter (Q_F1=15) !Herbers2024
+      integer DIMQLP, DIMTDO
+        parameter (DIMQLP=15)! changed 14 to 15 to add F1.
+C       parameter (DIMTDO=200)
+        parameter (DIMTDO=3000)
+      integer qlin(DIMLIN, DIMQLP, Q_UP:Q_LO)
+      integer todo(DIMTDO, DIMQLP)
+      integer ncalc
+
+      integer LN_FREQ, LN_ERR, LN_PSI, LN_INT
+        parameter (LN_FREQ=1)
+        parameter (LN_ERR=2)
+        parameter (LN_PSI=3)
+        parameter (LN_INT=4)     ! Intensity
+        integer DIMDLN
+        parameter (DIMDLN=LN_INT)
+      real*8  dln(DIMLIN, DIMDLN)
+
+      integer NV_ENG, NV_DEF, NV_DEL
+        parameter (NV_ENG=1)    ! energyparameter of one niveau
+        parameter (NV_DEF=1)    ! first derivativ of energy in array dnv
+        parameter (NV_DEL=DIMFIT+NV_ENG)   ! last derivativ of energy
+      integer DIMDNV
+        parameter (DIMDNV=NV_DEL)
+      real*8  dnv(DIMLIN, DIMDNV, Q_UP:Q_LO)
+
+      integer NaQN,BINUNIT,UI,GU
+        parameter (NaQN=-12345,BINUNIT=11,UI=5,GU=1)
+      real*8 NOFIT
+        parameter (NOFIT=1.0d12)
+      character*3 BINSTR
+        parameter (BINSTR='iam')
+      
+      integer S_H, S_K,  S_VV
+      integer S_G
+      integer S_V, S_S,  S_MINV, S_MAXV
+      integer S_MAXK,S_NB
+      integer S_FIRV,S_MAXM
+        parameter (S_H   =1)
+        parameter (S_K   =2)
+        parameter (S_VV  =3)   
+        parameter (S_MAXK=4)
+        parameter (S_NB  =5)
+        parameter (S_G   =6)
+
+        parameter (S_V   =6)             ! S_V+itop= 7, 8, 9
+        parameter (S_S   =S_V+1*DIMTOP)  ! S_S+itop=10,11,12
+        parameter (S_MINV=S_V+2*DIMTOP)  !          13,14,15
+        parameter (S_MAXV=S_V+3*DIMTOP)  !          16,17,18
+        parameter (S_FIRV=S_V+4*DIMTOP)  !          19,20,21
+        parameter (S_MAXM=S_V+5*DIMTOP)  !          22,23,24
+      integer DIMSIZ
+        parameter (DIMSIZ=S_MAXM+6*DIMTOP)
+      integer size(DIMSIZ)
+
+C   array used in IAMM
+        parameter (DIMPM =4)
+
+C     for DIMOVV, for DIMPM
+      integer DIMOVV
+        parameter (DIMOVV=08)
+      integer PM_F, PM_VN1, PM_VN2, PM_RHO
+C     integer PM_DPI4, PM_DPIC
+      integer PM_PI, PM_COS, PM_SIN
+C     integer PM_M,  PM_RK
+      integer PM_PI2
+        parameter (PM_F   =1)
+        parameter (PM_VN1 =2)
+        parameter (PM_VN2 =3)
+        parameter (PM_RHO =4)
+c       parameter (PM_DPI4=5)
+c       parameter (PM_DPIC=6)
+C                                DIMENSION DIMPM
+        parameter (PM_PI  =5)
+        parameter (PM_COS =6)
+        parameter (PM_SIN =7)
+        parameter (PM_PI2 =8)
+C                                DIMENSION DIMOVV
+
+      integer PI_VN1, PI_VN2, PI_F, PI_RHO
+C     integer PI_DPI4,PI_DPIC
+      integer PI_BETA,PI_GAMA
+      integer PI_DPIJ,PI_DPIK,PI_DPID
+      integer PI_DC3J,PI_DC3K, PI_DC3D !Herbers 2018
+      integer PI_D3K2,PI_DPK2 !Herbers 2024
+      integer PI_DFM2,PI_DFK2 !Herbers 2026
+      integer PI_F0,  PI_ANGX,PI_ANGZ
+        parameter (PI_F   = 1)
+        parameter (PI_VN1 = 2)
+        parameter (PI_VN2 = 3)
+        parameter (PI_RHO = 4)
+c        parameter (PI_DPI4= 5)
+c        parameter (PI_DPIC= 6)
+        parameter (PI_BETA= 5)
+        parameter (PI_GAMA= 6)
+        parameter (PI_DC3J= 7)
+        parameter (PI_DC3K= 8)!Herbers 2018
+        parameter (PI_DC3D= 9)!Herbers 2018
+        parameter (PI_DPIJ=10)!Herbers 2028
+        parameter (PI_DPIK=11)!Herbers 2028
+        parameter (PI_DPID=12)!Herbers 2028
+        parameter (PI_D3K2=13)!Herbers 2024
+        parameter (PI_DPK2=14)!Herbers 2024
+        parameter (PI_DFM2=15)!Herbers 2026
+        parameter (PI_DFK2=16)!Herbers 2026
+        parameter (PI_F0  =17) 
+        parameter (PI_ANGX=18) 
+        parameter (PI_ANGZ=19) 
+C ********                    DIMENSION: DIMPIR
+
+      integer P_BJ,  P_BK,  P_BD,  P_DJ,  P_DJK, P_DK
+      integer P_DJD, P_DKD,  P_FF
+      integer P_QZ , P_QD,  P_QXY, P_QXZ, P_QYZ
+      integer P_Q2Z , P_Q2D,  P_Q2XY, P_Q2XZ, P_Q2YZ
+      integer P_VCC, P_VSS
+      integer P_HJ,  P_HJK, P_HKJ, P_HK,  P_HJD, P_HJKD,P_HKD
+      integer P_CP,  P_CZ,  P_CD
+      integer P_MUX, P_MUY, P_MUZ
+      integer P_PX,  P_PY,  P_PZ
+      integer P_E, P_GZ12, P_GX12, P_GY12  !Herbers2023/2024
+      integer P_GZ34, P_GX34, P_GY34  !Herbers2024
+      integer P_FXY1, P_FYZ1, P_FXZ1, P_FXY3, P_FYZ3, P_FXZ3     !Herbers2024
+      integer P_DUMP
+      integer P_DZ1, P_DZ2, P_DZ3, P_DZ4, P_DZ5  
+      integer P_DZ6, P_DZ7, P_DZ8, P_DZ9, P_DZ10, P_DZ11
+      integer P_DY1, P_DY2, P_DY3, P_DY4, P_DY5 
+      integer P_DY6, P_DY7, P_DY8, P_DY9, P_DY10, P_DY11
+      integer P_DX1, P_DX2, P_DX3, P_DX4, P_DX5 
+      integer P_DX6, P_DX7, P_DX8, P_DX9, P_DX10, P_DX11
+      integer P1_VN1, P1_VN2, P1_F,   P1_RHO, P1_BETA,P1_GAMA
+      integer P1_DC3J,P1_DPIJ,P1_DPIK,P1_DPID, P1_DC3K, P1_DC3D !Herbers2018
+      integer P1_DPK2,P1_D3K2                                   !Herbers2024
+      integer P1_DFM2,P1_DFK2                                   !Herbers2026
+      integer P1_F0,  P1_ANGX,P1_ANGZ
+      integer P2_VN1, P2_VN2, P2_F,   P2_RHO, P2_BETA,P2_GAMA
+      integer P2_DC3J,P2_DPIJ,P2_DPIK,P2_DPID, P2_DC3K, P2_DC3D !Herbers2018
+      integer P2_DPK2,P2_D3K2                                   !Herbers2024
+      integer P2_DFM2,P2_DFK2                                   !Herbers2026
+      integer P2_F0,  P2_ANGX,P2_ANGZ
+      integer P3_VN1, P3_VN2, P3_F,   P3_RHO, P3_BETA,P3_GAMA
+      integer P3_DC3J,P3_DPIJ,P3_DPIK,P3_DPID, P3_DC3K, P3_DC3D !Herbers2018
+      integer P3_DPK2,P3_D3K2                                   !Herbers2024
+      integer P3_DFM2,P3_DFK2                                   !Herbers2026
+      integer P3_F0,  P3_ANGX,P3_ANGZ
+      integer P4_VN1, P4_VN2, P4_F,   P4_RHO, P4_BETA,P4_GAMA   !Herbers2024
+      integer P4_DC3J,P4_DPIJ,P4_DPIK,P4_DPID, P4_DC3K, P4_DC3D !Herbers2024
+      integer P4_DPK2,P4_D3K2                                   !Herbers2024
+      integer P4_DFM2,P4_DFK2                                   !Herbers2026
+      integer P4_F0,  P4_ANGX,P4_ANGZ                           !Herbers2024
+
+        parameter (P_BJ  = 1)
+        parameter (P_BK  = 2)
+        parameter (P_BD  = 3)
+        parameter (P_DJ  = 4)
+        parameter (P_DJK = 5)
+        parameter (P_DK  = 6)
+        parameter (P_DJD = 7)
+        parameter (P_DKD = 8)
+C       parameter (P_R6  = 9)
+        parameter (P_FF  =09)
+        parameter (P_QZ  =10)
+        parameter (P_QD  =11)
+        parameter (P_QXY =12)
+        parameter (P_QXZ =13)
+        parameter (P_QYZ =14)
+        parameter (P_VSS =15)
+        parameter (P_VCC =16)
+
+        parameter (P_HJ  =17)
+        parameter (P_HJK =18)
+        parameter (P_HKJ =19)
+        parameter (P_HK  =20)
+        parameter (P_HJD =21)
+        parameter (P_HJKD=22)
+        parameter (P_HKD =23)
+
+        parameter (P_CP  =24)
+        parameter (P_CZ  =25)
+        parameter (P_CD  =26)
+
+        parameter (P_MUX =27)
+        parameter (P_MUY =28)
+        parameter (P_MUZ =29)
+
+        parameter (P_PX  =30)
+        parameter (P_PY  =31)
+        parameter (P_PZ  =32)
+        parameter (P_E   =33)!Herbers2023
+        parameter (P_GX12=34)!Herbers2024
+        parameter (P_GY12=35)!Herbers2024
+        parameter (P_GZ12=36)!Herbers2024
+        parameter (P_FXY1=37)!Herbers2024
+        parameter (P_FYZ1=38)!Herbers2024
+        parameter (P_FXZ1=39)!Herbers2024
+        parameter (P_GX34=40)!Herbers2024
+        parameter (P_GY34=41)!Herbers2024
+        parameter (P_GZ34=42)!Herbers2024        
+        parameter (P_FXY3=43)!Herbers2024
+        parameter (P_FYZ3=44)!Herbers2024
+        parameter (P_FXZ3=45)!Herbers2024        
+        parameter (P_DX1 =46)!Herbers2024
+        parameter (P_DX2 =47)!Herbers2024
+        parameter (P_DX3 =48)!Herbers2024
+        parameter (P_DX4 =49)!Herbers2024
+        parameter (P_DX5 =50)!Herbers2024
+        parameter (P_DX6 =51)!Herbers2024
+        parameter (P_DX7 =52)!Herbers2024
+        parameter (P_DX8 =53)!Herbers2024
+        parameter (P_DX9 =54)!Herbers2024
+        parameter (P_DX10=55)!Herbers2024
+        parameter (P_DX11=56)!Herbers2024
+        parameter (P_DY1 =57)!Herbers2024
+        parameter (P_DY2 =58)!Herbers2024
+        parameter (P_DY3 =59)!Herbers2024
+        parameter (P_DY4 =60)!Herbers2024
+        parameter (P_DY5 =61)!Herbers2024
+        parameter (P_DY6 =62)!Herbers2024
+        parameter (P_DY7 =63)!Herbers2024
+        parameter (P_DY8 =64)!Herbers2024
+        parameter (P_DY9 =65)!Herbers2024
+        parameter (P_DY10=66)!Herbers2024
+        parameter (P_DY11=67)!Herbers2024
+        parameter (P_DZ1 =68)!Herbers2024
+        parameter (P_DZ2 =69)!Herbers2024
+        parameter (P_DZ3 =70)!Herbers2024
+        parameter (P_DZ4 =71)!Herbers2024
+        parameter (P_DZ5 =72)!Herbers2024
+        parameter (P_DZ6 =73)!Herbers2024
+        parameter (P_DZ7 =74)!Herbers2024
+        parameter (P_DZ8 =75)!Herbers2024
+        parameter (P_DZ9 =76)!Herbers2024
+        parameter (P_DZ10=77)!Herbers2024    
+        parameter (P_DZ11=78)!Herbers2024  
+        parameter (P_Q2Z =79)!h2024 2nd nucleus quadrupole coupling
+        parameter (P_Q2D =80)!h2024 2nd nucleus quadrupole coupling
+        parameter (P_Q2XY=81)!h2024 2nd nucleus quadrupole coupling
+        parameter (P_Q2XZ=82)!h2024 2nd nucleus quadrupole coupling
+        parameter (P_Q2YZ=83)!h2024 2nd nucleus quadrupole coupling
+        parameter (P_DUMP=84)!Herbers2024
+        
+
+C ********                    DIMENSION: DIMPRR
+
+        parameter (P1_VN1 = DIMPRR+PI_VN1 )
+        parameter (P1_VN2 = DIMPRR+PI_VN2 )
+        parameter (P1_F   = DIMPRR+PI_F   )
+        parameter (P1_RHO = DIMPRR+PI_RHO )
+c        parameter (P1_DPI4= DIMPRR+PI_DPI4)
+c        parameter (P1_DPIC= DIMPRR+PI_DPIC)
+        parameter (P1_BETA= DIMPRR+PI_BETA)
+        parameter (P1_GAMA= DIMPRR+PI_GAMA)
+        parameter (P1_DPIJ= DIMPRR+PI_DPIJ)
+        parameter (P1_DPIK= DIMPRR+PI_DPIK)
+        parameter (P1_DPID= DIMPRR+PI_DPID)
+        parameter (P1_DC3J= DIMPRR+PI_DC3J)
+        parameter (P1_DC3K= DIMPRR+PI_DC3K) !Herbers2018
+        parameter (P1_DC3D= DIMPRR+PI_DC3D) !Herbers2018
+        parameter (P1_D3K2= DIMPRR+PI_D3K2) !Herbers2024
+        parameter (P1_DPK2= DIMPRR+PI_DPK2) !Herbers2024 
+        parameter (P1_DFM2= DIMPRR+PI_DFM2) !Herbers2026
+        parameter (P1_DFK2= DIMPRR+PI_DFK2) !Herbers2026
+        parameter (P1_F0  = DIMPRR+PI_F0  )
+        parameter (P1_ANGX= DIMPRR+PI_ANGX)
+        parameter (P1_ANGZ= DIMPRR+PI_ANGZ)
+        parameter (P2_VN1 = DIMPRR+DIMPIR+PI_VN1 )
+        parameter (P2_VN2 = DIMPRR+DIMPIR+PI_VN2 )
+        parameter (P2_F   = DIMPRR+DIMPIR+PI_F   )
+        parameter (P2_RHO = DIMPRR+DIMPIR+PI_RHO )
+c        parameter (P2_DPI4= DIMPRR+DIMPIR+PI_DPI4)
+c        parameter (P2_DPIC= DIMPRR+DIMPIR+PI_DPIC)
+        parameter (P2_BETA= DIMPRR+DIMPIR+PI_BETA)
+        parameter (P2_GAMA= DIMPRR+DIMPIR+PI_GAMA)
+        parameter (P2_DPIJ= DIMPRR+DIMPIR+PI_DPIJ)
+        parameter (P2_DPIK= DIMPRR+DIMPIR+PI_DPIK)
+        parameter (P2_DPID= DIMPRR+DIMPIR+PI_DPID)
+        parameter (P2_DC3J= DIMPRR+DIMPIR+PI_DC3J)  
+        parameter (P2_DC3K= DIMPRR+DIMPIR+PI_DC3K)  !Herbers2018    
+        parameter (P2_DC3D= DIMPRR+DIMPIR+PI_DC3D)  !Herbers2018   
+        parameter (P2_D3K2= DIMPRR+DIMPIR+PI_D3K2)  !Herbers2024
+        parameter (P2_DPK2= DIMPRR+DIMPIR+PI_DPK2)  !Herbers2024  
+        parameter (P2_DFM2= DIMPRR+DIMPIR+PI_DFM2) !Herbers2026
+        parameter (P2_DFK2= DIMPRR+DIMPIR+PI_DFK2) !Herbers2026
+        parameter (P2_F0  = DIMPRR+DIMPIR+PI_F0  )
+        parameter (P2_ANGX= DIMPRR+DIMPIR+PI_ANGX)
+        parameter (P2_ANGZ= DIMPRR+DIMPIR+PI_ANGZ)
+
+        parameter (P3_VN1 = DIMPRR+2*DIMPIR+PI_VN1 )
+        parameter (P3_VN2 = DIMPRR+2*DIMPIR+PI_VN2 )
+        parameter (P3_F   = DIMPRR+2*DIMPIR+PI_F   )
+        parameter (P3_RHO = DIMPRR+2*DIMPIR+PI_RHO )
+c        parameter (P3_DPI4= DIMPRR+2*DIMPIR+PI_DPI4)
+c        parameter (P3_DPIC= DIMPRR+2*DIMPIR+PI_DPIC)
+        parameter (P3_BETA= DIMPRR+2*DIMPIR+PI_BETA)
+        parameter (P3_GAMA= DIMPRR+2*DIMPIR+PI_GAMA)
+        parameter (P3_DPIJ= DIMPRR+2*DIMPIR+PI_DPIJ)
+        parameter (P3_DPIK= DIMPRR+2*DIMPIR+PI_DPIK)
+        parameter (P3_DPID= DIMPRR+2*DIMPIR+PI_DPID)
+        parameter (P3_DC3J= DIMPRR+2*DIMPIR+PI_DC3J)
+        parameter (P3_DC3K= DIMPRR+2*DIMPIR+PI_DC3K)  !Herbers2018 
+        parameter (P3_DC3D= DIMPRR+2*DIMPIR+PI_DC3D)  !Herbers2018   
+        parameter (P3_D3K2= DIMPRR+2*DIMPIR+PI_D3K2)  !Herbers2024
+        parameter (P3_DPK2= DIMPRR+2*DIMPIR+PI_DPK2)  !Herbers2024 
+        parameter (P3_DFM2= DIMPRR+2*DIMPIR+PI_DFM2) !Herbers2026
+        parameter (P3_DFK2= DIMPRR+2*DIMPIR+PI_DFK2) !Herbers2026
+        parameter (P3_F0  = DIMPRR+2*DIMPIR+PI_F0  )
+        parameter (P3_ANGX= DIMPRR+2*DIMPIR+PI_ANGX)
+        parameter (P3_ANGZ= DIMPRR+2*DIMPIR+PI_ANGZ)
+        
+        parameter (P4_VN1 = DIMPRR+3*DIMPIR+PI_VN1 )  !Herbers2024
+        parameter (P4_VN2 = DIMPRR+3*DIMPIR+PI_VN2 )  !Herbers2024
+        parameter (P4_F   = DIMPRR+3*DIMPIR+PI_F   )  !Herbers2024
+        parameter (P4_RHO = DIMPRR+3*DIMPIR+PI_RHO )  !Herbers2024
+        parameter (P4_BETA= DIMPRR+3*DIMPIR+PI_BETA)  !Herbers2024
+        parameter (P4_GAMA= DIMPRR+3*DIMPIR+PI_GAMA)  !Herbers2024
+        parameter (P4_DPIJ= DIMPRR+3*DIMPIR+PI_DPIJ)  !Herbers2024
+        parameter (P4_DPIK= DIMPRR+3*DIMPIR+PI_DPIK)  !Herbers2024
+        parameter (P4_DPID= DIMPRR+3*DIMPIR+PI_DPID)  !Herbers2024
+        parameter (P4_DC3J= DIMPRR+3*DIMPIR+PI_DC3J)  !Herbers2024
+        parameter (P4_DC3K= DIMPRR+3*DIMPIR+PI_DC3K)  !Herbers2024
+        parameter (P4_DC3D= DIMPRR+3*DIMPIR+PI_DC3D)  !Herbers2024    
+        parameter (P4_D3K2= DIMPRR+3*DIMPIR+PI_D3K2)  !Herbers2024
+        parameter (P4_DPK2= DIMPRR+3*DIMPIR+PI_DPK2)  !Herbers2024     
+        parameter (P4_DFM2= DIMPRR+3*DIMPIR+PI_DFM2) !Herbers2026
+        parameter (P4_DFK2= DIMPRR+3*DIMPIR+PI_DFK2) !Herbers2026
+        parameter (P4_F0  = DIMPRR+3*DIMPIR+PI_F0  )  !Herbers2024
+        parameter (P4_ANGX= DIMPRR+3*DIMPIR+PI_ANGX)  !Herbers2024
+        parameter (P4_ANGZ= DIMPRR+3*DIMPIR+PI_ANGZ)  !Herbers2024
+
+C   control integers
+
+      integer C_NZYK, C_PRINT,C_EVAL, C_DFRQ, C_ORGER, C_INTS
+      integer C_PRI  ,C_XPR  ,C_NCYCL,C_RED
+      integer C_WOODS,C_ADJF 
+      integer C_NDATA,C_NFOLD,C_SPIN, C_NTOP
+      integer C_SVDER,C_LAST, C_FITSC
+      integer C_MAXM, C_MAXV
+      integer C_QSUM !Herbers2023 adding qsum control
+      integer C_DW!Herbers2024 adding Doublewell control
+      integer C_SORT!Herbers2024 ! adding F1 assignment and sorting control for Quadrupole coupling
+C     integer C_NQI!Herbers2024 adding control for approx intensities (not used at the moment)
+      integer C_SPIN2 ! Herbers2024, for a second nucleus.
+      
+C      integer C_MAXM1,C_MAXM2,C_MAXM3,C_MAXM
+C      integer C_MAXV1,C_MAXV2,C_MAXV3,C_MAXV
+C      integer C_WOOD1,C_WOOD2,C_WOOD3,C_WOOD4,C_WOODS
+C      integer C_ADJ1 ,C_ADJ2 ,C_ADJ3 ,C_ADJ4 ,C_ADJF 
+C       parameter (C_MAXM1= 7, C_MAXM2= 8, C_MAXM3= 9) 
+C       parameter (C_WOOD1=10, C_WOOD2=11, C_WOOD3=12, C_WOOD4=13 )
+C       parameter (C_MAXV1=16, C_MAXV2=17, C_MAXV3=18) 
+C       parameter (C_ADJ1 =28, C_ADJ2 =29,  C_ADJ3 =30, C_ADJ4 =31)
+C       parameter (C_MAXM=C_MAXM1-1)
+C       parameter (C_MAXV=C_MAXV1-1)
+
+        parameter (C_NZYK = 1, C_PRINT= 2, C_EVAL = 3)
+        parameter (C_DFRQ = 4, C_ORGER= 5, C_INTS = 6)
+        parameter (C_MAXM =07) 
+        parameter (C_WOODS=08, C_NDATA=09)
+        parameter (C_NFOLD=10, C_SPIN =11, C_NTOP =12)
+        parameter (C_ADJF =13)
+        parameter (C_MAXV =14) 
+        parameter (C_PRI  =15, C_XPR=16,   C_NCYCL=17)
+        parameter (C_SVDER=18, C_FITSC=19)
+        parameter (C_RED  =20)
+        parameter (C_DW= 21) !
+        parameter (C_SPIN2 =22) !h2024
+        parameter (C_SORT =23) !h2024
+        parameter (C_LAST =23) 
+      integer C_ROFIT, C_EPS, C_DEFER, C_WEIGF, C_CNVG
+      integer C_LMBDA, C_FRQLO,C_FRQUP,C_INTLM, C_TEMP
+        parameter (C_ROFIT=C_LAST+1, C_EPS  =C_LAST+2)
+        parameter (C_DEFER=C_LAST+3, C_WEIGF=C_LAST+4) 
+        parameter (C_CNVG =C_LAST+5, C_LMBDA=C_LAST+6)
+        parameter (C_FRQLO=C_LAST+7)
+        parameter (C_FRQUP=C_LAST+8, C_INTLM=C_LAST+9)      
+        parameter (C_TEMP=C_LAST+10)      
+        parameter (C_QSUM=C_LAST+11)!Herbers2023 adding qsum parameter
+        
+      integer   DIMCINT, DIMCPAR
+
+      parameter (DIMCINT=C_LAST)
+      parameter (DIMCPAR=11) !Hebers2023 set to 11 for qsum
+      integer   CTLINT(1:DIMCINT)
+      real*8    CTLPAR(DIMCINT+1:DIMCINT+DIMCPAR)
+
+      integer qvv(DIMVV,DIMTOP,DIMVB)
+
+C   woods(1-DIMVB) adjust(1-DIMVB)
+      integer CB_WDS, CB_ADJ
+      parameter (CB_WDS=1, CB_ADJ=2)
+      integer ctlnb(2,DIMVB)
+
+      integer AP_PL    ! Parameter List (0..3)
+      integer AP_TF    ! List of Transitions zero cycle 
+      integer AP_TL    ! List of Transitions 
+      integer AP_TE    ! List of Transitions extended
+      integer AP_PC    ! additional Parameter information
+      integer AP_IO    ! Input control
+      integer AP_LT    ! Latex Output (at the end only)
+      integer AP_SV    ! SVD-Information
+      integer AP_ST    ! status
+      integer AP_TI    ! Torsional Integrals < v K | v' K' > 
+      integer AP_RM    ! Rotation Matrix D   
+      integer AP_EO    ! Eigenenergies of one top operator
+      integer AP_MO    ! Matrixelements of one top operator  
+      integer AP_EH    ! Eigenenergies / vectors    
+      integer AP_MH    ! Matrixelements     
+
+      integer XP_FI    ! first cycle
+      integer XP_LA    ! last cycle
+      integer XP_CC    ! every converged cycle
+      integer XP_EC,xcy    ! every cycle
+      integer XP_DE,xde    ! for every dqu derivativ
+      
+      parameter(AP_PL=     7                            )
+      parameter(AP_TF=     8, AP_TL=    16, AP_TE=    32)
+      parameter(AP_PC=    64, AP_IO=   128, AP_LT=   256)
+      parameter(AP_SV=   512, AP_ST=  1024, AP_TI=  2048)
+      parameter(AP_RM=  4096, AP_EO=  8192, AP_MO= 16384)
+      parameter(AP_EH= 32768, AP_MH= 65536)
+
+      parameter(XP_FI=     1, XP_LA=     2, XP_CC=     4)
+      parameter(XP_EC=     8, XP_DE=    16)
+
+
+      common /data/qlin,dln,dnv,ctlpar,ctlint
+     $             ,ctlnb
+     $             ,size,gamma
+     $             ,todo,ncalc,qvv,xcy,xde
+
+      integer DIMQC,MAXQC 
+      parameter (MAXQC=32)
+      parameter (DIMQC=MAXQC+DIMGAM)
