@@ -20,9 +20,9 @@ ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f i
 ----------------------------------------------------------------------------
   XIAM-2NQ v0.26 - Sven Herbers, 02-January-2026
   
-  - Removed parameters ``DFK2`` and ``DFM2`
+  - Removed parameters ``DFK2`` and ``DFM2``
   - Added parameters ``Dpi4J, Dpi4K, Dpi4-, Fmk, DFm2, mk3J, mk3K, mk3-, m3kJ, m3kK, m3K-``
-  - Updated Example-Methylformate (v=0, Jmax=30, Kmax=10) of lines from the much larger dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM on this subset is 66 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset. The example demonstrates the succeful application of the new parameters ``Dpi4K, Dpi4-, Fmk, m3kK``
+  - Updated Example-Methylformate (v=0, Jmax=30, Kmax=10) of lines from the much larger dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM on this subset is 66 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset. The example demonstrates the successful application of the new parameters ``Dpi4K, Dpi4-, Fmk, m3kK``
   
   XIAM-2NQ v0.25 - Sven Herbers, 31-December-2025 
 
