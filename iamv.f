@@ -341,11 +341,11 @@ C------Diagnoalization finished
 C------Diagnoalization finished
 C------Diagnoalization finished
 
-        cm2=0                                    !!!!!!!!!!!!!!CONTIUNUE here
+        cm2=0                                     
         hitsj=0
         hitsJPPM=0
         hitsJP=0
-        do i = 1, size(S_H)   ! here goes one size... ! I have to write this on paper first.
+        do i = 1, size(S_H)   ! here goes one size... 
           normis=0   !normis for j identification.
           normis2=0  ! normis2 for f1 identification
           normisEO=0.0
@@ -441,7 +441,7 @@ C             write(0,*) h_3(sizepre+check2+1+j-3:sizepre+check2+1+j+3,i)
          else
          if ((normisPM(0)*normisPM(1)).lt.0) then !wangs gamma separation, see also Gordy equation 7.22
 
-          if (abs(normisPM(1)).gt.0.1) then ! for all but K=0 the normisPM(0) and (1) should be abput 0.5 in their absolutes., for K=0 normisPM(1) must be very close to zero.
+          if (abs(normisPM(1)).gt.0.1) then ! for all but K=0 the normisPM(0) and (1) should be about 0.5 in their absolutes., for K=0 normisPM(1) must be very close to zero.
            PMofI(i)=1
           else
            PMofI(i)=0
@@ -452,7 +452,7 @@ C             write(0,*) h_3(sizepre+check2+1+j-3:sizepre+check2+1+j+3,i)
          end if
          
 C         if (gam.eq.1) then
-C         write(0,*) normisPM(0), normisPM(1) ! somehow in case of mikes molecule these can add up to more than 0.5
+C         write(0,*) normisPM(0), normisPM(1) ! 
 C         end if
 C         if (abs(normisPM(1)).ge.0.9) then
 C          qcase=maxloc(normis,1)-1+minJ
@@ -636,16 +636,6 @@ C            end do
 C            
 C          end do
 C         end do   
-
-
-         
-
-
-
-
-
-
-
 
 
 

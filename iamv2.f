@@ -113,6 +113,87 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
       rrir1=.false.
       rrir2=.false.
       rrir3=.false.
+      rrir4=.false.!Herbers2024
+      do itop=1, ctlint(C_NTOP)
+        ift=(itop-1)*DIMPIR
+        if (a(P1_DP4J+ift).ne.0.0) rrir1=.true.
+        if (a(P1_DP4K+ift).ne.0.0) rrir2=.true.
+        if (a(P1_DP4D+ift).ne.0.0) rrir3=.true.
+c        write(*,'(50F10.4)')
+c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
+      end do
+      if (rrir1.or.rrir2.or.rrir3.or.rrir4)
+     $ call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_DPI4,PM_DPI4
+     $     ,.true.)
+      if (rrir1) then
+        call haddjp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DP4J)!  
+      end if
+      if (rrir2) then
+        call haddkp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DP4K)
+      end if
+      if (rrir3) then
+        call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DP4D)
+      end if
+      rrir1=.false.
+      rrir2=.false.
+      rrir3=.false.
+	  rrir4=.false.!Herbers2024
+      do itop=1, ctlint(C_NTOP)
+        ift=(itop-1)*DIMPIR
+        if (a(P1_MK3J+ift).ne.0.0) rrir1=.true.
+        if (a(P1_MK3K+ift).ne.0.0) rrir2=.true.
+        if (a(P1_MK3D+ift).ne.0.0) rrir3=.true.
+c        write(*,'(50F10.4)')
+c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
+      end do
+      if (rrir1.or.rrir2.or.rrir3.or.rrir4)
+     $ call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_MK3,PM_MK3
+     $     ,.true.)
+      if (rrir1) then
+        call haddjp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_MK3J)!  
+      end if
+      if (rrir2) then
+        call haddkp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_MK3K)
+      end if
+      if (rrir3) then
+        call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_MK3D)
+      end if
+      rrir1=.false.
+      rrir2=.false.
+      rrir3=.false.
+	  rrir4=.false.!Herbers2024
+      do itop=1, ctlint(C_NTOP)
+        ift=(itop-1)*DIMPIR
+        if (a(P1_M3KJ+ift).ne.0.0) rrir1=.true.
+        if (a(P1_M3KK+ift).ne.0.0) rrir2=.true.
+        if (a(P1_M3KD+ift).ne.0.0) rrir3=.true.
+c        write(*,'(50F10.4)')
+c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
+      end do
+      if (rrir1.or.rrir2.or.rrir3.or.rrir4)
+     $ call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_M3K,PM_M3K
+     $     ,.true.)
+      if (rrir1) then
+        call haddjp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_M3KJ)!  
+      end if
+      if (rrir2) then
+        call haddkp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_M3KK)
+      end if
+      if (rrir3) then
+        call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_M3KD)
+      end if
+      rrir1=.false.
+      rrir2=.false.
+      rrir3=.false.
 	  rrir4=.false.!Herbers2024
       do itop=1, ctlint(C_NTOP)
         ift=(itop-1)*DIMPIR

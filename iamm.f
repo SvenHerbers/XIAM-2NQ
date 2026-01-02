@@ -110,15 +110,20 @@ C     diagonal m/m
         dm=dble(qm(im))
         t =
      $       + (ao(PM_F  ) 
-     $       + ai(PI_DFM2)*dm**2
-     $       + ai(PI_DFK2)*dk**2)
+     $       + ai(PI_FMK)*am(PM_RHO)*dk*dm
+     $       + ai(PI_DFM2)*dm**2) ! ai() Parameters are discarded in calcovv
+C     $       + ai(PI_FMK)*am(PM_RHO)**2*dk**2)
      $       * (dm - am(PM_RHO)*dk)**2  
      $       + ao(PM_VN1) * 0.5
      $       + ao(PM_VN2) * 0.5
      $       + ao(PM_RHO) * 2.0*am(PM_F)*dk*(am(PM_RHO)*dk-dm)
 c     $                      +4.0*am(PM_DPI4)*dk*(am(PM_RHO)*dk-dm)**3)
      $       + ao(PM_PI ) * (dm - am(PM_RHO)*dk)
-c     $       + ao(PM_DPI4)* (dm - am(PM_RHO)*dk)**4
+     $       + ao(PM_DPI4)* (dm - am(PM_RHO)*dk)**4
+     $    + ao(PM_MK3)* am(PM_RHO)**3*dk**3*dm
+     $    + ao(PM_M3K)* am(PM_RHO)*dk*dm**3
+C     $       + ao(PM_M3K)* (dm - am(PM_RHO)*dk)**2*dm**2
+C     $    + ao(PM_MK3)* (dm - am(PM_RHO)*dk)**2*am(PM_RHO)**2*dk**2
 c     $       + ao(PM_M)   *  dm
 c     $       - ao(PM_RK)  *  am(PM_RHO)*dk
         vo(im)=vo(im)+v(im)*t
@@ -276,6 +281,8 @@ C     do iv=minv,minv+sizev-2
 
 C----------------------------------------------------------------------
       subroutine calovv(ifit,am,qm,sizem,sizev,minv,h,ovv,k,ai)
+C     This Subroutine calculates the operator representations in the RAS.
+C     Ai should not be used here.
       implicit none
       include 'iam.fi'
       integer sizem,sizev,k,minv
@@ -284,8 +291,11 @@ C----------------------------------------------------------------------
       real*8  ai(DIMPIR)!Herbers2026
 C     work
       real*8  vo(DIMTOT),da(DIMOVV),t(DIMTOT,DIMV)
+      real*8  noai(DIMPIR)!Herbers2026
       integer i,it,im,ir,ic
-
+      do i=1, DIMPIR !Herbers2026
+        noai(i) = 0.0 !Herbers2026
+      end do          !Herbers2026
       if (sizem.gt.DIMTOT) stop 'Dimension Error in CALOVV'
 C     clear ovv
       do ir=1, sizev
@@ -305,7 +315,7 @@ C     clear ovv
           do im=1, sizem
             vo(im)=0.0
           end do
-          call multm(h(1,i+minv-1),sizem,am,da,qm,vo,k,1,ai)
+          call multm(h(1,i+minv-1),sizem,am,da,qm,vo,k,1,noai)
           do im=1, sizem
             t(im,i)=vo(im)
           end do

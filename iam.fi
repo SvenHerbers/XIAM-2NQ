@@ -5,7 +5,7 @@ C
 C	maximal J quantum number
       integer DIMJ
 C       parameter (DIMJ=30)
-        parameter (DIMJ=41)  
+        parameter (DIMJ=71)  
 
 C   maximal number of v-blocks in the last diagonalisation.
 C   the size of the matrix is (2*DIMJ+1)*DIMVV
@@ -23,7 +23,7 @@ C   maximal internal rotation symmetry number sigma for one top
 C   maximal number of basis funcions for the pure internal rotation 
 C   Hamiltonian 
       integer DIMM
-        parameter (DIMM=31) !reducing frmo 71 to 31 improves computation time by 5%
+        parameter (DIMM=31)  
 
 C   maximum number of v basis funktions for one top
       integer DIMV
@@ -31,7 +31,6 @@ C   maximum number of v basis funktions for one top
 
 C   maximum number of transitions 
       integer DIMLIN
-C       parameter (DIMLIN=500)
         parameter (DIMLIN=15000)
 
 C   maximum number of different sets of paramaters 
@@ -67,7 +66,7 @@ C     max. allowed number of tops
 C     array dimensions for data
       integer DIMPRR, DIMPIR, DIMPAR, DIMPM, MAXPAR
         parameter (DIMPRR=84)  !Herbers2024 33->84
-        parameter (DIMPIR=19)  !Herbers2018 Herbers2024, Herbers2026
+        parameter (DIMPIR=28)  !Herbers2018 Herbers2024, Herbers2026
         parameter (DIMPAR=DIMPRR + DIMPIR*DIMTOP)
         parameter (MAXPAR=DIMPRR + DIMPIR*MAXTOP)
 
@@ -157,32 +156,38 @@ C   array used in IAMM
 
 C     for DIMOVV, for DIMPM
       integer DIMOVV
-        parameter (DIMOVV=08)
+        parameter (DIMOVV=11)
       integer PM_F, PM_VN1, PM_VN2, PM_RHO
-C     integer PM_DPI4, PM_DPIC
+      integer PM_DPI4
+C     integer PM_DPIC
       integer PM_PI, PM_COS, PM_SIN
 C     integer PM_M,  PM_RK
-      integer PM_PI2
+      integer PM_PI2, PM_M3K, PM_MK3 !Herbers2026
         parameter (PM_F   =1)
         parameter (PM_VN1 =2)
         parameter (PM_VN2 =3)
         parameter (PM_RHO =4)
-c       parameter (PM_DPI4=5)
 c       parameter (PM_DPIC=6)
 C                                DIMENSION DIMPM
-        parameter (PM_PI  =5)
-        parameter (PM_COS =6)
-        parameter (PM_SIN =7)
-        parameter (PM_PI2 =8)
+        parameter (PM_DPI4=5)
+        parameter (PM_M3K=6) !herbers2026
+        parameter (PM_MK3=7) !herbers2026
+        parameter (PM_PI  =8)
+        parameter (PM_COS =9)
+        parameter (PM_SIN =10)
+        parameter (PM_PI2 =11)
 C                                DIMENSION DIMOVV
 
       integer PI_VN1, PI_VN2, PI_F, PI_RHO
 C     integer PI_DPI4,PI_DPIC
       integer PI_BETA,PI_GAMA
       integer PI_DPIJ,PI_DPIK,PI_DPID
+      integer PI_M3KJ,PI_M3KK,PI_M3KD !herbers2026
+      integer PI_MK3J,PI_MK3K,PI_MK3D !herbers2026
+      integer PI_DP4J,PI_DP4K,PI_DP4D !herbers2026
       integer PI_DC3J,PI_DC3K, PI_DC3D !Herbers 2018
       integer PI_D3K2,PI_DPK2 !Herbers 2024
-      integer PI_DFM2,PI_DFK2 !Herbers 2026
+      integer PI_DFM2,PI_FMK !Herbers 2026
       integer PI_F0,  PI_ANGX,PI_ANGZ
         parameter (PI_F   = 1)
         parameter (PI_VN1 = 2)
@@ -198,13 +203,22 @@ c        parameter (PI_DPIC= 6)
         parameter (PI_DPIJ=10)!Herbers 2028
         parameter (PI_DPIK=11)!Herbers 2028
         parameter (PI_DPID=12)!Herbers 2028
-        parameter (PI_D3K2=13)!Herbers 2024
-        parameter (PI_DPK2=14)!Herbers 2024
-        parameter (PI_DFM2=15)!Herbers 2026
-        parameter (PI_DFK2=16)!Herbers 2026
-        parameter (PI_F0  =17) 
-        parameter (PI_ANGX=18) 
-        parameter (PI_ANGZ=19) 
+        parameter (PI_DP4J=13)!Herbers 2028
+        parameter (PI_DP4K=14)!Herbers 2028
+        parameter (PI_DP4D=15)!Herbers 2028
+        parameter (PI_D3K2=16)!Herbers 2024
+        parameter (PI_DPK2=17)!Herbers 2024
+        parameter (PI_DFM2=18)!Herbers 2026
+        parameter (PI_FMK=19)!Herbers 2026
+        parameter (PI_MK3J=20)!Herbers 2024
+        parameter (PI_MK3K=21)!Herbers 2026
+        parameter (PI_MK3D=22)!Herbers 2026
+        parameter (PI_M3KJ=23)!Herbers 2024
+        parameter (PI_M3KK=24)!Herbers 2026
+        parameter (PI_M3KD=25)!Herbers 2026
+        parameter (PI_F0  =26) 
+        parameter (PI_ANGX=27) 
+        parameter (PI_ANGZ=28) 
 C ********                    DIMENSION: DIMPIR
 
       integer P_BJ,  P_BK,  P_BD,  P_DJ,  P_DJK, P_DK
@@ -228,23 +242,35 @@ C ********                    DIMENSION: DIMPIR
       integer P_DX6, P_DX7, P_DX8, P_DX9, P_DX10, P_DX11
       integer P1_VN1, P1_VN2, P1_F,   P1_RHO, P1_BETA,P1_GAMA
       integer P1_DC3J,P1_DPIJ,P1_DPIK,P1_DPID, P1_DC3K, P1_DC3D !Herbers2018
+      integer P1_DP4J,P1_DP4K,P1_DP4D
       integer P1_DPK2,P1_D3K2                                   !Herbers2024
-      integer P1_DFM2,P1_DFK2                                   !Herbers2026
+      integer P1_DFM2,P1_FMK                                   !Herbers2026
+      integer P1_M3KJ,P1_M3KK,P1_M3KD !herbers2026
+      integer P1_MK3J,P1_MK3K,P1_MK3D !herbers2026
       integer P1_F0,  P1_ANGX,P1_ANGZ
       integer P2_VN1, P2_VN2, P2_F,   P2_RHO, P2_BETA,P2_GAMA
       integer P2_DC3J,P2_DPIJ,P2_DPIK,P2_DPID, P2_DC3K, P2_DC3D !Herbers2018
+      integer P2_DP4J,P2_DP4K,P2_DP4D
       integer P2_DPK2,P2_D3K2                                   !Herbers2024
-      integer P2_DFM2,P2_DFK2                                   !Herbers2026
+      integer P2_DFM2,P2_FMK                                   !Herbers2026
+      integer P2_M3KJ,P2_M3KK,P2_M3KD !herbers2026
+      integer P2_MK3J,P2_MK3K,P2_MK3D !herbers2026
       integer P2_F0,  P2_ANGX,P2_ANGZ
       integer P3_VN1, P3_VN2, P3_F,   P3_RHO, P3_BETA,P3_GAMA
       integer P3_DC3J,P3_DPIJ,P3_DPIK,P3_DPID, P3_DC3K, P3_DC3D !Herbers2018
+      integer P3_DP4J,P3_DP4K,P3_DP4D
       integer P3_DPK2,P3_D3K2                                   !Herbers2024
-      integer P3_DFM2,P3_DFK2                                   !Herbers2026
+      integer P3_DFM2,P3_FMK                                   !Herbers2026
+      integer P3_M3KJ,P3_M3KK,P3_M3KD !herbers2026
+      integer P3_MK3J,P3_MK3K,P3_MK3D !herbers2026
       integer P3_F0,  P3_ANGX,P3_ANGZ
       integer P4_VN1, P4_VN2, P4_F,   P4_RHO, P4_BETA,P4_GAMA   !Herbers2024
       integer P4_DC3J,P4_DPIJ,P4_DPIK,P4_DPID, P4_DC3K, P4_DC3D !Herbers2024
+      integer P4_DP4J,P4_DP4K,P4_DP4D
       integer P4_DPK2,P4_D3K2                                   !Herbers2024
-      integer P4_DFM2,P4_DFK2                                   !Herbers2026
+      integer P4_DFM2,P4_FMK                                   !Herbers2026
+      integer P4_M3KJ,P4_M3KK,P4_M3KD !herbers2026
+      integer P4_MK3J,P4_MK3K,P4_MK3D !herbers2026
       integer P4_F0,  P4_ANGX,P4_ANGZ                           !Herbers2024
 
         parameter (P_BJ  = 1)
@@ -351,13 +377,22 @@ c        parameter (P1_DPIC= DIMPRR+PI_DPIC)
         parameter (P1_DPIJ= DIMPRR+PI_DPIJ)
         parameter (P1_DPIK= DIMPRR+PI_DPIK)
         parameter (P1_DPID= DIMPRR+PI_DPID)
+        parameter (P1_DP4J= DIMPRR+PI_DP4J) !Herbers2026
+        parameter (P1_DP4K= DIMPRR+PI_DP4K) !Herbers2026
+        parameter (P1_DP4D= DIMPRR+PI_DP4D) !Herbers2026
         parameter (P1_DC3J= DIMPRR+PI_DC3J)
         parameter (P1_DC3K= DIMPRR+PI_DC3K) !Herbers2018
         parameter (P1_DC3D= DIMPRR+PI_DC3D) !Herbers2018
         parameter (P1_D3K2= DIMPRR+PI_D3K2) !Herbers2024
         parameter (P1_DPK2= DIMPRR+PI_DPK2) !Herbers2024 
         parameter (P1_DFM2= DIMPRR+PI_DFM2) !Herbers2026
-        parameter (P1_DFK2= DIMPRR+PI_DFK2) !Herbers2026
+        parameter (P1_FMK= DIMPRR+PI_FMK) !Herbers2026
+        parameter (P1_MK3J= DIMPRR+PI_MK3J) !Herbers2026
+        parameter (P1_MK3K= DIMPRR+PI_MK3K) !Herbers2026
+        parameter (P1_MK3D= DIMPRR+PI_MK3D) !Herbers2026
+        parameter (P1_M3KJ= DIMPRR+PI_M3KJ) !Herbers2026
+        parameter (P1_M3KK= DIMPRR+PI_M3KK) !Herbers2026
+        parameter (P1_M3KD= DIMPRR+PI_M3KD) !Herbers2026
         parameter (P1_F0  = DIMPRR+PI_F0  )
         parameter (P1_ANGX= DIMPRR+PI_ANGX)
         parameter (P1_ANGZ= DIMPRR+PI_ANGZ)
@@ -372,13 +407,22 @@ c        parameter (P2_DPIC= DIMPRR+DIMPIR+PI_DPIC)
         parameter (P2_DPIJ= DIMPRR+DIMPIR+PI_DPIJ)
         parameter (P2_DPIK= DIMPRR+DIMPIR+PI_DPIK)
         parameter (P2_DPID= DIMPRR+DIMPIR+PI_DPID)
+        parameter (P2_DP4J= DIMPRR+DIMPIR+PI_DP4J) !Herbers2026
+        parameter (P2_DP4K= DIMPRR+DIMPIR+PI_DP4K) !Herbers2026
+        parameter (P2_DP4D= DIMPRR+DIMPIR+PI_DP4D) !Herbers2026
         parameter (P2_DC3J= DIMPRR+DIMPIR+PI_DC3J)  
         parameter (P2_DC3K= DIMPRR+DIMPIR+PI_DC3K)  !Herbers2018    
         parameter (P2_DC3D= DIMPRR+DIMPIR+PI_DC3D)  !Herbers2018   
         parameter (P2_D3K2= DIMPRR+DIMPIR+PI_D3K2)  !Herbers2024
         parameter (P2_DPK2= DIMPRR+DIMPIR+PI_DPK2)  !Herbers2024  
         parameter (P2_DFM2= DIMPRR+DIMPIR+PI_DFM2) !Herbers2026
-        parameter (P2_DFK2= DIMPRR+DIMPIR+PI_DFK2) !Herbers2026
+        parameter (P2_FMK= DIMPRR+DIMPIR+PI_FMK) !Herbers2026
+        parameter (P2_MK3J= DIMPRR+DIMPIR+PI_MK3J) !Herbers2026
+        parameter (P2_MK3K= DIMPRR+DIMPIR+PI_MK3K) !Herbers2026
+        parameter (P2_MK3D= DIMPRR+DIMPIR+PI_MK3D) !Herbers2026
+        parameter (P2_M3KJ= DIMPRR+DIMPIR+PI_M3KJ) !Herbers2026
+        parameter (P2_M3KK= DIMPRR+DIMPIR+PI_M3KK) !Herbers2026
+        parameter (P2_M3KD= DIMPRR+DIMPIR+PI_M3KD) !Herbers2026
         parameter (P2_F0  = DIMPRR+DIMPIR+PI_F0  )
         parameter (P2_ANGX= DIMPRR+DIMPIR+PI_ANGX)
         parameter (P2_ANGZ= DIMPRR+DIMPIR+PI_ANGZ)
@@ -394,13 +438,22 @@ c        parameter (P3_DPIC= DIMPRR+2*DIMPIR+PI_DPIC)
         parameter (P3_DPIJ= DIMPRR+2*DIMPIR+PI_DPIJ)
         parameter (P3_DPIK= DIMPRR+2*DIMPIR+PI_DPIK)
         parameter (P3_DPID= DIMPRR+2*DIMPIR+PI_DPID)
+        parameter (P3_DP4J= DIMPRR+2*DIMPIR+PI_DP4J) !Herbers2026
+        parameter (P3_DP4K= DIMPRR+2*DIMPIR+PI_DP4K) !Herbers2026
+        parameter (P3_DP4D= DIMPRR+2*DIMPIR+PI_DP4D) !Herbers2026
         parameter (P3_DC3J= DIMPRR+2*DIMPIR+PI_DC3J)
         parameter (P3_DC3K= DIMPRR+2*DIMPIR+PI_DC3K)  !Herbers2018 
         parameter (P3_DC3D= DIMPRR+2*DIMPIR+PI_DC3D)  !Herbers2018   
         parameter (P3_D3K2= DIMPRR+2*DIMPIR+PI_D3K2)  !Herbers2024
         parameter (P3_DPK2= DIMPRR+2*DIMPIR+PI_DPK2)  !Herbers2024 
         parameter (P3_DFM2= DIMPRR+2*DIMPIR+PI_DFM2) !Herbers2026
-        parameter (P3_DFK2= DIMPRR+2*DIMPIR+PI_DFK2) !Herbers2026
+        parameter (P3_FMK= DIMPRR+2*DIMPIR+PI_FMK) !Herbers2026
+        parameter (P3_MK3J= DIMPRR+2*DIMPIR+PI_MK3J) !Herbers2026
+        parameter (P3_MK3K= DIMPRR+2*DIMPIR+PI_MK3K) !Herbers2026
+        parameter (P3_MK3D= DIMPRR+2*DIMPIR+PI_MK3D) !Herbers2026
+        parameter (P3_M3KJ= DIMPRR+2*DIMPIR+PI_M3KJ) !Herbers2026
+        parameter (P3_M3KK= DIMPRR+2*DIMPIR+PI_M3KK) !Herbers2026
+        parameter (P3_M3KD= DIMPRR+2*DIMPIR+PI_M3KD) !Herbers2026
         parameter (P3_F0  = DIMPRR+2*DIMPIR+PI_F0  )
         parameter (P3_ANGX= DIMPRR+2*DIMPIR+PI_ANGX)
         parameter (P3_ANGZ= DIMPRR+2*DIMPIR+PI_ANGZ)
@@ -414,13 +467,22 @@ c        parameter (P3_DPIC= DIMPRR+2*DIMPIR+PI_DPIC)
         parameter (P4_DPIJ= DIMPRR+3*DIMPIR+PI_DPIJ)  !Herbers2024
         parameter (P4_DPIK= DIMPRR+3*DIMPIR+PI_DPIK)  !Herbers2024
         parameter (P4_DPID= DIMPRR+3*DIMPIR+PI_DPID)  !Herbers2024
+        parameter (P4_DP4J= DIMPRR+3*DIMPIR+PI_DP4J)  !Herbers2026
+        parameter (P4_DP4K= DIMPRR+3*DIMPIR+PI_DP4K)  !Herbers2026
+        parameter (P4_DP4D= DIMPRR+3*DIMPIR+PI_DP4D)  !Herbers2026
         parameter (P4_DC3J= DIMPRR+3*DIMPIR+PI_DC3J)  !Herbers2024
         parameter (P4_DC3K= DIMPRR+3*DIMPIR+PI_DC3K)  !Herbers2024
         parameter (P4_DC3D= DIMPRR+3*DIMPIR+PI_DC3D)  !Herbers2024    
         parameter (P4_D3K2= DIMPRR+3*DIMPIR+PI_D3K2)  !Herbers2024
         parameter (P4_DPK2= DIMPRR+3*DIMPIR+PI_DPK2)  !Herbers2024     
         parameter (P4_DFM2= DIMPRR+3*DIMPIR+PI_DFM2) !Herbers2026
-        parameter (P4_DFK2= DIMPRR+3*DIMPIR+PI_DFK2) !Herbers2026
+        parameter (P4_FMK= DIMPRR+3*DIMPIR+PI_FMK) !Herbers2026
+        parameter (P4_MK3J= DIMPRR+3*DIMPIR+PI_MK3J) !Herbers2026
+        parameter (P4_MK3K= DIMPRR+3*DIMPIR+PI_MK3K) !Herbers2026
+        parameter (P4_MK3D= DIMPRR+3*DIMPIR+PI_MK3D) !Herbers2026
+        parameter (P4_M3KJ= DIMPRR+3*DIMPIR+PI_M3KJ) !Herbers2026
+        parameter (P4_M3KK= DIMPRR+3*DIMPIR+PI_M3KK) !Herbers2026
+        parameter (P4_M3KD= DIMPRR+3*DIMPIR+PI_M3KD) !Herbers2026
         parameter (P4_F0  = DIMPRR+3*DIMPIR+PI_F0  )  !Herbers2024
         parameter (P4_ANGX= DIMPRR+3*DIMPIR+PI_ANGX)  !Herbers2024
         parameter (P4_ANGZ= DIMPRR+3*DIMPIR+PI_ANGZ)  !Herbers2024
