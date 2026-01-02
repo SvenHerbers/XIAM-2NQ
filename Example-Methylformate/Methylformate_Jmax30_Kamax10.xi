@@ -1,67 +1,66 @@
 ~Methylformate Vmax0 Jmax30 Kamax10 sub-dataset of full dataset given in https://doi.org/10.1016/j.jms.2009.01.016 by Ilyushin et al. 
  
-ntop  1  !   Performance: Error weighted RMS: 26 kHz, pure RMS: 76 kHz.
+ntop  1  !   Performance: Error weighted RMS: 20 kHz, pure RMS: 66 kHz.
 ncyc 25
 reduc 1
 print 4  
-conv 0.9999999999
 woods 33
 
- BJ            6.108210882 { 0.000052399}
- BK           13.863955297 { 0.000452281}
- B-            0.804232998 { 0.000052456}
- DJ            5.902314E-6 { 0.000232E-6}
- DJK         -20.687098E-6 { 0.001441E-6}
- DK           78.302813E-6 { 0.009207E-6}
- dj           -1.871087E-6 { 0.000105E-6}
- dk          -57.877593E-9 { 0.030849E-9}
- H_J          -0.005852E-9 { 0.000158E-9}
- HJK          -0.297970E-9 { 0.001889E-9}
- HKJ           0.672755E-9 { 0.011038E-9}
- H_K           2.301700E-9 { 0.063311E-9}
- h_j          -0.003809E-9 { 0.000090E-9}
- hjk          -0.000443E-9 { 0.000048E-9}
- h_k           0.000365E-9 { 0.000012E-9}
-\F           168.927366952 {     derived} 
- V1n          11982.215618 {    4.389084} 
-\rho           0.085032442 {     derived} 
-\beta          0.426744547 {     derived} 
- Dc3J         -0.001251877 { 0.000042168} 
- Dc3K          0.005017086 { 0.000284923} 
- Dpi2J         0.002242281 { 0.000022651} 
- Dpi2K        -0.010798134 { 0.000180695} 
- Dpi2-         0.000445205 { 0.000021288} 
- DFM2          0.048106425 { 0.002042816} 
- DFK2          0.001799098 { 0.000094384} 
- F0          156.276503558 { 0.015555637} 
- delta         0.920170755 { 0.000161039} 
-   
- fit BJ      
- fit BK      
- fit B-      
- fit DJ      
- fit DJK     
- fit DK      
- fit dj      
- fit dk      
- fit H_J 
- fit HJK 
- fit HKJ 
- fit H_K 
- fit h_j 
- fit hjk 
- fit h_k 
- fit V1n     
- fit Dpi2J   
- fit Dpi2K   
- fit Dpi2-   
- fit delta   
- fit F0
- fit DFM2
- fit DFK2
- fit Dc3J
- fit Dc3K
-                                                                                                                      
+ BJ            6.107070942 { 0.000019325}
+ BK           13.854772122 { 0.000166780}
+ B-            0.803022802 { 0.000019868}
+ DJ            5.898927E-6 { 0.000176E-6}
+ DJK         -20.681736E-6 { 0.001114E-6}
+ DK           78.456541E-6 { 0.006103E-6}
+ dj           -1.868170E-6 { 0.000070E-6}
+ dk          -57.729328E-9 { 0.021764E-9}
+ H_J          -0.006080E-9 { 0.000125E-9}
+ HJK          -0.296063E-9 { 0.001107E-9}
+ HKJ           1.051020E-9 { 0.007541E-9}
+ H_K           1.863422E-9 { 0.043167E-9}
+ h_j          -0.004506E-9 { 0.000068E-9}
+ hjk           0.000021E-9 { 0.000035E-9}
+ h_k           0.000591E-9 { 0.000009E-9}
+\F           173.580557056 {     derived} 
+ V1n          12493.462772 {    4.597343} 
+\rho           0.081883201 {     derived} 
+\beta          0.432554683 {     derived} 
+ Dpi2J         0.001466453 { 0.000001879} 
+ Dpi2K        -0.016889990 { 0.000505437} 
+ Dpi2-        -0.005298297 { 0.000078721} 
+ Dpi4K        -0.000446057 { 0.000019529} 
+ Dpi4-        -0.000212208 { 0.000003080} 
+ Fmk           0.687109779 { 0.007008841} 
+ m3kK         -0.000426481 { 0.000005118} 
+ F0          161.072663723 { 0.046258482} 
+ delta         0.927464886 { 0.000053250} 
+ 
+fit BJ        
+fit BK        
+fit B-        
+fit DJ        
+fit DJK       
+fit DK        
+fit dj        
+fit dk        
+fit H_J       
+fit HJK       
+fit HKJ       
+fit H_K       
+fit h_j       
+fit hjk       
+fit h_k       
+dqx  V1n      
+dqx Dpi2J     
+dqx Dpi2K     
+dqx Dpi2-     
+dqx Dpi4K     
+dqx Dpi4-     
+dqx Fmk       
+dqx m3kK      
+dqx F0        
+dqx delta     
+                     
    S     0  !S 1                                    
    S     1  !S 2                                                                                                                                                                    
                                                                                  
