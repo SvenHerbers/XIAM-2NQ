@@ -112,7 +112,6 @@ C     diagonal m/m
      $       + (ao(PM_F  ) 
      $       + ai(PI_FMK)*am(PM_RHO)*dk*dm
      $       + ai(PI_DFM2)*dm**2) ! ai() Parameters are discarded in calcovv
-C     $       + ai(PI_FMK)*am(PM_RHO)**2*dk**2)
      $       * (dm - am(PM_RHO)*dk)**2  
      $       + ao(PM_VN1) * 0.5
      $       + ao(PM_VN2) * 0.5
@@ -122,10 +121,8 @@ c     $                      +4.0*am(PM_DPI4)*dk*(am(PM_RHO)*dk-dm)**3)
      $       + ao(PM_DPI4)* (dm - am(PM_RHO)*dk)**4
      $    + ao(PM_MK3)* am(PM_RHO)**3*dk**3*dm
      $    + ao(PM_M3K)* am(PM_RHO)*dk*dm**3
-C     $       + ao(PM_M3K)* (dm - am(PM_RHO)*dk)**2*dm**2
-C     $    + ao(PM_MK3)* (dm - am(PM_RHO)*dk)**2*am(PM_RHO)**2*dk**2
-c     $       + ao(PM_M)   *  dm
-c     $       - ao(PM_RK)  *  am(PM_RHO)*dk
+     $    + ai(PI_MK)*am(PM_RHO)*dk*dm
+     $    + ai(PI_M2K2)*am(PM_RHO)**2*dk**2*dm**2
         vo(im)=vo(im)+v(im)*t
       end do
       

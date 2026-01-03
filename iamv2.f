@@ -29,7 +29,7 @@ C      into the matrix h using the subroutines addo1 and addovv.
      $     -DIMSIG:DIMSIG,DIMTOP)
 C      real*8            erk(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
       integer itop,ift
-      logical rrir1,rrir2,rrir3,rrir4 !Herbers2024
+      logical rrir1,rrir2,rrir3,rrir4,rrir5,rrir6,rrir7 !Herbers2024
       external myand
       integer myand
 
@@ -82,12 +82,18 @@ C      real*8            erk(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
       rrir2=.false.
       rrir3=.false.
 	  rrir4=.false.!Herbers2024
+      rrir5=.false.!Herbers2026
+      rrir6=.false.!Herbers2026
+      rrir7=.false.!Herbers2026
       do itop=1, ctlint(C_NTOP)
         ift=(itop-1)*DIMPIR
         if (a(P1_DPIJ+ift).ne.0.0) rrir1=.true.
         if (a(P1_DPIK+ift).ne.0.0) rrir2=.true.
         if (a(P1_DPID+ift).ne.0.0) rrir3=.true.
 		if (a(P1_DPK2+ift).ne.0.0) rrir4=.true.!Herbers2024
+        if (a(P1_DPJ2+ift).ne.0.0) rrir5=.true.!Herbers2026
+        if (a(P1_DPD2+ift).ne.0.0) rrir6=.true.!Herbers2026
+        if (a(P1_DPJK+ift).ne.0.0) rrir7=.true.!Herbers2026
 c        write(*,'(50F10.4)')
 c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
       end do
@@ -95,30 +101,46 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
      $     call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_F,PM_F
      $     ,.true.)
       if (rrir1) then
-        call haddjp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $       ,PI_DPIJ)!  
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DPIJ,0,1)!last two indices are powers on (Pz^2)^expk, and (P^2)^expj    
       end if
       if (rrir2) then
-        call haddkp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $       ,PI_DPIK)
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DPIK,1,0)!last two indices are powers on (Pz^2)^expk, and (P^2)^expj   
       end if
       if (rrir3) then
         call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
      $       ,PI_DPID)
       end if
       if (rrir4) then!Hebers2024
-        call haddkkp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $       ,PI_DPK2)!Herbers2024
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DPK2,2,0)!Herbers2024
       end if!Herbers2024
+      if (rrir5) then!Hebers2026
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DPJ2,0,2)!Herbers2026
+      end if!Herbers2026
+      if (rrir6) then!Hebers2026
+        call haddddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DPD2)!Herbers2026
+      end if!Herbers2026
+      if (rrir7) then!Hebers2026
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DPJK,1,1)!Herbers2026
+      end if!Herbers2026
       rrir1=.false.
       rrir2=.false.
       rrir3=.false.
       rrir4=.false.!Herbers2024
+      rrir5=.false.
+      rrir6=.false.!Herbers2026
+      rrir7=.false.!Herbers2026
       do itop=1, ctlint(C_NTOP)
         ift=(itop-1)*DIMPIR
         if (a(P1_DP4J+ift).ne.0.0) rrir1=.true.
         if (a(P1_DP4K+ift).ne.0.0) rrir2=.true.
         if (a(P1_DP4D+ift).ne.0.0) rrir3=.true.
+        if (a(P1_DPI4+ift).ne.0.0) rrir4=.true.
 c        write(*,'(50F10.4)')
 c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
       end do
@@ -126,16 +148,20 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
      $ call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_DPI4,PM_DPI4
      $     ,.true.)
       if (rrir1) then
-        call haddjp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $       ,PI_DP4J)!  
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DP4J,0,1)!last two indices are powers on (Pz^2)^expk, and (P^2)^expj  
       end if
       if (rrir2) then
-        call haddkp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $       ,PI_DP4K)
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DP4K,1,0)
       end if
       if (rrir3) then
         call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
      $       ,PI_DP4D)
+      end if
+      if (rrir4) then
+        call addo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $      ,a(P1_DPI4+ift))
       end if
       rrir1=.false.
       rrir2=.false.
@@ -146,6 +172,7 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
         if (a(P1_MK3J+ift).ne.0.0) rrir1=.true.
         if (a(P1_MK3K+ift).ne.0.0) rrir2=.true.
         if (a(P1_MK3D+ift).ne.0.0) rrir3=.true.
+        if (a(P1_MK3+ift).ne.0.0)  rrir4=.true.
 c        write(*,'(50F10.4)')
 c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
       end do
@@ -153,16 +180,20 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
      $ call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_MK3,PM_MK3
      $     ,.true.)
       if (rrir1) then
-        call haddjp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $       ,PI_MK3J)!  
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_MK3J,0,1)!  
       end if
       if (rrir2) then
-        call haddkp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $       ,PI_MK3K)
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_MK3K,1,0)
       end if
       if (rrir3) then
         call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
      $       ,PI_MK3D)
+      end if
+      if (rrir4) then
+        call addo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $      ,a(P1_MK3+ift))
       end if
       rrir1=.false.
       rrir2=.false.
@@ -173,6 +204,7 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
         if (a(P1_M3KJ+ift).ne.0.0) rrir1=.true.
         if (a(P1_M3KK+ift).ne.0.0) rrir2=.true.
         if (a(P1_M3KD+ift).ne.0.0) rrir3=.true.
+        if (a(P1_M3K+ift).ne.0.0)  rrir4=.true.
 c        write(*,'(50F10.4)')
 c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
       end do
@@ -180,16 +212,20 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
      $ call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_M3K,PM_M3K
      $     ,.true.)
       if (rrir1) then
-        call haddjp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $       ,PI_M3KJ)!  
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_M3KJ,0,1)!  
       end if
       if (rrir2) then
-        call haddkp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $       ,PI_M3KK)
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_M3KK,1,0)
       end if
       if (rrir3) then
         call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
      $       ,PI_M3KD)
+      end if
+      if (rrir4) then
+        call addo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $      ,a(P1_M3K+ift))
       end if
       rrir1=.false.
       rrir2=.false.
@@ -208,20 +244,20 @@ C       ...
      $     call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_COS,PM_COS
      $     ,.true.)
       if (rrir1) then
-        call haddjp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $       ,PI_DC3J)! 
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_DC3J,0,1)! 
       end if
       if (rrir2) then                                                       !Herbers
-        call haddkp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori           !Herbers
-     $       ,PI_DC3K)                                                      !Herbers
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori           !Herbers
+     $       ,PI_DC3K,1,0)                                                      !Herbers
       end if                                                                !Herbers
       if (rrir3) then                                                       !Herbers
         call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori           !Herbers
      $       ,PI_DC3D)                                                      !Herbers
       end if                                                                !Herbers
       if (rrir4) then                                                       !Herbers
-        call haddkkp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori   !Herbers2024
-     $       ,PI_D3K2)                                               !Herbers2024
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori   !Herbers2024
+     $       ,PI_D3K2,2,0)                                               !Herbers2024
       end if 
       call rotevl(j,gam,f,qvk,a,evalv,rotm,rott,tori)
       if (complex) then
@@ -503,7 +539,76 @@ C        if (ctlint(C_PRI).gt.11) write(*,'(/,A,I2)') 'H_Djp',itop
 
       return
       end
+C----------------------------------------------------------------------
+      subroutine haddjjp(j,gam,f,qvk,ruse 
+     $     ,h,a,evalv,ovv,rotm,rott,tori,ipm) !Herbers2026
+      implicit none
+      include 'iam.fi'
+      integer j,gam,f,ipm
+      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
+      integer ruse(DIMVV,DIMVV,DIMTOP)
+      real*8  h(DIMTOT,DIMTOT),a(DIMPAR)
+      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
+      real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
+      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
+     $     -DIMSIG:DIMSIG,DIMTOP)
+C     
+      integer qv(DIMTOT) 
+C     work
+      real*8 rt,tt
+      real*8 dcgam, dsgam
+      integer iv,itop,ir,ic,voff
+      external myand
+      integer myand
+            
+      if (size(S_H).gt.DIMTOT) stop 'Dimension Error in ADDJP'
+      do iv=1,size(S_H)
+        qv(iv)=int((iv-1)/size(S_K))+1
+      end do
+      do itop=1, ctlint(C_NTOP)
+        voff=size(S_MINV+itop)-1
+C        if (ctlint(C_PRI).gt.11) write(*,'(/,A,I2)') 'H_Djp',itop
+        do ir=1,size(S_H)
+          do ic=1,ir
+            tt=dble(ruse(qv(ir),qv(ic),itop)) ! don't mult. with tor. int. of the other tops  
+            rt=rott(qvk(ir,Q_K)
+     $           ,qvk(ic,Q_K)
+     $           ,qvk(ir,Q_V+itop)!-voff
+     $           ,qvk(ic,Q_V+itop)!-voff
+     $           ,itop)
+     $           *tt
+     $           *2.0*(a(DIMPRR+(itop-1)*DIMPIR+ipm)
+     $                *(dble(j*(j+1)))**2) !Herbers 2026
+            dcgam=cos(a(P1_GAMA+(itop-1)*DIMPIR)
+     $           *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
+            h(ir,ic)=h(ir,ic)+dcgam
+            if (qvk(ir,Q_K).ne.qvk(ic,Q_K)) then
+              dsgam=sin(a(P1_GAMA+(itop-1)*DIMPIR)
+     $             *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
+              h(ic,ir)=h(ic,ir)+dsgam
+            end if
+          end do
+        end do
+      end do
+      if (myand(ctlint(C_PRI),AP_MH).ne.0) then
+        write(*,*) ' H_DJPM '
+        do ir=1, size(S_H)
+          do ic=1, size(S_H)
+            if (abs(h(ir,ic)).lt.1000.0) then
+              write(*,'(F10.5,$)') h(ir,ic)
+            else
+              write(*,'(F10.2,$)') h(ir,ic)
+            end if
+          end do
+          write(*,*)
+        end do
+        write(*,*)
+      end if
 
+      return
+      end
 C----------------------------------------------------------------------
       subroutine haddkp(j,gam,f,qvk,ruse
      $     ,h,a,evalv,ovv,rotm,rott,tori,ipm)
@@ -617,6 +722,80 @@ C        if (ctlint(C_PRI).gt.11) write(*,'(/,A,I2)') 'H_DKp',itop
      $           *tt
      $           *(a(DIMPRR+(itop-1)*DIMPIR+ipm)
      $           *(dble(qvk(ir,Q_K))**4+dble(qvk(ic,Q_K))**4))
+C            h(ir,ic)=h(ir,ic)+rt
+            dcgam=cos(a(P1_GAMA+(itop-1)*DIMPIR)
+     $           *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
+            h(ir,ic)=h(ir,ic)+dcgam
+            if (qvk(ir,Q_K).ne.qvk(ic,Q_K)) then
+              dsgam=sin(a(P1_GAMA+(itop-1)*DIMPIR)
+     $             *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
+              h(ic,ir)=h(ic,ir)+dsgam
+            end if
+          end do
+        end do
+      end do
+      if (myand(ctlint(C_PRI),AP_MH).ne.0) then
+        write(*,*) ' H_DKKP'
+        do ir=1, size(S_H)
+          do ic=1, size(S_H)
+            if (abs(h(ir,ic)).lt.1000.0) then
+              write(*,'(F10.5,$)') h(ir,ic)
+            else
+              write(*,'(F10.2,$)') h(ir,ic)
+            end if
+          end do
+          write(*,*)
+        end do
+        write(*,*)
+      end if
+
+      return
+      end
+C----------------------------------------------------------------------
+      subroutine haddjkmix(j,gam,f,qvk,ruse
+     $     ,h,a,evalv,ovv,rotm,rott,tori,ipm,expk,expj)!herbers2026
+      implicit none!test to implement Dc3KK Dpi2KK
+      include 'iam.fi'
+      integer j,gam,f,ipm
+      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
+      integer ruse(DIMVV,DIMVV,DIMTOP)
+      integer expk, expj
+      real*8  h(DIMTOT,DIMTOT),a(DIMPAR)
+      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
+      real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
+      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
+     $     -DIMSIG:DIMSIG,DIMTOP)
+C     
+      integer qv(DIMTOT) 
+C     work
+      real*8 rt,tt
+      real*8 dcgam, dsgam
+      integer iv,itop,ir,ic,voff
+      external myand
+      integer myand
+      
+      if (size(S_H).gt.DIMTOT) stop 'Dimension Error in HaddKP'
+      do iv=1,size(S_H)
+        qv(iv)=int((iv-1)/size(S_K))+1
+      end do
+      do itop=1, ctlint(C_NTOP)
+        voff=size(S_MINV+itop)-1
+C        if (ctlint(C_PRI).gt.11) write(*,'(/,A,I2)') 'H_DKp',itop
+        do ir=1,size(S_H)
+          do ic=1,ir
+            tt=dble(ruse(qv(ir),qv(ic),itop)) ! don't mult. with tor. int. of the other tops 
+            rt=rott(qvk(ir,Q_K)
+     $           ,qvk(ic,Q_K)
+     $           ,qvk(ir,Q_V+itop)!-voff
+     $           ,qvk(ic,Q_V+itop)!-voff
+     $           ,itop)
+     $           *tt
+     $           *(a(DIMPRR+(itop-1)*DIMPIR+ipm)
+     $           *(dble(qvk(ir,Q_K))**(2*expk)
+     $           +dble(qvk(ic,Q_K))**(2*expk))
+     $           *(dble(j*(j+1))**expj))!Herbers 2026
 C            h(ir,ic)=h(ir,ic)+rt
             dcgam=cos(a(P1_GAMA+(itop-1)*DIMPIR)
      $           *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
@@ -780,8 +959,144 @@ C     work
 
       return
       end
+C----------------------------------------------------------------------
+      subroutine haddddp(j,gam,f,qvk,ruse !herbers2026
+     $     ,h,a,evalv,ovv,rotm,rott,tori,ipm)
+      implicit none
+      include 'iam.fi'
+      integer j,gam,f,ipm
+      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
+      integer ruse(DIMVV,DIMVV,DIMTOP)
+      real*8  h(DIMTOT,DIMTOT),a(DIMPAR)
+      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
+      real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
+      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
+     $     -DIMSIG:DIMSIG,DIMTOP)
+C     
+      integer qv(DIMTOT) 
+C     work
+      real*8 tmp(DIM2J1,DIM2J1),djj1,dk,dff
+      integer itop,ir,ic,voff,ivr,ivc,ikr,ikc
+      external myand
+      integer myand
+
+      if (size(S_H).gt.DIMTOT) stop 'Dimension Error in HAddDP'
+      do ivr=1,size(S_H)
+        qv(ivr)=int((ivr-1)/size(S_K))+1
+      end do
+      djj1=dble(j*(j+1))
+      do itop=1, ctlint(C_NTOP)
+        voff=size(S_MINV+itop)-1 
+        do ivr=1, size(S_VV)
+          do ivc=1, ivr
+            if (ruse(ivr,ivc,itop).ne.0) then 
+              do ikr=1, size(S_K)
+                do ikc=1, size(S_K)
+                  tmp(ikr,ikc)=0.0
+                end do
+              end do
+              do ikc=1, size(S_K)-2
+                ic=ikc+(ivc-1)*size(S_K)
+                dk=dble(qvk(ic,Q_K)) 
+                dff=0.5d0*dsqrt((djj1-dk*(dk+1.0))
+     $               *(djj1-(dk+1.0)*(dk+2.0)))
+                dff=dff**2 !herbers2026
+                do ikr=1, size(S_K)
+                  ir=ikr+(ivr-1)*size(S_K)
+                  tmp(ikr,ikc)=tmp(ikr,ikc)+
+     $                 rott(qvk(ir,Q_K)     ,qvk(ic+2,Q_K)
+     $                 ,qvk(ir,Q_V+itop),qvk(ic+2,Q_V+itop)
+     $                 ,itop)
+     $                 *dff
+                  tmp(ikr,ikc+2)=tmp(ikr,ikc+2)+
+     $                 rott(qvk(ir,Q_K)     ,qvk(ic,Q_K)
+     $                 ,qvk(ir,Q_V+itop),qvk(ic,Q_V+itop)
+     $                 ,itop)
+     $                 *dff
+                end do
+              end do
+              do ikr=1, size(S_K)-2
+                ir=ikr+(ivr-1)*size(S_K)
+                dk=dble(qvk(ir,Q_K)) 
+                dff=0.5d0*dsqrt((djj1-dk*(dk+1.0))
+     $               *(djj1-(dk+1.0)*(dk+2.0)))
+                dff=dff**2 !herbers2026
+                do ikc=1, size(S_K)
+                  ic=ikc+(ivc-1)*size(S_K)
+                  tmp(ikr,ikc)=tmp(ikr,ikc)+
+     $                 rott(qvk(ir+2,Q_K)     ,qvk(ic,Q_K)
+     $                 ,qvk(ir+2,Q_V+itop),qvk(ic,Q_V+itop)
+     $                 ,itop)
+     $                 *dff
+                  tmp(ikr+2,ikc)=tmp(ikr+2,ikc)+
+     $                 rott(qvk(ir,Q_K)     ,qvk(ic,Q_K)
+     $                 ,qvk(ir,Q_V+itop),qvk(ic,Q_V+itop)
+     $                 ,itop)
+     $                 *dff
+                end do
+              end do
+              if (ivr.eq.ivc) then
+                do ikr=1, size(S_K)
+                  ir=ikr+(ivr-1)*size(S_K)
+                  do ikc=1, ikr
+                    ic=ikc+(ivc-1)*size(S_K)
+                    h(ir,ic)=h(ir,ic)
+     $                 +a(DIMPRR+(itop-1)*DIMPIR+ipm)
+     $                 *cos(a(P1_GAMA+(itop-1)*DIMPIR)
+     $                 *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))
+     $                 *tmp(ikr,ikc)
+                    h(ic,ir)=h(ic,ir)
+     $                 +a(DIMPRR+(itop-1)*DIMPIR+ipm)
+     $                 *sin(a(P1_GAMA+(itop-1)*DIMPIR)
+     $                 *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))
+     $                 *tmp(ikr,ikc)
+                  end do
+                enddo
+              else
+                do ikr=1, size(S_K)
+                  ir=ikr+(ivr-1)*size(S_K)
+                  do ikc=1, size(S_K)
+                    ic=ikc+(ivc-1)*size(S_K)
+                    h(ir,ic)=h(ir,ic)
+     $                 +a(DIMPRR+(itop-1)*DIMPIR+ipm)
+     $                 *cos(a(P1_GAMA+(itop-1)*DIMPIR)
+     $                 *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))
+     $                 *tmp(ikr,ikc)
+                    h(ic,ir)=h(ic,ir)
+     $                 +a(DIMPRR+(itop-1)*DIMPIR+ipm)
+     $                 *sin(a(P1_GAMA+(itop-1)*DIMPIR)
+     $                 *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))
+     $                 *tmp(ikr,ikc)
+                  end do
+                end do
+              end if
+            end if
+          end do
+        end do
+        if (myand(ctlint(C_PRI),AP_MH).ne.0) then
+          write(*,'(A,I3)') ' H_DKD   top',itop
+          do ir=1, size(S_H)
+            do ic=1, size(S_H)
+              if (abs(h(ir,ic)).lt.1000.0) then
+                write(*,'(F10.5,$)') h(ir,ic)
+              else
+                write(*,'(F10.2,$)') h(ir,ic)
+              end if
+            end do
+            write(*,*)
+          end do
+          write(*,*)
+        end if
+      end do
+
+      return
+      end
 
 C----------------------------------------------------------------------
+C----------------------------------------------------------------------
+
       subroutine haddo1(j,gam,f,qvk,ruse
      $     ,h,a,evalv,ovv,rotm,rott,tori,ap)
 C     add the rotated matrixelements (in rott) to the main matrix h
