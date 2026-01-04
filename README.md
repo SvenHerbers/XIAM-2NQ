@@ -21,6 +21,7 @@ ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f i
   XIAM-2NQ v0.28 - Sven Herbers, 04-January-2026
   - Removed parameter ``Dp2--``
   - Added Parameters ``Dp2-j, Dp2-k`` which, together with ``Dp2JJ, Dp2KK, Dp2JK``, should constitute a complete set of quartic overall-rotation operators mutliplying with dt pi**2 d (with dt, d meaning rotation into the PAS using wigner small d matrices).
+  - Updated readme parameter definitions of Dc3J Dc3K Dc3- (there was an error by a factor of 2 and the usage of anti commutators was not shown).
 
   XIAM-2NQ v0.27 - Sven Herbers, 03-January-2026
   
@@ -129,7 +130,7 @@ XIAM-2NQ uses 2I as input for control parameter 'spin', it also uses 2F as input
 
 
 XIAM_mod parameters: The additional empirical disortion parameters (Dc3K and Dc3-) available in 
-                     XIAM_mod are also available in XIAM-NQ.
+                     XIAM_mod are also available in XIAM-NQ. 
 Internal rotation overall - rotation distortion operator in XIAM_mod:
 <pre>
   Hird =  2 Dpi2J (p_alpha - rho P_r)**2 P**2
@@ -137,9 +138,9 @@ Internal rotation overall - rotation distortion operator in XIAM_mod:
                                   + P_z**2 (p_alpha - rho P_r)**2]
          + Dpi2- [(p_alpha - rho P_r)**2 (P_x**2 - P_y**2)
                                   + (P_x**2 - P_y**2) (p_alpha - rho P_r)**2]
-         + Dc3J  cos(3alpha) P**2
-         + Dc3K  cos(3alpha) P_z**2         
-         + Dc3-  cos(3alpha) (P_x**2 - P_y**2)
+         + 2 Dc3J  cos(3alpha) P**2
+         + Dc3K  [cos(3alpha) P_z**2 + P_z**2 cos(3alpha)]       
+         + Dc3-  [cos(3alpha) (P_x**2 - P_y**2) + (P_x**2 - P_y**2) cos(3alpha)]
 </pre> 
 
 -----------------------------------------------------------------------------
