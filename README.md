@@ -18,6 +18,10 @@ ifort -c iam.f <br/>
 ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f <br/> 
 
 ----------------------------------------------------------------------------
+  XIAM-2NQ v0.28 - Sven Herbers, 04-January-2026
+  - Removed parameter ``Dp2--``
+  - Added Parameters ``Dp2-j, Dp2-k`` which, together with ``Dp2JJ, Dp2KK, Dp2JK``, should constitute a complete set of quartic overall-rotation operators mutliplying with pi**2.
+
   XIAM-2NQ v0.27 - Sven Herbers, 03-January-2026
   
   - Implemented a generalized subroutine into iamv2.f ``subroutine haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori,ipm,expk,expj)`` to simplify and unify the implementation of Dpi2JxKy type parameters.
