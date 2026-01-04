@@ -20,7 +20,7 @@ ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f i
 ----------------------------------------------------------------------------
   XIAM-2NQ v0.28 - Sven Herbers, 04-January-2026
   - Removed parameter ``Dp2--``
-  - Added Parameters ``Dp2-j, Dp2-k`` which, together with ``Dp2JJ, Dp2KK, Dp2JK``, should constitute a complete set of quartic overall-rotation operators mutliplying with pi**2.
+  - Added Parameters ``Dp2-j, Dp2-k`` which, together with ``Dp2JJ, Dp2KK, Dp2JK``, should constitute a complete set of quartic overall-rotation operators mutliplying with dt pi**2 d (with dt, d meaning rotation into the PAS using wigner small d matrices).
 
   XIAM-2NQ v0.27 - Sven Herbers, 03-January-2026
   
