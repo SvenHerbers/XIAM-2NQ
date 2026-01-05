@@ -100,7 +100,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `Dc3-` | `[dt(cos(nα))d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(cos(nα))d]` |
 | `D3KK` | `[dt(cos(nα))d Pz**4+ Pz**4 dt(cos(nα))d]` |
 
-## Top-Top coupling term Hii
+### Top-Top coupling term Hii
 
 | `Parameter` | `Operator` |
 |------------|------------|
@@ -108,7 +108,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `Vcc` | `dt1 cos(nα1) d1 * dt2 cos(nα2) d2` |
 | `Vss` | `dt1 sin(nnα1) d1 * dt2 sin(n nα2) d2` |
 
-## Other parameters
+### Other parameters
 
 | `Parameter` | `Description` |
 |------------|---------------|
@@ -118,7 +118,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `beta` | `rotation about y axis` |
 | `gamma` | `rotation about x axis` |
 
-## First order local parameters
+### First order local parameters
 
 These parameters multiply with Px,Py,Pz in the PAS, but can be defined for each Species separately (up to 11 species possible).  
 They can be particularly helpful for 1st order corrections, when dealing with two low barrier coupling rotors, when the few coupling parameters available in XIAM (F12,Vcc,Vss) reach their limits.
@@ -129,7 +129,7 @@ They can be particularly helpful for 1st order corrections, when dealing with tw
 | `DyS1, DyS2,.. DyS11` |
 | `DzS1, DzS2,.. DzS11` |
 
-## Nuclear quadrupole coupling parameters
+### Nuclear quadrupole coupling parameters
 for first or second nucleus
 
 | `Parameter` |
@@ -140,7 +140,7 @@ for first or second nucleus
 | `chi_xz, chi2_xz` |
 | `chi_yz, chi2_yz` |
 
-## Vibrational state interaction parameters
+### Vibrational state interaction parameters
 Parameter E is always available. 
 For Wilson and Pickets coriolis coupling parameters, vibrational coupling mode must be activated by setting control parameter ctrl to  `ctrl 1`.
 Can only be used with the “old” approximate nuclear quadrupole coupling (elements off diagonal in J neglected)  with a single quadrupolar nucleus.  
@@ -154,28 +154,10 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
 
 ## Update Notes
 
-  XIAM-2NQ v0.28 - Sven Herbers, 04-January-2026
-  - Removed parameter ``Dp2--``
-  - Added Parameters ``Dp2-j, Dp2-k`` which, together with ``Dp2JJ, Dp2KK, Dp2JK``, should constitute a complete set of quartic overall-rotation operators mutliplying with dt pi**2 d (with dt, d meaning rotation into the PAS using wigner small d matrices).
-  - Updated readme parameter definitions of Dc3J Dc3K Dc3- (there was an error by a factor of 2 and the usage of anti commutators was not shown).
-
-  XIAM-2NQ v0.27 - Sven Herbers, 03-January-2026
-  
-  - Implemented a generalized subroutine into iamv2.f ``subroutine haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori,ipm,expk,expj)`` to simplify and unify the implementation of Dpi2JxKy type parameters.
-  - Added new Hamiltonian parameters: ``mk, mk3, m3k, m2k2, Dpi4, Dp2JJ, Dp2JK, Dp2--``
-  - Parameter table including operator definitions: in preparation (will be added to this README once finalized).
-  - Updated Example-Methylformate (v=0, Jmax=30, Kmax=10) of lines from the much larger dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM on this subset is 61 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset. This example demonstrates the successful application of the new parameters ``Dpi4K, Dpi4-, Fmk, m3kK, Dp2JJ``. Larger J and K values were intentionally excluded, as even the A species exceeds the validity of the sextic semi-rigid rotor Hamiltonian currently implemented in XIAM; octic terms (not yet implemented) are likely required.
-
-  XIAM-2NQ v0.26 - Sven Herbers, 02-January-2026
-  
-  - Removed parameters ``DFK2`` and ``DFM2``
-  - Added parameters ``Dpi4J, Dpi4K, Dpi4-, Fmk, DFm2, mk3J, mk3K, mk3-, m3kJ, m3kK, m3K-``
-  - Updated Example-Methylformate (v=0, Jmax=30, Kmax=10). The unweighted rms of XIAM on this subset is 66 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset.
-  
-  XIAM-2NQ v0.25 - Sven Herbers, 31-December-2025 
-
-  - Added parameters ``DFK2`` and ``DFM2`` replacing ``F`` with ``(F+DFK2*K**2+DFM2*M**2)`` in the free-rotor-basis RAS representation of Hir.
-  - Added Example-Methylformate to demonstrate useage of new parameters on a subset (v=0, Jmax=30, Kmax=10). The unweighted rms of XIAM on this subset is 76 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset.
+  XIAM-2NQ v0.25 -> v0.29 - Sven Herbers, 05-January-2026
+  - Many new parameters available in Hird and Hir, parametertable added to readme.md.
+  - Minor code cleanup (removal/replacement of some functions)
+  - Added Example-Methylformate (v=0, Jmax=30, Kmax=10) of lines from the much larger dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM on this subset is 61 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset. This example demonstrates the successful application of the new parameters ``Dpi4K, Dpi4-, Fmk, m3kK, Dp2JJ``. Larger J and K values were intentionally excluded, as even the A species exceeds the validity of the sextic semi-rigid rotor Hamiltonian currently implemented in XIAM; octic terms (not yet implemented) are likely required.
 
   XIAM-2NQ v0.24b - Sven Herbers, 17-June-2025 
 
