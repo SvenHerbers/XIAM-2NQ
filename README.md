@@ -174,17 +174,13 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
   XIAM-2NQ v0.23 -  Sven Herbers, 6-Jan-2025
   
   This is an updated version of XIAM-NQ with severale changes, the most important one
-being the implementation of exact quadrupole coupling for two nuclei. The changes come with 
-new control parameters. The go-to citations for this version are: <br/> 
-...to be published... <br/> 
-and <br/> 
-  S. Herbers, J. Mol. Spectrosc., 2024, 405, 111950, DOI: 10.1016/j.jms.2024.111950  <br/> 
-It follows a list of changes, the original documentation by Hartwig is printed below 
-for completeness.<br/> 
+being the implementation of exact quadrupole coupling for two nuclei. 
+
 
 ----------------------------------------------------------------------------
 ## Further documentation
-
+It follows a list of changes compared to original XIAM, the original documentation by Hartwig is printed below 
+for completeness.<br/> 
 New control parameters:  
 
      ctrl (default 3)    If spin is not 0 this switches exact quadrupole coupling on (3) or off (0) 
