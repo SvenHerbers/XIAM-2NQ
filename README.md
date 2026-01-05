@@ -142,7 +142,7 @@ for first or second nucleus
 
 ### Vibrational state interaction parameters
 Parameter E is always available. 
-For Wilson and Pickets coriolis coupling parameters, vibrational coupling mode must be activated by setting control parameter ctrl to  `ctrl 1`.
+For Wilson and Pickett coriolis coupling parameters, vibrational coupling mode must be activated by setting control parameter ctrl to  `ctrl 1`.
 Can only be used with the “old” approximate nuclear quadrupole coupling (elements off diagonal in J neglected)  with a single quadrupolar nucleus.  
 
 
