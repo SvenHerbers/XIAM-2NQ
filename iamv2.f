@@ -176,6 +176,32 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
 	  rrir4=.false.!Herbers2024
       do itop=1, ctlint(C_NTOP)
         ift=(itop-1)*DIMPIR
+        if (a(P1_MKJ+ift).ne.0.0) rrir1=.true.
+        if (a(P1_MKK+ift).ne.0.0) rrir2=.true.
+        if (a(P1_MKD+ift).ne.0.0) rrir3=.true.
+c        write(*,'(50F10.4)')
+c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
+      end do
+      if (rrir1.or.rrir2.or.rrir3.or.rrir4)
+     $ call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_MK,PM_MK
+     $     ,.true.)
+      if (rrir1) then
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_MKJ,0,1)!  
+      end if
+      if (rrir2) then
+        call haddjkmix(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_MKK,1,0)
+      end if
+      if (rrir3) then
+        call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+     $       ,PI_MKD)
+      end if
+      rrir1=.false.
+      rrir2=.false.
+      rrir3=.false.
+      do itop=1, ctlint(C_NTOP)
+        ift=(itop-1)*DIMPIR
         if (a(P1_MK3J+ift).ne.0.0) rrir1=.true.
         if (a(P1_MK3K+ift).ne.0.0) rrir2=.true.
         if (a(P1_MK3D+ift).ne.0.0) rrir3=.true.
@@ -473,288 +499,6 @@ c          write(*,*)
 c        end do
 c       write(*,*)
 c     end if
-
-      return
-      end
-C----------------------------------------------------------------------
-      subroutine haddjp(j,gam,f,qvk,ruse
-     $     ,h,a,evalv,ovv,rotm,rott,tori,ipm)
-      implicit none
-      include 'iam.fi'
-      integer j,gam,f,ipm
-      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      real*8  h(DIMTOT,DIMTOT),a(DIMPAR)
-      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-C     
-      integer qv(DIMTOT) 
-C     work
-      real*8 rt,tt
-      real*8 dcgam, dsgam
-      integer iv,itop,ir,ic,voff
-      external myand
-      integer myand
-            
-      if (size(S_H).gt.DIMTOT) stop 'Dimension Error in ADDJP'
-      do iv=1,size(S_H)
-        qv(iv)=int((iv-1)/size(S_K))+1
-      end do
-      do itop=1, ctlint(C_NTOP)
-        voff=size(S_MINV+itop)-1
-C        if (ctlint(C_PRI).gt.11) write(*,'(/,A,I2)') 'H_Djp',itop
-        do ir=1,size(S_H)
-          do ic=1,ir
-            tt=dble(ruse(qv(ir),qv(ic),itop)) ! don't mult. with tor. int. of the other tops  
-            rt=rott(qvk(ir,Q_K)
-     $           ,qvk(ic,Q_K)
-     $           ,qvk(ir,Q_V+itop)!-voff
-     $           ,qvk(ic,Q_V+itop)!-voff
-     $           ,itop)
-     $           *tt
-     $           *2.0*(a(DIMPRR+(itop-1)*DIMPIR+ipm)
-     $                *dble(j*(j+1)))
-            dcgam=cos(a(P1_GAMA+(itop-1)*DIMPIR)
-     $           *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
-            h(ir,ic)=h(ir,ic)+dcgam
-            if (qvk(ir,Q_K).ne.qvk(ic,Q_K)) then
-              dsgam=sin(a(P1_GAMA+(itop-1)*DIMPIR)
-     $             *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
-              h(ic,ir)=h(ic,ir)+dsgam
-            end if
-          end do
-        end do
-      end do
-      if (myand(ctlint(C_PRI),AP_MH).ne.0) then
-        write(*,*) ' H_DJPM '
-        do ir=1, size(S_H)
-          do ic=1, size(S_H)
-            if (abs(h(ir,ic)).lt.1000.0) then
-              write(*,'(F10.5,$)') h(ir,ic)
-            else
-              write(*,'(F10.2,$)') h(ir,ic)
-            end if
-          end do
-          write(*,*)
-        end do
-        write(*,*)
-      end if
-
-      return
-      end
-C----------------------------------------------------------------------
-      subroutine haddjjp(j,gam,f,qvk,ruse 
-     $     ,h,a,evalv,ovv,rotm,rott,tori,ipm) !Herbers2026
-      implicit none
-      include 'iam.fi'
-      integer j,gam,f,ipm
-      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      real*8  h(DIMTOT,DIMTOT),a(DIMPAR)
-      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-C     
-      integer qv(DIMTOT) 
-C     work
-      real*8 rt,tt
-      real*8 dcgam, dsgam
-      integer iv,itop,ir,ic,voff
-      external myand
-      integer myand
-            
-      if (size(S_H).gt.DIMTOT) stop 'Dimension Error in ADDJP'
-      do iv=1,size(S_H)
-        qv(iv)=int((iv-1)/size(S_K))+1
-      end do
-      do itop=1, ctlint(C_NTOP)
-        voff=size(S_MINV+itop)-1
-C        if (ctlint(C_PRI).gt.11) write(*,'(/,A,I2)') 'H_Djp',itop
-        do ir=1,size(S_H)
-          do ic=1,ir
-            tt=dble(ruse(qv(ir),qv(ic),itop)) ! don't mult. with tor. int. of the other tops  
-            rt=rott(qvk(ir,Q_K)
-     $           ,qvk(ic,Q_K)
-     $           ,qvk(ir,Q_V+itop)!-voff
-     $           ,qvk(ic,Q_V+itop)!-voff
-     $           ,itop)
-     $           *tt
-     $           *2.0*(a(DIMPRR+(itop-1)*DIMPIR+ipm)
-     $                *(dble(j*(j+1)))**2) !Herbers 2026
-            dcgam=cos(a(P1_GAMA+(itop-1)*DIMPIR)
-     $           *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
-            h(ir,ic)=h(ir,ic)+dcgam
-            if (qvk(ir,Q_K).ne.qvk(ic,Q_K)) then
-              dsgam=sin(a(P1_GAMA+(itop-1)*DIMPIR)
-     $             *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
-              h(ic,ir)=h(ic,ir)+dsgam
-            end if
-          end do
-        end do
-      end do
-      if (myand(ctlint(C_PRI),AP_MH).ne.0) then
-        write(*,*) ' H_DJPM '
-        do ir=1, size(S_H)
-          do ic=1, size(S_H)
-            if (abs(h(ir,ic)).lt.1000.0) then
-              write(*,'(F10.5,$)') h(ir,ic)
-            else
-              write(*,'(F10.2,$)') h(ir,ic)
-            end if
-          end do
-          write(*,*)
-        end do
-        write(*,*)
-      end if
-
-      return
-      end
-C----------------------------------------------------------------------
-      subroutine haddkp(j,gam,f,qvk,ruse
-     $     ,h,a,evalv,ovv,rotm,rott,tori,ipm)
-      implicit none
-      include 'iam.fi'
-      integer j,gam,f,ipm
-      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      real*8  h(DIMTOT,DIMTOT),a(DIMPAR)
-      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-C     
-      integer qv(DIMTOT) 
-C     work
-      real*8 rt,tt
-      real*8 dcgam, dsgam
-      integer iv,itop,ir,ic,voff
-      external myand
-      integer myand
-      
-      if (size(S_H).gt.DIMTOT) stop 'Dimension Error in HaddKP'
-      do iv=1,size(S_H)
-        qv(iv)=int((iv-1)/size(S_K))+1
-      end do
-      do itop=1, ctlint(C_NTOP)
-        voff=size(S_MINV+itop)-1
-C        if (ctlint(C_PRI).gt.11) write(*,'(/,A,I2)') 'H_DKp',itop
-        do ir=1,size(S_H)
-          do ic=1,ir
-            tt=dble(ruse(qv(ir),qv(ic),itop)) ! don't mult. with tor. int. of the other tops  
-            rt=rott(qvk(ir,Q_K)
-     $           ,qvk(ic,Q_K)
-     $           ,qvk(ir,Q_V+itop)!-voff
-     $           ,qvk(ic,Q_V+itop)!-voff
-     $           ,itop)
-     $           *tt
-     $           *(a(DIMPRR+(itop-1)*DIMPIR+ipm)
-     $           *(dble(qvk(ir,Q_K))**2+dble(qvk(ic,Q_K))**2))
-C            h(ir,ic)=h(ir,ic)+rt
-            dcgam=cos(a(P1_GAMA+(itop-1)*DIMPIR)
-     $           *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
-            h(ir,ic)=h(ir,ic)+dcgam
-            if (qvk(ir,Q_K).ne.qvk(ic,Q_K)) then
-              dsgam=sin(a(P1_GAMA+(itop-1)*DIMPIR)
-     $             *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
-              h(ic,ir)=h(ic,ir)+dsgam
-            end if
-          end do
-        end do
-      end do
-      if (myand(ctlint(C_PRI),AP_MH).ne.0) then
-        write(*,*) ' H_DKP '
-        do ir=1, size(S_H)
-          do ic=1, size(S_H)
-            if (abs(h(ir,ic)).lt.1000.0) then
-              write(*,'(F10.5,$)') h(ir,ic)
-            else
-              write(*,'(F10.2,$)') h(ir,ic)
-            end if
-          end do
-          write(*,*)
-        end do
-        write(*,*)
-      end if
-
-      return
-      end
-C----------------------------------------------------------------------
-      subroutine haddkkp(j,gam,f,qvk,ruse
-     $     ,h,a,evalv,ovv,rotm,rott,tori,ipm)
-      implicit none!test to implement Dc3KK Dpi2KK
-      include 'iam.fi'
-      integer j,gam,f,ipm
-      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      real*8  h(DIMTOT,DIMTOT),a(DIMPAR)
-      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-C     
-      integer qv(DIMTOT) 
-C     work
-      real*8 rt,tt
-      real*8 dcgam, dsgam
-      integer iv,itop,ir,ic,voff
-      external myand
-      integer myand
-      
-      if (size(S_H).gt.DIMTOT) stop 'Dimension Error in HaddKP'
-      do iv=1,size(S_H)
-        qv(iv)=int((iv-1)/size(S_K))+1
-      end do
-      do itop=1, ctlint(C_NTOP)
-        voff=size(S_MINV+itop)-1
-C        if (ctlint(C_PRI).gt.11) write(*,'(/,A,I2)') 'H_DKp',itop
-        do ir=1,size(S_H)
-          do ic=1,ir
-            tt=dble(ruse(qv(ir),qv(ic),itop)) ! don't mult. with tor. int. of the other tops 
-            rt=rott(qvk(ir,Q_K)
-     $           ,qvk(ic,Q_K)
-     $           ,qvk(ir,Q_V+itop)!-voff
-     $           ,qvk(ic,Q_V+itop)!-voff
-     $           ,itop)
-     $           *tt
-     $           *(a(DIMPRR+(itop-1)*DIMPIR+ipm)
-     $           *(dble(qvk(ir,Q_K))**4+dble(qvk(ic,Q_K))**4))
-C            h(ir,ic)=h(ir,ic)+rt
-            dcgam=cos(a(P1_GAMA+(itop-1)*DIMPIR)
-     $           *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
-            h(ir,ic)=h(ir,ic)+dcgam
-            if (qvk(ir,Q_K).ne.qvk(ic,Q_K)) then
-              dsgam=sin(a(P1_GAMA+(itop-1)*DIMPIR)
-     $             *dble(qvk(ir,Q_K)-qvk(ic,Q_K)))*rt
-              h(ic,ir)=h(ic,ir)+dsgam
-            end if
-          end do
-        end do
-      end do
-      if (myand(ctlint(C_PRI),AP_MH).ne.0) then
-        write(*,*) ' H_DKKP'
-        do ir=1, size(S_H)
-          do ic=1, size(S_H)
-            if (abs(h(ir,ic)).lt.1000.0) then
-              write(*,'(F10.5,$)') h(ir,ic)
-            else
-              write(*,'(F10.2,$)') h(ir,ic)
-            end if
-          end do
-          write(*,*)
-        end do
-        write(*,*)
-      end if
 
       return
       end

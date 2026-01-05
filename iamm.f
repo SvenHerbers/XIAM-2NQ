@@ -122,6 +122,7 @@ c     $                      +4.0*am(PM_DPI4)*dk*(am(PM_RHO)*dk-dm)**3)
      $    + ao(PM_MK3)* am(PM_RHO)**3*dk**3*dm
      $    + ao(PM_M3K)* am(PM_RHO)*dk*dm**3
      $    + ai(PI_MK)*am(PM_RHO)*dk*dm
+     $    + ao(PM_MK)*am(PM_RHO)*dk*dm ! for passing to multplication in the PAS 
      $    + ai(PI_M2K2)*am(PM_RHO)**2*dk**2*dm**2
         vo(im)=vo(im)+v(im)*t
       end do
