@@ -17,7 +17,143 @@ ifort -c iam.f <br/>
 
 ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f <br/> 
 
+Citation: J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
+
 ----------------------------------------------------------------------------
+## Parameter Table
+In this table, `Π = (Pα - ρ Pz)**2` refers to the relative internal angular momentum in the ρ-Axis System (RAS).
+
+The operator `Pz` is used with a double meaning, referring either to the z axis in the RAS or in the Principal Axis System (PAS).  
+In expressions where both occur, the RAS `Pz` is identifiable by being enclosed between two Wigner small-d matrices, `dt` and `d`, indicating the rotation from the RAS to the PAS.
+
+
+### Semi-Rigid Rotor Parameters Hrr
+Here only A reduction (S reduction also available)  
+Operators are formulated in the PAS
+
+| `Parameter` | `Operator` |
+|------------|------------|
+| `BJ` | `P**2` |
+| `BK` | `Pz**2` |
+| `B-` | `Px**2-Py**2` |
+| `DJ` | `-P**4` |
+| `DJK` | `-Pz**2P**2` |
+| `DK` | `-Pz**4` |
+| `dj` | `-2P**2 (Px**2-Py**2)` |
+| `dk` | `-[Pz**2(Px**2 - Py**2)+(Px**2 - Py**2)Pz**2]` |
+| `H_J` | `P**6` |
+| `HJK` | `P**4Pz**2` |
+| `HKJ` | `P**2 Pz**4` |
+| `H_K` | `Pz**6` |
+| `h_j` | `2P**4 (Px**2 - Py**2)` |
+| `hjk` | `P**2 [Pz**2 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**2]` |
+| `h_k` | `[Pz**4 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**4]` |
+
+### Internal Rotor Parameters Hir
+Operators are formulated in the RAS
+
+| `Parameter` | `Operator` |
+|------------|------------|
+| `F` | `Π**2` |
+| `V1n` | `0.5(1-cos(nα))` |
+| `V2n` | `0.5(1-cos(2nα))` |
+| `Fmk` | `Pα ρ Pz Π**2` |
+| `DFm2` | `Pα**2` |
+| `mk` | `Pα ρ Pz` |
+| `m2k2` | `Pα**2 ρ**2 Pz**2` |
+| `mk3` | `Pα ρ**3 Pz**3` |
+| `m3k` | `Pα**3 ρ Pz` |
+
+### Internal rotation - overall rotation distortion Hird
+Mixed PAS/RAS formulation  
+RAS operators are rotated into PAS, then multiplied with PAS operators  
+Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, and dt its transposed
+
+| `Parameter` | `Operator` |
+|------------|------------|
+| `Dpi2J` | `2*dt(Π**2)d P**2` |
+| `Dpi2K` | `[dt(Π**2)d Pz**2+ Pz**2 dt(Π**2)d]` |
+| `Dpi2-` | `[dt(Π**2)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**2)d]` |
+| `Dpi4`  | `dt(Π**4)d` |
+| `Dpi4J` | `2*dt(Π**4)d P**2` |
+| `Dpi4K` | `[dt(Π**4)d Pz**2+ Pz**2 dt(Π**4)d]` |
+| `Dpi4-` | `[dt(Π**4)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**4)d]` |
+|------------|------------|
+| `Dp2JJ` | `2*dt(Π**2)d P**4` |
+| `Dp2KK` | `[dt(Π**2)d Pz**4 + Pz**4 dt(Π**2)d]` |
+| `Dp2JK` | `P**2[dt(Π**2)d Pz**2 + Pz**2 dt(Π**2)d]` |
+| `Dp2-j` | `-P**2[dt(Π**2)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Π**2)d]` |
+| `Dp2-k` | `-[dt(Π**2)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Π**2)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Π**2)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Π**2)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Π**2)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Π**2)d]` |
+|------------|------------|
+| `mkJ` | `2*dt(Pα ρ Pz)d P**2` |
+| `mkK` | `[dt(Pα ρ Pz)d Pz**2+ Pz**2 dt(Pα ρ Pz)d]` |
+| `mk-` | `[dt(Pα ρ Pz)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα ρ Pz)d]` |
+| `mk3J` | `2*dt(Pα ρ**3 Pz**3)d P**2` |
+| `mk3K` | `[dt(Pα ρ**3 Pz**3)d Pz**2+ Pz**2 dt(Pαρ**3Pz**3)d]` |
+| `mk3-` | `[dt(Pα ρ**3 Pz**3)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pαρ**3Pz**3)d]` |
+| `m3kJ` | `2*dt(Pα**3 ρ Pz)d P**2` |
+| `m3kK` | `[dt(Pα**3 ρ Pz)d Pz**2+ Pz**2 dt(Pα**3 ρ Pz)d]` |
+| `m3k-` | `[dt(Pα**3 ρ Pz)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα**3 ρ Pz)d]` |
+|------------|------------|
+| `Dc3J` | `2*dt(cos(nα))d P**2` |
+| `Dc3K` | `[dt(cos(nα))d Pz**2+ Pz**2 dt(cos(nα))d]` |
+| `Dc3-` | `[dt(cos(nα))d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(cos(nα))d]` |
+| `D3KK` | `[dt(cos(nα))d Pz**4+ Pz**4 dt(cos(nα))d]` |
+
+## Top-Top coupling term Hii
+
+| `Parameter` | `Operator` |
+|------------|------------|
+| `F12` | `dt1 π1 d1 * dt2 π2 d2 + dt2 π2 d2 * dt1 π1 d1` |
+| `Vcc` | `dt1 cos(nα1) d1 * dt2 cos(nα2) d2` |
+| `Vss` | `dt1 sin(nnα1) d1 * dt2 sin(n nα2) d2` |
+
+## Other parameters
+
+| `Parameter` | `Description` |
+|------------|---------------|
+| `F0` | `Structural constant to internal rotation. Can be used as input to derive ρ,β,γ`<br>`F = ℏ**2/(2rIα)= F0/r `<br>`With`<br>`r=1-Σg λg**2 Iα/Ig`<br>`and with λ being the direction cosines, and g=a,b,c in the PAS`|
+| `delta` | `The angle between the internal rotation axis and the principal axis z` |
+| `epsil` | `The angle between the principal axis x and the projection of the internal rotation axis onto xy-plane` |
+| `beta` | `rotation about y axis` |
+| `gamma` | `rotation about x axis` |
+
+## First order local parameters
+
+These parameters multiply with Px,Py,Pz in the PAS, but can be defined for each Species separately (up to 11 species possible).  
+They can be particularly helpful for 1st order corrections, when dealing with two low barrier coupling rotors, when the few coupling parameters available in XIAM (F12,Vcc,Vss) reach their limits.
+
+| `Parameter` |
+|-------------|
+| `DxS1, DxS2,.. DxS11` |
+| `DyS1, DyS2,.. DyS11` |
+| `DzS1, DzS2,.. DzS11` |
+
+## Nuclear quadrupole coupling parameters
+for first or second nucleus
+
+| `Parameter` |
+|-------------|
+| `chi_z, chi2_z` |
+| `chi_-, chi2_-` |
+| `chi_xy, chi2_xy` |
+| `chi_xz, chi2_xz` |
+| `chi_yz, chi2_yz` |
+
+## Vibrational state interaction parameters
+Parameter E is always available. 
+For Wilson and Pickets coriolis coupling parameters, vibrational coupling mode must be activated by setting control parameter ctrl to  `ctrl 1`.
+Can only be used with the “old” approximate nuclear quadrupole coupling (elements off diagonal in J neglected)  with a single quadrupolar nucleus.  
+
+
+| `Parameter` | `Description` |
+|------------|---------------|
+| `E` | `Energy-offset assignable to the various vibrational states` |
+| `Gx12,Gx34,Gy12,Gy34,Gz12,Gz34` | `Wilson type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Pickett type at the moment, due to a likely phase inconsistency` |
+| `Fxy12,Fxy34,Fyz12,Fyz34,Fxz12,Fxz34` | `Pickett type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency` |
+
+## Update Notes
+
   XIAM-2NQ v0.28 - Sven Herbers, 04-January-2026
   - Removed parameter ``Dp2--``
   - Added Parameters ``Dp2-j, Dp2-k`` which, together with ``Dp2JJ, Dp2KK, Dp2JK``, should constitute a complete set of quartic overall-rotation operators mutliplying with dt pi**2 d (with dt, d meaning rotation into the PAS using wigner small d matrices).
@@ -64,6 +200,8 @@ and <br/>
 It follows a list of changes, the original documentation by Hartwig is printed below 
 for completeness.<br/> 
 
+----------------------------------------------------------------------------
+## Further documentation
 
 New control parameters:  
 
