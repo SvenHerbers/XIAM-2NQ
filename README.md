@@ -21,7 +21,7 @@ Citation: J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
 
 ----------------------------------------------------------------------------
 ## Parameter Table
-In this table, `Π = (Pα - ρ Pz)**2` refers to the relative internal angular momentum in the ρ-Axis System (RAS).
+In this table, `Π = (Pα - ρ Pz)` refers to the relative internal angular momentum in the ρ-Axis System (RAS).
 
 The operator `Pz` is used with a double meaning, referring either to the z axis in the RAS or in the Principal Axis System (PAS).  
 In expressions where both occur, the RAS `Pz` is identifiable by being enclosed between two Wigner small-d matrices, `dt` and `d`, indicating the rotation from the RAS to the PAS.
