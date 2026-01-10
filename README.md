@@ -58,7 +58,7 @@ Operators are formulated in the RAS
 | `V1n` | `0.5(1-cos(nα))` |
 | `V2n` | `0.5(1-cos(2nα))` |
 | `Fmk` | `Pα ρ Pz Π**2` |
-| `DFm2` | `Pα**2 `Π**2` |
+| `DFm2` | `Pα**2 Π**2` |
 | `mk` | `Pα ρ Pz` |
 | `m2k2` | `Pα**2 ρ**2 Pz**2` |
 | `mk3` | `Pα ρ**3 Pz**3` |
