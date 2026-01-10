@@ -104,7 +104,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 
 | `Parameter` | `Operator` |
 |------------|------------|
-| `F12` | `dt1 π1 d1 * dt2 π2 d2 + dt2 π2 d2 * dt1 π1 d1` |
+| `F12` | `dt1 Π1 d1 * dt2 Π2 d2 + dt2 Π2 d2 * dt1 Π1 d1` |
 | `Vcc` | `dt1 cos(nα1) d1 * dt2 cos(nα2) d2` |
 | `Vss` | `dt1 sin(nα1) d1 * dt2 sin(nα2) d2` |
 
