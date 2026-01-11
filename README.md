@@ -87,7 +87,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 |------------|------------|
 | `mkJ` | `2*dt(Pα ρ Pz)d P**2` |
 | `mkK` | `[dt(Pα ρ Pz)d Pz**2+ Pz**2 dt(Pα ρ Pz)d]` |
-| `mk-` | `[dt(Pα ρ Pz)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα ρ Pz)d]` |
+| `mkD` | `[dt(Pα ρ Pz)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα ρ Pz)d]` |
 | `mk3J` | `2*dt(Pα ρ**3 Pz**3)d P**2` |
 | `mk3K` | `[dt(Pα ρ**3 Pz**3)d Pz**2+ Pz**2 dt(Pαρ**3Pz**3)d]` |
 | `mk3-` | `[dt(Pα ρ**3 Pz**3)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pαρ**3Pz**3)d]` |
