@@ -55,7 +55,7 @@ Operators are formulated in the PAS
 | `L_K` | `Pz**8` |
 | `l_j`  | `2*P**6 (Px**2 - Py**2)` |
 | `ljk` | `P**4  [Pz**2 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**2]` |
-| `lkj` | `P**2  [Pz**2 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**4]` |
+| `lkj` | `P**2  [Pz**4 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**4]` |
 | `l_k` | `[Pz**6 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**6]` |
 
 
