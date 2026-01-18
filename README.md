@@ -42,14 +42,14 @@ Operators are formulated in the PAS
 | `dj` | `-2P**2 (Px**2-Py**2)` |
 | `dk` | `-[Pz**2(Px**2 - Py**2)+(Px**2 - Py**2)Pz**2]` |
 | `H_J` | `P**6` |
-| `HJK` | `P**4Pz**2` |
+| `HJK` | `P**4 Pz**2` |
 | `HKJ` | `P**2 Pz**4` |
 | `H_K` | `Pz**6` |
 | `h_j` | `2P**4 (Px**2 - Py**2)` |
 | `hjk` | `P**2 [Pz**2 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**2]` |
 | `h_k` | `[Pz**4 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**4]` |
 | `L_J` | `P**8` |
-| `LJK` | `P**4 Pz**2` |
+| `LJK` | `P**4 Pz**4` |
 | `LJJK` | `P**6 Pz**2` |
 | `LKKJ` | `P**2 Pz**6` |
 | `L_K` | `Pz**8` |
