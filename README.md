@@ -48,6 +48,16 @@ Operators are formulated in the PAS
 | `h_j` | `2P**4 (Px**2 - Py**2)` |
 | `hjk` | `P**2 [Pz**2 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**2]` |
 | `h_k` | `[Pz**4 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**4]` |
+| `L_J` | `P**8` |
+| `LJK` | `P**4 Pz**2` |
+| `LJJK` | `P**6 Pz**2` |
+| `LKKJ` | `P**2 Pz**6` |
+| `L_K` | `Pz**8` |
+| `l_j`  | `2*P**6 (Px**2 - Py**2)` |
+| `ljk` | `P**4  [Pz**2 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**2]` |
+| `lkj` | `P**2  [Pz**2 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**4]` |
+| `l_k` | `[Pz**6 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**6]` |
+
 
 ### Internal Rotor Parameters Hir
 Operators are formulated in the RAS
@@ -154,10 +164,15 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
 
 ## Update Notes
 
+  XIAM-2NQ v0.32 - Sven Herbers, 18-January-2026
+  - Implementation of octic centrifugal distortion coefficients for Watson A and Watson S reduction (reduc 0 or reduc 1)
+  - Many new parameters available in Hird and Hir, parametertable will be updated in the following days
+  - Updated Example-Methylformate (v=0, Jmax=40, Kmax=15) of lines from the much larger dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM on this subset is 89 kHz; RAM36 global fits on the complete set of lines yield 66 kHz rms within this subset. This example demonstrates the successful application of octic centrifugal distortion as well as several newly implemented parameters.
+
   XIAM-2NQ v0.25 -> v0.29 - Sven Herbers, 05-January-2026
   - Many new parameters available in Hird and Hir, parametertable added to readme.md.
   - Minor code cleanup (removal/replacement of some functions)
-  - Added Example-Methylformate (v=0, Jmax=30, Kmax=10) of lines from the much larger dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM on this subset is 61 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset. This example demonstrates the successful application of the new parameters ``Dpi4K, Dpi4-, Fmk, m3kK, Dp2JJ``. Larger J and K values were intentionally excluded, as even the A species exceeds the validity of the sextic semi-rigid rotor Hamiltonian currently implemented in XIAM; octic terms (not yet implemented) are likely required.
+  - Added Example-Methylformate (v=0, Jmax=30, Kmax=10) of lines from the much larger dataset of lines. The unweighted rms of XIAM on this subset is 61 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset. 
 
   XIAM-2NQ v0.24b - Sven Herbers, 17-June-2025 
 
