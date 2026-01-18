@@ -2010,9 +2010,17 @@ C ---------------------------------------------------------------------
         write(astr,'(F12.6,A)') a*1.d9,'E-9' !Sven2023
         write(dstr,'(F9.6,A)')  d*1.d9,'E-9' !Sven2023
       end if                                   !Sven2023
-      if (aexp.lt.-9) then                    !Sven2023
-        write(astr,'(F12.6,A)') a*1.d9,'E-9' !Sven2023
-        write(dstr,'(F9.6,A)')  d*1.d9,'E-9' !Sven2023
+      if ((aexp.lt.-9).and.(aexp.ge.-12)) then !Sven2026
+        write(astr,'(F11.5,A)') a*1.d12,'E-12'  !Sven2026
+        write(dstr,'(F8.5,A)')  d*1.d12,'E-12'  !Sven2026
+      end if
+      if ((aexp.lt.-12).and.(aexp.ge.-15)) then !Sven2026
+        write(astr,'(F11.5,A)') a*1.d15,'E-15'  !Sven2026
+        write(dstr,'(F8.5,A)')  d*1.d15,'E-15'  !Sven2026
+      end if
+      if (aexp.lt.-15) then                    !Sven2026
+        write(astr,'(F11.5,A)') a*1.d15,'E-15'  !Sven2026
+        write(dstr,'(F8.5,A)')  d*1.d15,'E-15'  !Sven2026
       end if
       return
       end

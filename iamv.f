@@ -2004,6 +2004,8 @@ C     work
       real*8  dk,dj,djj1,dff,t,t1,t2,djjc
       real*8  e1,df,dff1,di,dii1,dg
       real*8  adelk,adelj,ah2,ah3,ahk,ar6,ahjk,ahj
+      real*8  alj,aljk,alkj,alk !Herbers2026
+      real*8  al2,al3,al4 !Herbers2026
       real*8  DXTERM, DYTERM, DZTERM
       integer ik,ir,ic,ivr,ivc,itop
       integer off,voff
@@ -2043,6 +2045,10 @@ C     Watson A
         ah2  =0.0d0
         ahk  =a(P_HKD)
         ah3  =0.0d0
+        alj = a(P_LJD)
+        aljk = a(P_LJKD)
+        alkj = a(P_LKJD)
+        alk  = a(P_LKD)
       end if
 C     Watson S
       if (ctlint(C_RED).eq.1) then
@@ -2054,6 +2060,10 @@ C     Watson S
         ah2  =a(P_HJKD)
         ahk  =0.0d0
         ah3  =a(P_HKD)
+        alj = a(P_LJD)
+        al2 = a(P_LJKD)
+        al3 = a(P_LKJD)
+        al4 = a(P_LKD)
       end if
 C     van Eijck / Typke
       if (ctlint(C_RED).eq.2) then
@@ -2065,6 +2075,7 @@ C     van Eijck / Typke
         ah2  =0.25d0*a(P_HJKD)
         ahk  =0.0d0
         ah3  =0.125d0*a(P_HKD)
+        alj  =0.5*a(P_LJD) ! no further implementation for octic.
       end if
 
       if ( (a(P_BJ) .ne.0.0).or.(a(P_BK) .ne.0.0).or.
@@ -2072,7 +2083,9 @@ C     van Eijck / Typke
      $     (a(P_DK) .ne.0.0).or.(a(P_HJ ).ne.0.0).or.
      $     (a(P_HJK).ne.0.0).or.(a(P_HKJ).ne.0.0).or.
      $     (a(P_HK) .ne.0.0).or.(a(P_QZ) .ne.0.0).or.
-     $     (a(P_CP) .ne.0.0).or.(a(P_CZ) .ne.0.0).or.
+     $     (a(P_LJ) .ne.0.0).or.(a(P_LK) .ne.0.0).or.
+     $     (a(P_LJJK) .ne.0.0).or.(a(P_LJK) .ne.0.0).or.
+     $     (a(P_LKKJ) .ne.0.0).or.
      $     (a(P_E)  .ne.0.0)) then !Herbers2023
         do ik=1, size(S_K)
           dk=dble(qvk(ik,Q_K))
@@ -2088,6 +2101,11 @@ C     van Eijck / Typke
      $         + a(P_CP) * 0.5*dg*(1.0-dk*dk/djjc)
      $         + a(P_CZ) * 0.5*dg*dk*dk/djjc
      $         + a(P_E)  !Herbers2023
+     $         + a(P_LJ) *djj1**4                 !Herbers2026
+     $         + a(P_LK) *dk**8                   !Herbers2026
+     $         + a(P_LJK)*(djj1**2)*(dk**4)       !Herbers2026
+     $         + a(P_LJJK)*(djj1**3)*(dk**2)      !Herbers2026
+     $         + a(P_LKKJ)*(djj1**1)*(dk**6)      !Herbers2026
           do ivc=1, size(S_VV)
             ic=ik+size(S_K)*(ivc-1)
             vor(ic)=vor(ic)+vr(ic)*t
@@ -2161,16 +2179,22 @@ C          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
 C        end do
 C      end if
 
-C     real off diagonal k/k+1 
-      if ((a(P_PX).ne.0.0)) then
+C     real off diagonal k/k+1 ! in XIAM P_PX is real and P_PY gives imaginary, this is flipped convention from Gordy 2.63
+      if ((a(P_PX).ne.0.0).or.(a(P_DZX).ne.0.0).or.
+     $     (a(P_DZXJ).ne.0.0).or.(a(P_DZXK).ne.0.0)) then!Adding Dab, DabJ, DabK here
         off=1
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
           dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=  a(P_PX) *dff
+          t=  a(P_PX)*dff
+     $       +a(P_DZX)*(dk+(dk+1.0))*dff
+     $       +a(P_DZXJ)*(dk+(dk+1.0))*djj1*dff
+     $       +a(P_DZXK)*(dk**3+(dk+1.0)**3)*dff     
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
+      
+      
       
       DXTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
       if (gam.eq.1)  DXTERM=a(P_DX1)   !herbers2024
@@ -2244,7 +2268,9 @@ C     real off diagonal k/k+2
       if ((a(P_BD).ne.0.0).or.(adelj.ne.0.0).or.
      $    (adelk.ne.0.0).or.(a(P_QD).ne.0.0).or.
      $    (ahj.ne.0.0).or.(a(P_CD).ne.0.0).or.
-     $    (ahjk.ne.0.0).or.(ahk.ne.0.0)) then
+     $    (ahjk.ne.0.0).or.(ahk.ne.0.0).or.(alj.ne.0.0).or.
+     $    (aljk.ne.0.0).or.(alkj.ne.0.0).or.(alk.ne.0.0)
+     $     ) then
         off=2
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
@@ -2256,6 +2282,10 @@ C     real off diagonal k/k+2
      $         + ahjk*dff*((dk+2.0d0)**2+dk**2)*djj1
      $         + ahk*dff*((dk+2.0d0)**4+dk**4)   !     $         + a(P_QD) *dff*e1 removed
      $         + a(P_CD) *0.5*dg*dff/djjc
+     $         + alj*2.0d0*dff*djj1**3                        !Herbers2026
+     $         + aljk*dff*((dk+2.0d0)**2+dk**2)*djj1**2       !Herbers2026
+     $         + alkj*dff*((dk+2.0d0)**4+dk**4)*djj1          !Herbers2026
+     $         + alk*dff*((dk+2.0d0)**6+dk**6)                !Herbers2026
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
@@ -2286,20 +2316,20 @@ C        end do
 C      end if
  
 C     Watson S off diagonal k/k+4 (evtl. change dff)
-      if ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0)) then
+      if ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0).or.(al2.ne.0.0d0)) then
         off=4
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
           dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
      $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))) 
           t=   
-     $          ar6*dff + ah2*djj1*dff
+     $          ar6*dff + ah2*djj1*dff + al2*djj1**2*dff
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
 
 C     Watson S off diagonal k/k+6 
-      if (ah3.ne.0.0d0) then
+      if ((ah3.ne.0.0d0).or.(al3.ne.0.0)) then
         off=6
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
@@ -2307,8 +2337,23 @@ C     Watson S off diagonal k/k+6
      $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))
      $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))) 
           t=   
-     $          ah3*dff
+     $          ah3*dff+al3*djj1*dff
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
+        end do
+      end if
+      
+C     Watson S off diagonal k/k+8                                     !Herbers2026
+      if (al4.ne.0.0) then                                            !Herbers2026
+        off=8                                                         !Herbers2026
+        do ik=1, size(S_K)-off                                        !Herbers2026
+          dk=dble(qvk(ik,Q_K))                                        !Herbers2026
+          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))       !Herbers2026
+     $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))     !Herbers2026
+     $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))     !Herbers2026
+     $         *(djj1-(dk+6.0)*(dk+7.0))*(djj1-(dk+7.0)*(dk+8.0)))    !Herbers2026
+          t=                                                          !Herbers2026
+     $          al4*dff                                               !Herbers2026
+          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)            !Herbers2026
         end do
       end if
       
@@ -2337,6 +2382,8 @@ C     work
       real*8  dk,dj,djj1,dff,t,t1,t2,djjc
       real*8  e1,df,dff1,di,dii1,dg
       real*8  adelk,adelj,ah2,ah3,ahk,ar6,ahjk,ahj
+      real*8  alj,aljk,alkj,alk !Herbers2026
+      real*8  al2,al3,al4 !Herbers2026
       real*8  DXTERM, DYTERM, DZTERM
       integer ik,ir,ic,ivr,ivc,itop
       integer off,voff
@@ -2376,6 +2423,10 @@ C     Watson A
         ah2  =0.0d0
         ahk  =a(P_HKD)
         ah3  =0.0d0
+        alj = a(P_LJD)
+        aljk = a(P_LJKD)
+        alkj = a(P_LKJD)
+        alk  = a(P_LKD)
       end if
 C     Watson S
       if (ctlint(C_RED).eq.1) then
@@ -2387,6 +2438,10 @@ C     Watson S
         ah2  =a(P_HJKD)
         ahk  =0.0d0
         ah3  =a(P_HKD)
+        alj = a(P_LJD)
+        al2 = a(P_LJKD)
+        al3 = a(P_LKJD)
+        al4 = a(P_LKD)
       end if
 C     van Eijck / Typke
       if (ctlint(C_RED).eq.2) then
@@ -2398,6 +2453,7 @@ C     van Eijck / Typke
         ah2  =0.25d0*a(P_HJKD)
         ahk  =0.0d0
         ah3  =0.125d0*a(P_HKD)
+        alj  =0.5*a(P_LJD) ! no further implementation for octic.
       end if
 
       if ( (a(P_BJ) .ne.0.0).or.(a(P_BK) .ne.0.0).or.
@@ -2405,7 +2461,9 @@ C     van Eijck / Typke
      $     (a(P_DK) .ne.0.0).or.(a(P_HJ ).ne.0.0).or.
      $     (a(P_HJK).ne.0.0).or.(a(P_HKJ).ne.0.0).or.
      $     (a(P_HK) .ne.0.0).or.(a(P_QZ) .ne.0.0).or.
-     $     (a(P_CP) .ne.0.0).or.(a(P_CZ) .ne.0.0).or.
+     $     (a(P_LJ) .ne.0.0).or.(a(P_LK) .ne.0.0).or.
+     $     (a(P_LJJK) .ne.0.0).or.(a(P_LJK) .ne.0.0).or.
+     $     (a(P_LKKJ) .ne.0.0).or.
      $     (a(P_E)  .ne.0.0)) then !Herbers2023
         do ik=1, size(S_K)
           dk=dble(qvk(ik,Q_K))
@@ -2422,6 +2480,11 @@ C     van Eijck / Typke
      $         + a(P_CP) * 0.5*dg*(1.0-dk*dk/djjc)
      $         + a(P_CZ) * 0.5*dg*dk*dk/djjc
      $         + a(P_E)  !Herbers2023
+     $         + a(P_LJ) *djj1**4                 !Herbers2026
+     $         + a(P_LK) *dk**8                   !Herbers2026
+     $         + a(P_LJK)*(djj1**2)*(dk**4)       !Herbers2026
+     $         + a(P_LJJK)*(djj1**3)*(dk**2)      !Herbers2026
+     $         + a(P_LKKJ)*(djj1**1)*(dk**6)      !Herbers2026
           do ivc=1, size(S_VV)
             ic=ik+size(S_K)*(ivc-1)
             vor(ic)=vor(ic)+vr(ic)*t
@@ -2495,13 +2558,17 @@ C     real off diagonal k/k+1
         end do
       end if
 
-C     real off diagonal k/k+1 
-      if ((a(P_PX).ne.0.0)) then
+C     real off diagonal k/k+1 ! in XIAM P_PX is real and P_PY gives imaginary, this is flipped convention from Gordy 2.63
+      if ((a(P_PX).ne.0.0).or.(a(P_DZX).ne.0.0).or.
+     $     (a(P_DZXJ).ne.0.0).or.(a(P_DZXK).ne.0.0)) then!Adding Dab, DabJ, DabK here
         off=1
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
           dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=  a(P_PX) *dff
+          t=  a(P_PX)*dff
+     $       +a(P_DZX)*(dk+(dk+1.0))*dff
+     $       +a(P_DZXJ)*(dk+(dk+1.0))*djj1*dff
+     $       +a(P_DZXK)*(dk**3+(dk+1.0)**3)*dff     
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
@@ -2578,7 +2645,9 @@ C     real off diagonal k/k+2
       if ((a(P_BD).ne.0.0).or.(adelj.ne.0.0).or.
      $    (adelk.ne.0.0).or.(a(P_QD).ne.0.0).or.
      $    (ahj.ne.0.0).or.(a(P_CD).ne.0.0).or.
-     $    (ahjk.ne.0.0).or.(ahk.ne.0.0)) then
+     $    (ahjk.ne.0.0).or.(ahk.ne.0.0).or.(alj.ne.0.0).or.
+     $    (aljk.ne.0.0).or.(alkj.ne.0.0).or.(alk.ne.0.0)
+     $     ) then
         off=2
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
@@ -2591,6 +2660,10 @@ C     real off diagonal k/k+2
      $         + ahk*dff*((dk+2.0d0)**4+dk**4)
      $         + a(P_QD) *dff*e1
      $         + a(P_CD) *0.5*dg*dff/djjc
+     $         + alj*2.0d0*dff*djj1**3                        !Herbers2026
+     $         + aljk*dff*((dk+2.0d0)**2+dk**2)*djj1**2       !Herbers2026
+     $         + alkj*dff*((dk+2.0d0)**4+dk**4)*djj1          !Herbers2026
+     $         + alk*dff*((dk+2.0d0)**6+dk**6)                !Herbers2026
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
@@ -2621,20 +2694,20 @@ C     imaginaer off diagonal k/k+2
       end if
  
 C     Watson S off diagonal k/k+4 (evtl. change dff)
-      if ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0)) then
+      if ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0).or.(al2.ne.0.0d0)) then
         off=4
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
           dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
      $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))) 
           t=   
-     $          ar6*dff + ah2*djj1*dff
+     $          ar6*dff + ah2*djj1*dff + al2*djj1**2*dff
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
 
 C     Watson S off diagonal k/k+6 
-      if (ah3.ne.0.0d0) then
+      if ((ah3.ne.0.0d0).or.(al3.ne.0.0)) then
         off=6
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
@@ -2642,10 +2715,26 @@ C     Watson S off diagonal k/k+6
      $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))
      $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))) 
           t=   
-     $          ah3*dff
+     $          ah3*dff+al3*djj1*dff
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
+      
+C     Watson S off diagonal k/k+8                                     !Herbers2026
+      if (al4.ne.0.0) then                                            !Herbers2026
+        off=8                                                         !Herbers2026
+        do ik=1, size(S_K)-off                                        !Herbers2026
+          dk=dble(qvk(ik,Q_K))                                        !Herbers2026
+          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))       !Herbers2026
+     $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))     !Herbers2026
+     $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))     !Herbers2026
+     $         *(djj1-(dk+6.0)*(dk+7.0))*(djj1-(dk+7.0)*(dk+8.0)))    !Herbers2026
+          t=                                                          !Herbers2026
+     $          al4*dff                                               !Herbers2026
+          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)            !Herbers2026
+        end do
+      end if
+      
       
       return
       end

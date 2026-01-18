@@ -110,13 +110,20 @@ C     diagonal m/m
         dm=dble(qm(im))
         t =
      $       + (ao(PM_F  ) 
-     $       + ai(PI_FMK)*am(PM_RHO)*dk*dm
+     $       + ai(PI_FMK  )*am(PM_RHO)*dk*dm
+     $       + ai(PI_FM2K2)*am(PM_RHO)**2*dk**2*dm**2
+     $       + ai(PI_FMK3 )*am(PM_RHO)**3*dk**3*dm
+     $       + ai(PI_FM3K )*am(PM_RHO)*dk*dm**3
+     $       + ai(PI_FK2  )*am(PM_RHO)*dk**2
+     $       + ai(PI_FM3K3)*am(PM_RHO)**3*dk**3*dm**3
+     $       + ao(PM_FMK  )*am(PM_RHO)*dk*dm! use with ovv mixed parameters
      $       + ai(PI_DFM2)*dm**2) ! ai() Parameters are discarded in calcovv
      $       * (dm - am(PM_RHO)*dk)**2  
      $       + ao(PM_VN1) * 0.5
      $       + ao(PM_VN2) * 0.5
-     $       + ao(PM_RHO) * 2.0*am(PM_F)*dk*(am(PM_RHO)*dk-dm)
-c     $                      +4.0*am(PM_DPI4)*dk*(am(PM_RHO)*dk-dm)**3)
+C     $       + ao(PM_RHO) * 2.0*am(PM_F)*dk*(am(PM_RHO)*dk-dm) !original
+     $       + ao(PM_RHOP1) *am(PM_F)*(2.0*am(PM_RHO)*dk**2-2.0*dm*dk) !first term comes from linear crossterm of F(roh+param*op)**2 Pz**2 = F rho**2 Pz*2 + 2F*rho*param*op*Pz**2+Fparam**2op**2*Pz**2, second term is cross term from regular pi^2 expression
+     $       + ao(PM_RHOP2) *(am(PM_F)*dk**2) !this is the quadratic term to be multiplied with param**2op**2
      $       + ao(PM_PI ) * (dm - am(PM_RHO)*dk)
      $       + ao(PM_DPI4)* (dm - am(PM_RHO)*dk)**4
      $    + ao(PM_MK3)* am(PM_RHO)**3*dk**3*dm
