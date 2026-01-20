@@ -73,7 +73,13 @@ Operators are formulated in the RAS
 | `V1n` | `0.5(1-cos(nα))` |
 | `V2n` | `0.5(1-cos(2nα))` |
 | `Fmk` | `Pα ρ Pz Π**2` |
+| `Fm2k2` | `Pα**2 ρ**2 Pz**2 Π**2` |
+| `Fmk3` | `Pα ρ**3 Pz**3 Π**2` |
+| `Fm3k` | `Pα**3 ρ Pz Π**2` |
+| `Fm3k3` | `Pα**3 ρ**3 Pz**3 Π**2` |
+|------------|------------|
 | `DFm2` | `Pα**2 Π**2` |
+| `Fk2` | `ρ Pz**2 Π**2` |
 | `mk` | `Pα ρ Pz` |
 | `m2k2` | `Pα**2 ρ**2 Pz**2` |
 | `mk3` | `Pα ρ**3 Pz**3` |
@@ -89,16 +95,21 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `Dpi2J` | `2*dt(Π**2)d P**2` |
 | `Dpi2K` | `[dt(Π**2)d Pz**2+ Pz**2 dt(Π**2)d]` |
 | `Dpi2-` | `[dt(Π**2)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**2)d]` |
-| `Dpi4`  | `dt(Π**4)d` |
-| `Dpi4J` | `2*dt(Π**4)d P**2` |
-| `Dpi4K` | `[dt(Π**4)d Pz**2+ Pz**2 dt(Π**4)d]` |
-| `Dpi4-` | `[dt(Π**4)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**4)d]` |
-|------------|------------|
 | `Dp2JJ` | `2*dt(Π**2)d P**4` |
 | `Dp2KK` | `[dt(Π**2)d Pz**4 + Pz**4 dt(Π**2)d]` |
 | `Dp2JK` | `P**2[dt(Π**2)d Pz**2 + Pz**2 dt(Π**2)d]` |
 | `Dp2-j` | `-P**2[dt(Π**2)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Π**2)d]` |
 | `Dp2-k` | `-[dt(Π**2)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Π**2)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Π**2)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Π**2)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Π**2)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Π**2)d]` |
+|------------|------------|
+| `Dpi4`  | `dt(Π**4)d` |
+| `Dpi4J` | `2*dt(Π**4)d P**2` |
+| `Dpi4K` | `[dt(Π**4)d Pz**2+ Pz**2 dt(Π**4)d]` |
+| `Dpi4-` | `[dt(Π**4)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**4)d]` |
+| `Dp4JJ` | `2*dt(Π**4)d P**4` |
+| `Dp4KK` | `[dt(Π**4)d Pz**4 + Pz**4 dt(Π**4)d]` |
+| `Dp4JK` | `P**2[dt(Π**4)d Pz**2 + Pz**2 dt(Π**4)d]` |
+| `Dp4-j` | `-P**2[dt(Π**4)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Π**4)d]` |
+| `Dp4-k` | `-[dt(Π**4)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Π**4)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Π**4)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Π**4)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Π**4)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Π**4)d]` |
 |------------|------------|
 | `mkJ` | `2*dt(Pα ρ Pz)d P**2` |
 | `mkK` | `[dt(Pα ρ Pz)d Pz**2+ Pz**2 dt(Pα ρ Pz)d]` |
