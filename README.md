@@ -57,6 +57,11 @@ Operators are formulated in the PAS
 | `ljk` | `P**4  [Pz**2 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**2]` |
 | `lkj` | `P**2  [Pz**4 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**4]` |
 | `l_k` | `[Pz**6 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**6]` |
+|------------|------------|
+| `Dzx` | `(PzPx + PxPz)`|
+| `DzxJ` | `P**2 (PzPx + PxPz)`|
+| `DzxK` | `(Pz**3Px + PxPz**3)`|
+
 
 
 ### Internal Rotor Parameters Hir
