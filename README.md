@@ -78,12 +78,13 @@ Operators are formulated in the RAS
 | `Fm3k` | `Pα**3 ρ Pz Π**2` |
 | `Fm3k3` | `Pα**3 ρ**3 Pz**3 Π**2` |
 |------------|------------|
-| `DFm2` | `Pα**2 Π**2` |
-| `Fk2` | `ρ Pz**2 Π**2` |
 | `mk` | `Pα ρ Pz` |
 | `m2k2` | `Pα**2 ρ**2 Pz**2` |
 | `mk3` | `Pα ρ**3 Pz**3` |
 | `m3k` | `Pα**3 ρ Pz` |
+|------------|------------|
+| `DFm2` | `Pα**2 Π**2` |
+| `Fk2` | `ρ Pz**2 Π**2` |
 
 ### Internal rotation - overall rotation distortion Hird
 Mixed PAS/RAS formulation  
