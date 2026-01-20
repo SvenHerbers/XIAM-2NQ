@@ -133,7 +133,11 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `Dc3J` | `2*dt(cos(nα))d P**2` |
 | `Dc3K` | `[dt(cos(nα))d Pz**2+ Pz**2 dt(cos(nα))d]` |
 | `Dc3-` | `[dt(cos(nα))d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(cos(nα))d]` |
-| `D3KK` | `[dt(cos(nα))d Pz**4+ Pz**4 dt(cos(nα))d]` |
+| `D3JJ` | `2*dt(cos(nα))d P**4` |
+| `D3KK` | `[dt(cos(nα))d Pz**4 + Pz**4 dt(cos(nα))d]` |
+| `D3JK` | `P**2[dt(cos(nα))d Pz**2 + Pz**2 dt(cos(nα))d]` |
+| `D3-j` | `-P**2[dt(cos(nα))d (Px**2 - Py**2) + (Px**2 - Py**2) dt(cos(nα))d]` |
+| `D3-k` | `-[dt(cos(nα))d Pz**2(Px**2 -P_y**2)`<br>` + dt(cos(nα))d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(cos(nα))d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(cos(nα))d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(cos(nα))d`<br>` + (Px**2 - Py**2) Pz**2 dt(cos(nα))d]` |
 
 ### Top-Top coupling term Hii
 
