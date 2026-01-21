@@ -70,6 +70,7 @@ Operators are formulated in the RAS
 | `Parameter` | `Operator` |
 |------------|------------|
 | `F` | `Π**2` |
+| `rho` | `(ρ Pz**2 - 2 Pα Pz)` |
 | `V1n` | `0.5(1-cos(nα))` |
 | `V2n` | `0.5(1-cos(2nα))` |
 | `Fmk` | `Pα ρ Pz Π**2` |
