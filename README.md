@@ -202,7 +202,7 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
   XIAM-2NQ v0.25 -> v0.29 - Sven Herbers, 05-January-2026
   - Many new parameters available in Hird and Hir, parametertable added to readme.md.
   - Minor code cleanup (removal/replacement of some functions)
-  - Added Example-Methylformate treating the subset of v=0, Jmax=40, Kamax=15 lines. The unweighted rms of XIAM on this subset is 61 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset. 
+  - Added Example-Methylformate treating the subset of v=0, Jmax=30, Kamax=10 lines. The unweighted rms of XIAM on this subset is 61 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset. 
 
   XIAM-2NQ v0.24b - Sven Herbers, 17-June-2025 
 
