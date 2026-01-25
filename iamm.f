@@ -126,11 +126,15 @@ C     $       + ao(PM_RHO) * 2.0*am(PM_F)*dk*(am(PM_RHO)*dk-dm) !original
      $       + ao(PM_RHOP2) *(am(PM_F)*dk**2) !this is the quadratic term to be multiplied with param**2op**2
      $       + ao(PM_PI ) * (dm - am(PM_RHO)*dk)
      $       + ao(PM_DPI4)* (dm - am(PM_RHO)*dk)**4
+     $       + ao(PM_DPI6)* (dm - am(PM_RHO)*dk)**6
      $    + ao(PM_MK3)* am(PM_RHO)**3*dk**3*dm
      $    + ao(PM_M3K)* am(PM_RHO)*dk*dm**3
      $    + ai(PI_MK)*am(PM_RHO)*dk*dm
      $    + ao(PM_MK)*am(PM_RHO)*dk*dm ! for passing to multplication in the PAS 
      $    + ai(PI_M2K2)*am(PM_RHO)**2*dk**2*dm**2
+     $    + ai(PI_M2K4)*am(PM_RHO)**4*dk**4*dm**2
+     $    + ai(PI_M4K2)*am(PM_RHO)**2*dk**2*dm**4
+     $    + ai(PI_M3K3)*am(PM_RHO)**3*dk**3*dm**3
         vo(im)=vo(im)+v(im)*t
       end do
       

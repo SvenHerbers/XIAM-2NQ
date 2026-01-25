@@ -3248,6 +3248,7 @@ C----------------------------------------------------------------------
       real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
      $     -DIMSIG:DIMSIG,DIMTOP) 
       real*8  a(DIMPAR)
+      real*8  beta_tot
       integer qmv(DIMV)
       integer qmvs(DIMQ,DIMV)
 C     quantum numbers
@@ -3294,8 +3295,15 @@ C     work
       h=0.0
       if (j.ge.0) then   !START IF HERE 
       do itop=1,ctlint(C_NTOP)
-        call rotate(rotm(-DIMJ,-DIMJ,1,itop)
-     $         ,a(P1_BETA+DIMPIR*(itop-1)),j,oldj(itop))
+        beta_tot=a(P1_BETA+DIMPIR*(itop-1))
+C     $     +log(1.+j*(j+1))*a(P1_BLOGJ+DIMPIR*(itop-1))
+     $     +dble((j*(j+1))**1)*a(P1_BETJ1+DIMPIR*(itop-1))
+     $     +dble((j*(j+1))**2)*a(P1_BETJ2+DIMPIR*(itop-1))
+     $     +dble((j*(j+1))**3)*a(P1_BETJ3+DIMPIR*(itop-1))
+     $     +dble((j*(j+1))**4)*a(P1_BETJ4+DIMPIR*(itop-1))
+        
+          call rotate(rotm(-DIMJ,-DIMJ,1,itop)
+     $         ,beta_tot,j,oldj(itop))
       end do
 
 C       if ((abs((j)-df).le.abs(di)).or.(df.eq.-0.5)) then ! For some reason this exception leads to malfunction.
