@@ -102,6 +102,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `Dp2JK` | `P**2[dt(Π**2)d Pz**2 + Pz**2 dt(Π**2)d]` |
 | `Dp2-j` | `-P**2[dt(Π**2)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Π**2)d]` |
 | `Dp2-k` | `-[dt(Π**2)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Π**2)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Π**2)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Π**2)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Π**2)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Π**2)d]` |
+| `Dp2zx` | `-[dt(Π**2)d Pz Px`<br>` + dt(Π**2)d Px Pz`<br>` + Pz dt(Π**2)d Px`<br>` + Px dt(Π**2)d Pz`<br>` + Pz Px dt(Π**2)d`<br>` + Px Pz dt(Π**2)d]` |
 |------------|------------|
 | `Dpi4`  | `dt(Π**4)d` |
 | `Dpi4J` | `2*dt(Π**4)d P**2` |
@@ -112,6 +113,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `Dp4JK` | `P**2[dt(Π**4)d Pz**2 + Pz**2 dt(Π**4)d]` |
 | `Dp4-j` | `-P**2[dt(Π**4)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Π**4)d]` |
 | `Dp4-k` | `-[dt(Π**4)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Π**4)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Π**4)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Π**4)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Π**4)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Π**4)d]` |
+| `Dp4zx` | `-[dt(Π**4)d Pz Px`<br>` + dt(Π**4)d Px Pz`<br>` + Pz dt(Π**4)d Px`<br>` + Px dt(Π**4)d Pz`<br>` + Pz Px dt(Π**4)d`<br>` + Px Pz dt(Π**4)d]` |
 |------------|------------|
 | `rhoJ`  | `2*dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d P**2` |
 | `rhoK` | `[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2+ Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
@@ -121,6 +123,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `rhoJK` | `P**2 [dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2+ Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 | `rho-j` | `-P**2[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2) + (Px**2 - Py**2) dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 | `rho-k` | `-[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2(Px**2 -P_y**2)`<br>` + dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d`<br>` + (Px**2 - Py**2) Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
+| `rhozx` | `-[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz Px`<br>` + dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Px Pz`<br>` + Pz dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Px`<br>` + Px dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz`<br>` + Pz Px dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d`<br>` + Px Pz dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 |------------|------------|
 | `mkJ` | `2*dt(Pα ρ Pz)d P**2` |
 | `mkK` | `[dt(Pα ρ Pz)d Pz**2+ Pz**2 dt(Pα ρ Pz)d]` |
@@ -140,7 +143,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `D3JK` | `P**2[dt(cos(nα))d Pz**2 + Pz**2 dt(cos(nα))d]` |
 | `D3-j` | `-P**2[dt(cos(nα))d (Px**2 - Py**2) + (Px**2 - Py**2) dt(cos(nα))d]` |
 | `D3-k` | `-[dt(cos(nα))d Pz**2(Px**2 -P_y**2)`<br>` + dt(cos(nα))d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(cos(nα))d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(cos(nα))d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(cos(nα))d`<br>` + (Px**2 - Py**2) Pz**2 dt(cos(nα))d]` |
-
+| `D3zx` | `-[dt(cos(nα))d Pz Px`<br>` + dt(cos(nα))d Px Pz`<br>` + Pz dt(cos(nα))d Px`<br>` + Px dt(cos(nα))d Pz`<br>` + Pz Px dt(cos(nα))d`<br>` + Px Pz dt(cos(nα))d]` |
 ### Top-Top coupling term Hii
 
 | `Parameter` | `Operator` |
@@ -158,6 +161,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `epsil` | `The angle between the principal axis x and the projection of the internal rotation axis onto xy-plane` |
 | `beta` | `rotation about y axis` |
 | `gamma` | `rotation about x axis` |
+| `betJ1` `betJ2` `betJ3` `betJ4` | `Parameters to add P**2 dependence to beta. beta_total = beta + betJ1*(J(J+1))+ betJ2*(J(J+1))**2+ betJ3*(J(J+1))**3+ betJ4*(J(J+1))**4` |
 
 ### First order local parameters
 
