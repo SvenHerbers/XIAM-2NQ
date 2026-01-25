@@ -199,13 +199,17 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
 
 ## Update Notes
 
+  XIAM-2NQ v0.34 - Sven Herbers, 25-January-2026
+  - Many new parameters available in Hird and Hir, parameter table will be updated in the following days.
+  - Updated Example-Methylformate treating the subset of v=0, Jmax=50, Kamax=20 lines from the much larger dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM on this subset is 108 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
+
   XIAM-2NQ v0.32 - Sven Herbers, 18-January-2026
   - Implementation of octic centrifugal distortion coefficients for Watson A and Watson S reduction (reduc 0 or reduc 1)
-  - Many new parameters available in Hird and Hir, parametertable will be updated in the following days
-  - Updated Example-Methylformate treating the subset of v=0, Jmax=40, Kamax=15 lines from the much larger dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM on this subset is 89 kHz; RAM36 global fits on the complete set of lines yield 66 kHz rms within this subset. This example demonstrates the successful application of octic centrifugal distortion as well as several newly implemented parameters.
+  - Many new parameters available in Hird and Hir
+  - Updated Example-Methylformate treating the subset of v=0, Jmax=40, Kamax=15 lines. The unweighted rms of XIAM on this subset is 89 kHz; RAM36 global fits on the complete set of lines yield 66 kHz rms within this subset. 
 
   XIAM-2NQ v0.25 -> v0.29 - Sven Herbers, 05-January-2026
-  - Many new parameters available in Hird and Hir, parametertable added to readme.md.
+  - Many new parameters available in Hird and Hir, parameter table added to readme.md.
   - Minor code cleanup (removal/replacement of some functions)
   - Added Example-Methylformate treating the subset of v=0, Jmax=30, Kamax=10 lines. The unweighted rms of XIAM on this subset is 61 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset. 
 
