@@ -161,7 +161,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `epsil` | `The angle between the principal axis x and the projection of the internal rotation axis onto xy-plane` |
 | `beta` | `rotation about y axis` |
 | `gamma` | `rotation about x axis` |
-| `betJ1` `betJ2` `betJ3` `betJ4` | `Parameters to add P**2 dependence to beta. beta_total = beta + betJ1*(J(J+1))+ betJ2*(J(J+1))**2+ betJ3*(J(J+1))**3+ betJ4*(J(J+1))**4` |
+| `betJ1` `betJ2` `betJ3` `betJ4` | `Parameters to add P**2 dependence to beta.`<br/>`beta_total = beta + betJ1*(J(J+1))+ betJ2*(J(J+1))**2+ betJ3*(J(J+1))**3+ betJ4*(J(J+1))**4` |
 
 ### First order local parameters
 
