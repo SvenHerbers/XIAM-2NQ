@@ -204,7 +204,7 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
 
 ## Update Notes
   Sven Herbers, 28-January-2026
-  - Updated Example-Methylformate fit of the subset of v=0, Jmax=50, Kamax=20 lines. The unweighted rms of XIAM on this subset is 96 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
+  - Updated Example-Methylformate fit of the subset of v=0, Jmax=50, Kamax=20 lines. The unweighted rms of XIAM on this subset is 95 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
   - Added a fit to Example-Methylformate treating the *complete* set (49 parameters, Jmax=62, Kamax=27, fmax= 668.1 GHz, fmin= 1.6 GHz, 6976 assignments) of v=0 lines from the v=0,1 dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM fits on this subset is 145 kHz; RAM36 global fits on the complete set of lines yield 75 kHz rms within this subset. 
 
   XIAM-2NQ v0.34 - Sven Herbers, 25-January-2026
