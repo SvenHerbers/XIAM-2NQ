@@ -115,6 +115,11 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `Dp4-k` | `-[dt(Π**4)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Π**4)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Π**4)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Π**4)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Π**4)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Π**4)d]` |
 | `Dp4zx` | `-[dt(Π**4)d Pz Px`<br>` + dt(Π**4)d Px Pz`<br>` + Pz dt(Π**4)d Px`<br>` + Px dt(Π**4)d Pz`<br>` + Pz Px dt(Π**4)d`<br>` + Px Pz dt(Π**4)d]` |
 |------------|------------|
+| `Dpi6`  | `dt(Π**6)d` |
+| `Dpi6J` | `2*dt(Π**6)d P**2` |
+| `Dpi6K` | `[dt(Π**6)d Pz**2+ Pz**2 dt(Π**6)d]` |
+| `Dpi6-` | `[dt(Π**6)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**6)d]` |
+|------------|------------|
 | `rhoJ`  | `2*dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d P**2` |
 | `rhoK` | `[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2+ Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 | `rho-` | `[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
@@ -199,11 +204,11 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
 
 ## Update Notes
   Sven Herbers, 28-January-2026
-  - Added a fit to Example-Methylformate treating complete set (49 parameters, Jmax=62, Kamax=27, fmax= 668.1 GHz, fmin= 1.6 GHz) of v=0 lines from the v=0,1 dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM fits on this subset is 145 kHz; RAM36 global fits on the complete set of lines yield 75 kHz rms within this subset. 
+  - Updated Example-Methylformate fit of the subset of v=0, Jmax=50, Kamax=20 lines. The unweighted rms of XIAM on this subset is 96 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
+  - Added a fit to Example-Methylformate treating the *complete* set (49 parameters, Jmax=62, Kamax=27, fmax= 668.1 GHz, fmin= 1.6 GHz, 6976 assignments) of v=0 lines from the v=0,1 dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM fits on this subset is 145 kHz; RAM36 global fits on the complete set of lines yield 75 kHz rms within this subset. 
 
   XIAM-2NQ v0.34 - Sven Herbers, 25-January-2026
   - Many new parameters available in Hird and Hir, parameter table will be updated in the following days.
-  - Updated Example-Methylformate treating the subset of v=0, Jmax=50, Kamax=20 lines. The unweighted rms of XIAM on this subset is 108 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
 
   XIAM-2NQ v0.32 - Sven Herbers, 18-January-2026
   - Implementation of octic centrifugal distortion coefficients for Watson A and Watson S reduction (reduc 0 or reduc 1)
