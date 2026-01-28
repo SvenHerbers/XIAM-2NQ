@@ -198,10 +198,12 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
 | `Fxy12,Fxy34,Fyz12,Fyz34,Fxz12,Fxz34` | `Pickett type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency` |
 
 ## Update Notes
+  Sven Herbers, 28-January-2026
+  - Added a fit to Example-Methylformate treating complete set (49 parameters, Jmax=62, Kamax=27, fmax= 668.1 GHz, fmin= 1.6 GHz) of v=0 lines from the v=0,1 dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM fits on this subset is 145 kHz; RAM36 global fits on the complete set of lines yield 75 kHz rms within this subset. 
 
   XIAM-2NQ v0.34 - Sven Herbers, 25-January-2026
   - Many new parameters available in Hird and Hir, parameter table will be updated in the following days.
-  - Updated Example-Methylformate treating the subset of v=0, Jmax=50, Kamax=20 lines from the much larger dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM on this subset is 108 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
+  - Updated Example-Methylformate treating the subset of v=0, Jmax=50, Kamax=20 lines. The unweighted rms of XIAM on this subset is 108 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
 
   XIAM-2NQ v0.32 - Sven Herbers, 18-January-2026
   - Implementation of octic centrifugal distortion coefficients for Watson A and Watson S reduction (reduc 0 or reduc 1)
