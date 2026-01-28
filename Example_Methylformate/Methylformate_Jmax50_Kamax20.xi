@@ -1,65 +1,63 @@
 ~Methylformate Vmax0 Jmax50 Kamax20 sub-dataset of full dataset given in https://doi.org/10.1016/j.jms.2009.01.016 by Ilyushin et al. 
  
-ntop  1  !   This fit results in 41kHz weighted rms and 108 kHz unweighted rms.
+ntop  1  !   This fit results in 34kHz weighted rms and 95 kHz unweighted rms.
 ncyc 20    
 reduc 0      
 print 4  
 conv 1.0
 
- BJ            6.107764716  
- BK           13.860682184  
- B-            0.803731433  
- DJ            6.045835E-6  
- DJK         -21.785546E-6  
- DK           78.891123E-6  
- dj            1.884598E-6  
- dk            3.749483E-6  
- H_J           0.196394E-9  
- HJK          -0.645673E-9  
- HKJ           0.456657E-9  
- H_K           2.962600E-9  
- h_j          98.82505E-12  
- hjk          24.40769E-12  
- h_k           2.320687E-9  
- LJJK         30.46223E-15  
- LJK          -0.74402E-12  
- LKKJ          0.65987E-12  
- L_K          -0.96614E-12  
- ljk          11.65364E-15  
- l_k          -6.06720E-12  
- DzxJ         70.636669E-6  
-\F           173.613458910  
- V1n          12467.495493  
-\rho           0.081808926  
-\beta          0.433280795  
- Dpi2J        -0.051899700  
- Dpi2K         0.222408439  
- Dpi2-         0.000240236  
- Dpi4J        -0.002014906  
- Dpi4K         0.008665545  
- Dp2KK       -18.634658E-6  
- Dp2JJ        -0.225327E-6  
- Dp2JK       -31.879176E-6  
- Dp2-k        -1.091078E-6  
- Fmk           0.542393361  
- FmkJ          0.000733425  
- FmkKK         0.935871E-6  
- Fmk-j       -19.356776E-9  
- Fmk-k        -0.110788E-6  
- rhoJ         -1.458272E-6  
- rhoK        -14.495699E-6  
- rho-         -0.477049E-6  
- rho-j         0.172647E-9  
- Fm2k2        -0.004320469  
- Dp4-j       -11.289126E-9  
- Dp4JK        -1.330138E-6  
- Dp2zx        -0.000280773  
- Fmkzx        -0.000640415  
- rhozx         4.230041E-6  
- F0          161.116230049  
- delta         0.928441096  
- betJ1         2.670371E-6  
- betJ2         0.242351E-9  
+ BJ            6.108584375  
+ BK           13.867013841  
+ B-            0.804601086  
+ DJ            6.107560E-6  
+ DJK         -20.128073E-6  
+ DK           79.556531E-6  
+ dj            1.917229E-6  
+ dk            5.238030E-6  
+ H_J           0.528993E-9  
+ HJK           2.016833E-9  
+ HKJ          -2.438515E-9  
+ H_K          -2.177063E-9  
+ h_j           0.265199E-9  
+ hjk           1.857237E-9  
+ h_k           4.461793E-9  
+ LJJK         15.99231E-15  
+ LJK          -0.52912E-12  
+ LKKJ          0.73166E-12  
+ L_K          -0.94655E-12  
+ lkj          -0.16030E-12  
+ l_k          -5.99051E-12  
+ DzxJ          0.000117201  
+ DzxK          0.000136181  
+\F           172.272943322  
+ V1n          12326.396164  
+\rho           0.083658266  
+\beta          0.423116946  
+ Dpi2J         0.000417571  
+ Dpi2K        -0.004848306  
+ Dpi2-        -0.000685633  
+ Dp2KK        38.979484E-6  
+ Dp2JJ         0.912189E-6  
+ Dp2-j        -0.826254E-6  
+ Dp2JK       -14.706238E-6  
+ FmkJ         -0.000175931  
+ FmkK         -0.004154118  
+ FmkKK         0.433377E-6  
+ FmkJJ       -61.113166E-9  
+ Fmk-j        68.201632E-9  
+ rhoJ          1.816108E-6  
+ rhoK         23.144940E-6  
+ rho-          0.992773E-6  
+ rhoKK        -4.310442E-9  
+ rhoJK         2.323529E-9  
+ rho-k         0.811284E-9  
+ Fm2k2         0.011153599  
+ Fmkzx         0.001164884  
+ rhozx        -7.765124E-6  
+ F0          159.573193414  
+ delta         0.915541218  
+ betJ1         1.815921E-6  
+ betJ2         0.623661E-9  
                             
  fit BJ    
  fit BK    
@@ -80,38 +78,36 @@ conv 1.0
  fit LJK   
  fit LKKJ  
  fit L_K   
- fit ljk   
  fit l_k   
+ fit lkj
  fit DzxJ
+ fit DzxK 
  dqx V1n   
  dqx Dpi2J 
  dqx Dpi2K 
  dqx Dpi2- 
- dqx Dpi4J 
- dqx Dpi4K 
  dqx Dp2KK 
  dqx Dp2JJ 
  dqx Dp2JK 
- dqx Dp2-k 
- dqx Fmk   
  dqx FmkJ  
  dqx rhoK  
  dqx rho-  
- dqx rho-j 
- dqx Dp4JK 
- dqx Dp2zx 
  dqx Fmkzx 
  dqx rhozx 
  dqx F0    
  dqx delta  
  dqx betJ1  
  dqx Fm2k2
- dqx Dp4-j
  dqx betJ2
  dqx rhoJ 
  dqx Fmk-j 
  dqx FmkKK 
- dqx Fmk-k 
+ dqx Dp2-j 
+ dqx rhoKK 
+ dqx rhoJK 
+ dqx rho-k 
+ dqx FmkJJ 
+ dqx FmkK
 
    S     0  !S 1                                    
    S     1  !S 2                                                                                                                                                                    
