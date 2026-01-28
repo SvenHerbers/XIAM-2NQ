@@ -19,6 +19,8 @@ ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f i
 
 Citation: J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
 
+The executable in the repository is compiled for Jmax = 70, I1max = 5/2, I2max = 5/2, and up to two 3-fold tops.  Dimensions are set at compile time. These numbers can be adjusted in iam.fi and XIAM can be recompiled. However, beyond a certain size the matrix will become too large for memory (memory fixed, not dynamic). If, for example, a much higher Jmax is required for a molecule without quadrupole coupling / double well, DIMQ, DIMQ2, and DIMDW should first be set to "1" in iam.fi.
+
 ----------------------------------------------------------------------------
 ## Parameter Table
 In this table, `Π = (Pα - ρ Pz)` refers to the relative internal angular momentum in the ρ-Axis System (RAS).
