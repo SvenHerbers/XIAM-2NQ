@@ -86,8 +86,8 @@ Operators are formulated in the RAS
 | `mk3` | `Pα ρ**3 Pz**3` |
 | `m3k` | `Pα**3 ρ Pz` |
 |------------|------------|
-| `DFm2` | `Pα**2 Π**2` |
-| `Fk2` | `ρ Pz**2 Π**2` |
+| `Fm2` | `Pα**2 Π**2` |
+| `Fk2` | `ρ**2 Pz**2 Π**2` |
 
 ### Internal rotation - overall rotation distortion Hird
 Mixed PAS/RAS formulation  
@@ -100,8 +100,8 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `Dpi2K` | `[dt(Π**2)d Pz**2+ Pz**2 dt(Π**2)d]` |
 | `Dpi2-` | `[dt(Π**2)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**2)d]` |
 | `Dp2JJ` | `2*dt(Π**2)d P**4` |
-| `Dp2KK` | `[dt(Π**2)d Pz**4 + Pz**4 dt(Π**2)d]` |
 | `Dp2JK` | `P**2[dt(Π**2)d Pz**2 + Pz**2 dt(Π**2)d]` |
+| `Dp2KK` | `[dt(Π**2)d Pz**4 + Pz**4 dt(Π**2)d]` |
 | `Dp2-j` | `-P**2[dt(Π**2)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Π**2)d]` |
 | `Dp2-k` | `-[dt(Π**2)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Π**2)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Π**2)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Π**2)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Π**2)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Π**2)d]` |
 | `Dp2zx` | `-[dt(Π**2)d Pz Px`<br>` + dt(Π**2)d Px Pz`<br>` + Pz dt(Π**2)d Px`<br>` + Px dt(Π**2)d Pz`<br>` + Pz Px dt(Π**2)d`<br>` + Px Pz dt(Π**2)d]` |
@@ -111,8 +111,8 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `Dpi4K` | `[dt(Π**4)d Pz**2+ Pz**2 dt(Π**4)d]` |
 | `Dpi4-` | `[dt(Π**4)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**4)d]` |
 | `Dp4JJ` | `2*dt(Π**4)d P**4` |
-| `Dp4KK` | `[dt(Π**4)d Pz**4 + Pz**4 dt(Π**4)d]` |
 | `Dp4JK` | `P**2[dt(Π**4)d Pz**2 + Pz**2 dt(Π**4)d]` |
+| `Dp4KK` | `[dt(Π**4)d Pz**4 + Pz**4 dt(Π**4)d]` |
 | `Dp4-j` | `-P**2[dt(Π**4)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Π**4)d]` |
 | `Dp4-k` | `-[dt(Π**4)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Π**4)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Π**4)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Π**4)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Π**4)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Π**4)d]` |
 | `Dp4zx` | `-[dt(Π**4)d Pz Px`<br>` + dt(Π**4)d Px Pz`<br>` + Pz dt(Π**4)d Px`<br>` + Px dt(Π**4)d Pz`<br>` + Pz Px dt(Π**4)d`<br>` + Px Pz dt(Π**4)d]` |
@@ -126,15 +126,35 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `rhoK` | `[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2+ Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 | `rho-` | `[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 | `rhoJJ`  | `2*dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d P**4` |
-| `rhoKK` | `[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**4+ Pz**4 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 | `rhoJK` | `P**2 [dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2+ Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
+| `rhoKK` | `[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**4+ Pz**4 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 | `rho-j` | `-P**2[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2) + (Px**2 - Py**2) dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 | `rho-k` | `-[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2(Px**2 -P_y**2)`<br>` + dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d`<br>` + (Px**2 - Py**2) Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 | `rhozx` | `-[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz Px`<br>` + dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Px Pz`<br>` + Pz dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Px`<br>` + Px dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz`<br>` + Pz Px dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d`<br>` + Px Pz dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
 |------------|------------|
+| `Dc3J` | `2*dt(cos(nα))d P**2` |
+| `Dc3K` | `[dt(cos(nα))d Pz**2+ Pz**2 dt(cos(nα))d]` |
+| `Dc3-` | `[dt(cos(nα))d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(cos(nα))d]` |
+| `D3JJ` | `2*dt(cos(nα))d P**4` |
+| `D3JK` | `P**2[dt(cos(nα))d Pz**2 + Pz**2 dt(cos(nα))d]` |
+| `D3KK` | `[dt(cos(nα))d Pz**4 + Pz**4 dt(cos(nα))d]` |
+| `D3-j` | `-P**2[dt(cos(nα))d (Px**2 - Py**2) + (Px**2 - Py**2) dt(cos(nα))d]` |
+| `D3-k` | `-[dt(cos(nα))d Pz**2(Px**2 -P_y**2)`<br>` + dt(cos(nα))d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(cos(nα))d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(cos(nα))d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(cos(nα))d`<br>` + (Px**2 - Py**2) Pz**2 dt(cos(nα))d]` |
+| `D3zx` | `-[dt(cos(nα))d Pz Px`<br>` + dt(cos(nα))d Px Pz`<br>` + Pz dt(cos(nα))d Px`<br>` + Px dt(cos(nα))d Pz`<br>` + Pz Px dt(cos(nα))d`<br>` + Px Pz dt(cos(nα))d]` |
+|------------|------------|
+| `FmkJ` | `2*dt(Pα ρ Pz Π**2)d P**2` |
+| `FmkK` | `[dt(Pα ρ Pz Π**2)d Pz**2+ Pz**2 dt(Pα ρ Pz Π**2)d]` |
+| `Fmk-` | `[dt(Pα ρ Pz Π**2)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα ρ Pz Π**2)d]` |
+| `FmkJJ` | `2*dt(Pα ρ Pz Π**2)d P**4` |
+| `FmkJK` | `P**2[dt(Pα ρ Pz Π**2)d Pz**2 + Pz**2 dt(Pα ρ Pz Π**2)d]` |
+| `FmkKK` | `[dt(Pα ρ Pz Π**2)d Pz**4 + Pz**4 dt(Pα ρ Pz Π**2)d]` |
+| `Fmk-j` | `-P**2[dt(Pα ρ Pz Π**2)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Pα ρ Pz Π**2)d]` |
+| `Fmk-k` | `-[dt(Pα ρ Pz Π**2)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Pα ρ Pz Π**2)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Pα ρ Pz Π**2)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Pα ρ Pz Π**2)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Pα ρ Pz Π**2)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Pα ρ Pz Π**2)d]` |
+| `Fmkzx` | `-[dt(Pα ρ Pz Π**2)d Pz Px`<br>` + dt(Pα ρ Pz Π**2)d Px Pz`<br>` + Pz dt(Pα ρ Pz Π**2)d Px`<br>` + Px dt(Pα ρ Pz Π**2)d Pz`<br>` + Pz Px dt(Pα ρ Pz Π**2)d`<br>` + Px Pz dt(Pα ρ Pz Π**2)d]` |
+|------------|------------|
 | `mkJ` | `2*dt(Pα ρ Pz)d P**2` |
 | `mkK` | `[dt(Pα ρ Pz)d Pz**2+ Pz**2 dt(Pα ρ Pz)d]` |
-| `mkD` | `[dt(Pα ρ Pz)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα ρ Pz)d]` |
+| `mk-` | `[dt(Pα ρ Pz)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα ρ Pz)d]` |
 | `mk3J` | `2*dt(Pα ρ**3 Pz**3)d P**2` |
 | `mk3K` | `[dt(Pα ρ**3 Pz**3)d Pz**2+ Pz**2 dt(Pαρ**3Pz**3)d]` |
 | `mk3-` | `[dt(Pα ρ**3 Pz**3)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pαρ**3Pz**3)d]` |
@@ -142,15 +162,8 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 | `m3kK` | `[dt(Pα**3 ρ Pz)d Pz**2+ Pz**2 dt(Pα**3 ρ Pz)d]` |
 | `m3k-` | `[dt(Pα**3 ρ Pz)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα**3 ρ Pz)d]` |
 |------------|------------|
-| `Dc3J` | `2*dt(cos(nα))d P**2` |
-| `Dc3K` | `[dt(cos(nα))d Pz**2+ Pz**2 dt(cos(nα))d]` |
-| `Dc3-` | `[dt(cos(nα))d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(cos(nα))d]` |
-| `D3JJ` | `2*dt(cos(nα))d P**4` |
-| `D3KK` | `[dt(cos(nα))d Pz**4 + Pz**4 dt(cos(nα))d]` |
-| `D3JK` | `P**2[dt(cos(nα))d Pz**2 + Pz**2 dt(cos(nα))d]` |
-| `D3-j` | `-P**2[dt(cos(nα))d (Px**2 - Py**2) + (Px**2 - Py**2) dt(cos(nα))d]` |
-| `D3-k` | `-[dt(cos(nα))d Pz**2(Px**2 -P_y**2)`<br>` + dt(cos(nα))d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(cos(nα))d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(cos(nα))d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(cos(nα))d`<br>` + (Px**2 - Py**2) Pz**2 dt(cos(nα))d]` |
-| `D3zx` | `-[dt(cos(nα))d Pz Px`<br>` + dt(cos(nα))d Px Pz`<br>` + Pz dt(cos(nα))d Px`<br>` + Px dt(cos(nα))d Pz`<br>` + Pz Px dt(cos(nα))d`<br>` + Px Pz dt(cos(nα))d]` |
+
+
 ### Top-Top coupling term Hii
 
 | `Parameter` | `Operator` |
@@ -205,6 +218,13 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
 | `Fxy12,Fxy34,Fyz12,Fyz34,Fxz12,Fxz34` | `Pickett type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency` |
 
 ## Update Notes
+  XIAM-2NQ v0.34b - Sven Herbers, 31-January-2026
+  - General code clean-up.
+  - Renamed parameters for consistency: `DFm2` to `Fm2`, `mkD` to `mk-`.
+  - Redefined `Fk2` to multiply with `ρ**2 Pz**2 Π**2` instead of `ρ Pz**2 Π**2` for consistency.
+  - Reorded print-out of parameters to group them together by J,K,-,JJ,JK,KK,-j,-k,zx.
+  - Streamlined matrix initialization and Hamiltonian construction in the exact quadrupole-coupling routines. For quadrupole-containing fits, this leads to noticeable performance improvements: from a few percent up to a factor of ~5, depending on `iam.fi` pre-compilation settings and the dataset.
+
   Sven Herbers, 28-January-2026
   - Updated Example-Methylformate fit of the subset of v=0, Jmax=50, Kamax=20 lines. The unweighted rms of XIAM on this subset is 95 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
   - Added a fit to Example-Methylformate treating the *complete* set (49 parameters, Jmax=62, Kamax=27, fmax= 668.1 GHz, fmin= 1.6 GHz, 6976 assignments) of v=0 lines from the v=0,1 dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM fits on this subset is 145 kHz; RAM36 global fits on the complete set of lines yield 75 kHz rms within this subset. 
