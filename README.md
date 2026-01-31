@@ -75,6 +75,9 @@ Operators are formulated in the RAS
 | `rho` | `(ρ Pz**2 - 2 Pα Pz)` |
 | `V1n` | `0.5(1-cos(nα))` |
 | `V2n` | `0.5(1-cos(2nα))` |
+|------------|------------|
+| `Fm2` | `Pα**2 Π**2` |
+| `Fk2` | `ρ**2 Pz**2 Π**2` |
 | `Fmk` | `Pα ρ Pz Π**2` |
 | `Fm2k2` | `Pα**2 ρ**2 Pz**2 Π**2` |
 | `Fmk3` | `Pα ρ**3 Pz**3 Π**2` |
@@ -85,9 +88,6 @@ Operators are formulated in the RAS
 | `m2k2` | `Pα**2 ρ**2 Pz**2` |
 | `mk3` | `Pα ρ**3 Pz**3` |
 | `m3k` | `Pα**3 ρ Pz` |
-|------------|------------|
-| `Fm2` | `Pα**2 Π**2` |
-| `Fk2` | `ρ**2 Pz**2 Π**2` |
 
 ### Internal rotation - overall rotation distortion Hird
 Mixed PAS/RAS formulation  
