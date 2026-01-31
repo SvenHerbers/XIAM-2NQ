@@ -114,7 +114,7 @@ C     diagonal m/m
      $       + ai(PI_FM2K2)*am(PM_RHO)**2*dk**2*dm**2
      $       + ai(PI_FMK3 )*am(PM_RHO)**3*dk**3*dm
      $       + ai(PI_FM3K )*am(PM_RHO)*dk*dm**3
-     $       + ai(PI_FK2  )*am(PM_RHO)*dk**2
+     $       + ai(PI_FK2  )*am(PM_RHO)**2*dk**2
      $       + ai(PI_FM3K3)*am(PM_RHO)**3*dk**3*dm**3
      $       + ao(PM_FMK  )*am(PM_RHO)*dk*dm! use with ovv mixed parameters
      $       + ai(PI_DFM2)*dm**2) ! ai() Parameters are discarded in calcovv

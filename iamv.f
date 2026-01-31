@@ -16,15 +16,9 @@ C     fistat > 0  Eigenvalues for differential quotient
       integer sizef1,sizepre
       integer sj,ej,cm,cmb
       integer cm2
-      real*8  p0,p1,p2
-
       integer minJ,maxJ
       integer occupied
-      integer indi
       integer n
-      
-
-
       real*8  hs(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMTOT)
       real*8  evhs(DIMQ2,DIMQ+DIMQ2,DIMTOT)                    
       real*8  h_2(DIMQ*DIMTOT,DIMQ*DIMTOT) 
@@ -67,7 +61,6 @@ C     fistat > 0  Eigenvalues for differential quotient
       integer indicesJ(DIMQ+DIMQ2,(DIMQ+DIMQ2)*(2*DIMJ+1))
       integer indicesJPPM(DIMQ+DIMQ2,0:1,0:1,(DIMQ+DIMQ2)*(DIMJ+1))
       integer indis((DIMQ+DIMQ2)*(2*DIMJ+1))
-      integer KofI(DIMQ2*DIMQ*DIMTOT)
       integer hitsj(DIMQ+DIMQ2)
       integer hitsJPPM(DIMQ+DIMQ2,0:1,0:1)
       integer qcasesJ(DIMTOT*DIMQ2*DIMQ)
@@ -75,27 +68,25 @@ C     fistat > 0  Eigenvalues for differential quotient
       integer qmv(DIMV),ifittot(DIMPAR,DIMVB),dfit(DIMFIT)
       integer qmvs(DIMQ2,DIMQ,DIMV)
 C     quantum numbers
-      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP), qmk(DIMTOT,DIMQLP)
       integer qmks(DIMQ2,DIMQ,DIMTOT,DIMQLP)
       integer qvks(DIMQ2,DIMQ,DIMTOT,Q_K:Q_V+DIMTOP) 
       integer qvs(DIMQ2,DIMQ,DIMTOT)
-      integer qv(DIMTOT)
       integer qcase
 C     work
       real*8  zrs(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMTOT)
       real*8  zis(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMTOT)
-      real*8  dedp(DIMPAR) ! not used but maybe later
+C      real*8  dedp(DIMPAR) ! not used but maybe later
       integer check2
       integer results
       integer results2
-      integer ie,i,iv,itop,ivr,ivc,it1,it2
+      integer ie,i,itop,ivr,ivc,it1,it2
       integer eused(DIMTOT), ierr
       integer ruse(DIMVV,DIMVV,DIMTOP)
       integer mycounters(DIMQ2,DIMQ+DIMQ2)
       integer hitsJP((DIMQ+DIMQ2),0:1)                         ! remove if not needed.
       integer indicesJP(DIMQ+DIMQ2,0:1,(DIMQ+DIMQ2)*(DIMJ+1)) ! remove if not needed.
       character*4 fnpre
-      character*6 fnpost
+C      character*6 fnpost
       logical masave
       logical complex
       integer myand
@@ -145,8 +136,8 @@ C     work
       end if                                                         !An extra condition checking for DIMJ.
       
       
-      h_2=0.0
-      hs=0.0
+C      h_2=0.0
+      hs=0.0! (:ctlint(C_SPIN),:(ctlint(C_SPIN)+ctlint(C_SPIN2)),:,:) dimension restriction didnt cause speedup in intialization.
       evhs=0.0
       normis=0.0
       mycounters=1
@@ -177,7 +168,7 @@ C     work
       end if
        maxJ=(endf1+ctlint(C_SPIN))/2 ! these will be needed to get the vector components right later.
       
-      D2=DIMQ2*DIMQ*DIMTOT
+
       !!! for non existing J/F states with J>jselect no matrix has to be built up
       if (ctlint(C_EVAL).gt.3)   masave=.true.
 
@@ -224,7 +215,7 @@ C------Construction of Htot Starts
       do f1=startf1,endf1,2 ! uses a step size of 2
        
        cm=(f1-startf1)/2!count matrices
-       h_2=0.0
+C       h_2=0.0 ! is reinitilaized in nqvmat_ir anyway
        wF1s(cm+1)=f1 ! need to save the f1 to written vectors and matrices together with F1 contributions for later evaluation in intensity predictions
        sj=(2*jselect-(f1-ctlint(C_SPIN)))/2!startj offset
        ej=((f1+ctlint(C_SPIN))-2*jselect)/2!endj offset
@@ -291,8 +282,11 @@ C     Updating size
       size(s_h)=occupied+size(s_h)
       
 C     Adding second nucleus to hamiltonian
-      
-      h_3 = h_3 + h_3NQ2 ! Adding NQ2 matrix to total matrix.
+      D2=DIMQ2*DIMQ*DIMTOT 
+C      D2=size(S_H) ! replacing D2 with size(S_H) leads to quite some speed up but will cause stack overflow for iodotoluene for some reason?
+      h_3(1:size(S_H),1:size(S_H)) = 
+     $   h_3(1:size(S_H),1:size(S_H)) 
+     $ + h_3NQ2(1:size(S_H),1:size(S_H)) ! Adding NQ2 matrix to total matrix.
 
 C       The diagonalization can not handle zero rows + columns, so the following offset was added.
       do i=1,size(S_H)                     !
@@ -305,20 +299,20 @@ C------Construction of Htot finished
 C------Construction of Htot finished   
      
       
-      
-       e_3=0.0
-       e2_3=0.0
-       evh_3=0.0
-       tau_3=0.0
-       zr_3=0.0
+
+C       e_3(1:D2)=0.0      ! These are outputs of htrid3, intialization should be not required.
+C       e2_3(1:D2)=0.0     ! These are outputs of htrid3, intialization should be not required.
+C       evh_3(1:D2)=0.0    ! These are outputs of htrid3, intialization should be not required.
+C       tau_3=0.0          ! These are outputs of htrid3, intialization should be not required.
+       zr_3(1:D2,1:D2)=0.0
       do i=1, D2 !initialize zr_2 for diagonalization routine
        zr_3(i,i)=1.0
       end do
-      
-      call htrid3 (D2,size(s_h),h_3(:D2,:D2),evh_3(:D2),e_3(:D2), ! requires zr to be a unit matrix as input.
+
+      call htrid3 (D2,size(S_H),h_3(:D2,:D2),evh_3(:D2),e_3(:D2), ! requires zr to be a unit matrix as input.
      $  e2_3(:D2),tau_3(:,:D2))
       ierr=0.0
-      call tql2 (D2,size(s_h),evh_3(:D2),e_3(:D2),zr_3(:D2,:D2),ierr)
+      call tql2 (D2,size(S_H),evh_3(:D2),e_3(:D2),zr_3(:D2,:D2),ierr)
 
       if (ierr.ne.0) then
           write (*,'(a,i5)') 'Error in tql2 ',ierr
@@ -613,83 +607,6 @@ C        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! END IF CASES
 
 
 
-
-C        do j=minJ,maxJ       ! for each J block
-C          cm=j-minJ
-C          NormF1=0.0
-C          collectnorms=0.0
-C          do i=1, hitsj(cm+1)!for each line in the block
-C           
-C           NormF1=normisF1(indicesJ(cm+1,i),:) !read the F1 vector sums saved to normisF1
-C           collectnorms(i,:)=NormF1            !X
-C           indi=maxloc(NormF1,1)               !Find which F1 block has the biggest sum, this is the F1 quantum number that will be assigned.
-C          end do
-C          do f1=startf1,endf1,2                 ! for all F1 quantum numbers
-C            cm2=(f1-startf1)/2
-C            newnorms=collectnorms(:,cm2+1)              !load vector contributions to F1
-C            call argsort(newnorms,
-C     $         indis,2*(DIMJ+DIMQ+DIMQ2)+1,hitsj(cm+1)) ! sort
-C            do n=1,noJsinF1s(cm+1,cm2+1)
-C               qcasesF1(indicesJ(cm+1,indis(n)))=cm2+1
-C               collectnorms(indis(n),:)=0! this line is already assigned, and is removed from subsequent assignment processes.
-C            end do            
-C            
-C          end do
-C         end do   
-
-
-
-C               Three level cyclic permutations do not seem to have an effect so I removed them for now.
-C        do i=1,size(S_H) ! Testing once 3 level cyclic permutations. 
-C          j=0
-C          do while (j.lt.size(S_H))
-C           j=j+1
-C           k=0
-C           do while (k.lt.size(S_H))
-C           k=k+1
-C           if ((j.ne.i).and.(k.ne.i).and.(k.ne.j)) then
-C            if ((qcasesJ(i).eq.qcasesJ(j))
-C     $               .and.(qcasesJ(j).eq.qcasesJ(k))) then
-C            if ((EOofI(i).eq.EOofI(j)).and.(EOofI(j).eq.EOofI(k))) then
-C            if (.true.) then! (PMofI(i).eq.PMofI(j)) then
-C             p0=normisF1(i,qcasesF1(i))+normisF1(j,qcasesF1(j))
-C     $              +normisF1(k,qcasesF1(k))
-C             p1=normisF1(i,qcasesF1(k))+normisF1(j,qcasesF1(i))
-C     $              +normisF1(k,qcasesF1(j))
-C             p2=normisF1(i,qcasesF1(j))+normisF1(j,qcasesF1(k))
-C     $              +normisF1(k,qcasesF1(i))
-C             if ((p0.ge.p1).and.(p0.ge.p2)) then
-C             !Do nothing               ijk
-C             else
-C              if (p1.ge.p2) then
-C               Temp=qcasesF1(i)        !i to temp
-C               qcasesF1(i)=qcasesF1(k) !k to i
-C               qcasesF1(k)=Temp        !Temp(i) to k(i)
-C               Temp=qcasesF1(j)        !j to temp
-C               qcasesF1(j)=qcasesF1(k) !k(i) to j
-C               qcasesF1(k)=Temp        !Temp(j) to k
-C                                       ! cyclic permutation complete. kij
-C              else
-C               Temp=qcasesF1(i)        !i to temp
-C               qcasesF1(i)=qcasesF1(j) !j to i
-C               qcasesF1(j)=Temp        !Temp(i) to j(i)
-C               Temp=qcasesF1(k)        !k to temp
-C               qcasesF1(k)=qcasesF1(j) !j(i) to k
-C               qcasesF1(j)=Temp        !Temp(i) to j
-C                                       ! cyclic permutation complete. jki !by running the double loop also ikj and jik should be covered. as well as ijk
-C              end if
-C             j=0 !resets the loop if a swap was made to check again.
-C             k=0
-C             end if
-C            end if
-C            end if
-C            end if
-C           end if
-C           end do !k
-C          end do !j
-C        end do !i
-            
-
         do i = 1, size(S_H)   ! 
          qcase2=qcasesF1(i) !'loading' qcase for F1 from new assignment process
          qcase=qcasesJ(i) !'loading' qcase for J, still assuming that J remains a nearly good quantum number.
@@ -743,9 +660,11 @@ C        end do !i
      $           ,signs(results:results2)) !now the signs were restored following the signs of the largest contributing f1 !normalization should not be required since all components are used.
          mycounters(qcase2,qcase)=mycounters(qcase2,qcase)+1   !counter start at 1
          end do   !end for column i of h_3   
-
+         
+      if ((ctlint(C_INTS).gt.0).and.(fistat.eq.0)) then
       zis=0.0
       zrs=hs   
+      end if
       
       do f1= startf1, endf1,2 
       cm2=(f1-startf1)/2
@@ -762,26 +681,9 @@ C        end do !i
       cm=j-minJ
       cmb=j-(jselect-sj)
       
-
-      
-      
-      
-      
-      
-      
       size(S_H)= 2*(j)+1  ! added because it is used in wvrec,
       size(S_K)= 2*(j)+1 ! saved S_K added because S_K will be used in other routines
       
-      
-C      if ((j.eq.1).and.(f1.eq.3)) then
-C      if (gam.eq.1) then
-C      open(57,file='F3J1_newmat',status='unknown')
-C      do i=1,size(s_h)
-C        write(57,*) zrs(cm2+1,cm+1,i,:size(s_h))
-C        end do
-C      close(57)
-C      end if
-C      end if
       
       
       call assgn(j,gam,f,ib,f1,hs(cm2+1,cm+1,:,:),evhs(cm2+1,cm+1,:)
@@ -3292,7 +3194,7 @@ C     work
 
       do j=jselect-sj,jselect+ej
       cm=j-(jselect-sj)!count matrices
-      h=0.0
+      
       if (j.ge.0) then   !START IF HERE 
       do itop=1,ctlint(C_NTOP)
         beta_tot=a(P1_BETA+DIMPIR*(itop-1))
@@ -3320,6 +3222,9 @@ C       if ((abs((j)-df).le.abs(di)).or.(df.eq.-0.5)) then ! For some reason thi
         end do
       end do
       size(S_H)=i
+      
+      h(:size(S_H),:size(S_H))=0.0
+      
       if (gam.ne.0) then 
         call bld2vjk(j,gam,f
      $         ,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori,complex)
@@ -3332,8 +3237,8 @@ C       if ((abs((j)-df).le.abs(di)).or.(df.eq.-0.5)) then ! For some reason thi
       call addrig(j,gam,f
      $     ,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori,complex)
       if ((abs(2*j-f).le.abs(ctlint(C_SPIN))).or.(f.eq.-1)) then ! J-F > I  
-       h_2(1+DIMTOT*cm:1+DIMTOT*(cm+1),       ! same as double do loop above but more compact.
-     $    1+DIMTOT*cm:1+DIMTOT*(cm+1))=h(:,:) ! same as double do loop above but more compact.
+       h_2(1+DIMTOT*cm:1+DIMTOT*cm+size(S_H),       ! same as double do loop above but more compact.
+     $    1+DIMTOT*cm:1+DIMTOT*cm+size(S_H))=h(:size(S_H),:size(S_H)) ! same as double do loop above but more compact.
       end if ! J-F > I            
 
 
