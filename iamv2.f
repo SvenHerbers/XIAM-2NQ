@@ -163,7 +163,7 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
         if (a(P1_DP4JK+ift).ne.0.0) rrir7=.true.!Herbers2026
         if (a(P1_DP4_K+ift).ne.0.0) rrir8=.true.!Herbers2026
         if (a(P1_DP4ZX+ift).ne.0.0) rrir9=.true.
-        if (a(P1_DPI4+ift).ne.0.0) rrir10=.true.
+C        if (a(P1_DPI4+ift).ne.0.0) rrir10=.true. !iamm.f
 c        write(*,'(50F10.4)')
 c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
       end do
@@ -208,10 +208,10 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
         call hadd_pi2pzpx(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
      $       ,PI_DP4ZX)!Herbers2026
       end if
-      if (rrir10) then
-        call addo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $      ,a(P1_DPI4+ift))
-      end if
+C      if (rrir10) then
+C        call haddo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+C     $      ,a(P1_DPI4+ift))
+C      end if
       
       rrir1=.false.
       rrir2=.false.
@@ -228,7 +228,7 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
         if (a(P1_DP6J+ift).ne.0.0) rrir1=.true.
         if (a(P1_DP6K+ift).ne.0.0) rrir2=.true.
         if (a(P1_DP6D+ift).ne.0.0) rrir3=.true.
-        if (a(P1_DPI6+ift).ne.0.0) rrir9=.true.
+C        if (a(P1_DPI6+ift).ne.0.0) rrir9=.true. !moved to iamm.f
 c        write(*,'(50F10.4)')
 c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
       end do
@@ -248,10 +248,10 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
         call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
      $       ,PI_DP6D)
       end if
-      if (rrir9) then
-        call addo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $      ,a(P1_DPI6+ift))
-      end if
+C      if (rrir9) then
+C        call haddo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+C     $      ,a(P1_DPI6+ift))
+C      end if
       
       rrir1=.false.
       rrir2=.false.
@@ -416,7 +416,7 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
 C        if (rrir1.or.rrir2.or.rrir3.or.rrir4.or.
 C       $        rrir5.or.rrir6.or.rrir7.or.rrir8)                                              !Herbers
 C       $ call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_RHOP2,PM_RHOP2
-C       $     ,.true.)      !RHOP1 give the quadratic terms in parameter*operator.     These square terms will be tested first for PPz multiplting operators only. if they yield no practical benefit they will be removed. 
+C       $     ,.true.)      !RHOP2 give the quadratic terms in parameter*operator.     These square terms will be tested first for PPz multiplting operators only. if they yield no practical benefit they will be removed. 
 C              if (rrir1) then
 C          call haddjkmix_square(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,
 C       $       rott,tori,PI_RHOJ,0,2)!  
@@ -452,7 +452,7 @@ C        end if!Herbers2026
         if (a(P1_MK3J+ift).ne.0.0) rrir1=.true.
         if (a(P1_MK3K+ift).ne.0.0) rrir2=.true.
         if (a(P1_MK3D+ift).ne.0.0) rrir3=.true.
-        if (a(P1_MK3+ift).ne.0.0)  rrir4=.true.
+C        if (a(P1_MK3+ift).ne.0.0)  rrir4=.true. ! moved to iamm.f
 c        write(*,'(50F10.4)')
 c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
       end do
@@ -471,10 +471,10 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
         call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
      $       ,PI_MK3D)
       end if
-      if (rrir4) then
-        call addo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $      ,a(P1_MK3+ift))
-      end if
+C      if (rrir4) then
+C        call haddo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+C     $      ,a(P1_MK3+ift))
+C      end if
       rrir1=.false.
       rrir2=.false.
       rrir3=.false.
@@ -484,7 +484,7 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
         if (a(P1_M3KJ+ift).ne.0.0) rrir1=.true.
         if (a(P1_M3KK+ift).ne.0.0) rrir2=.true.
         if (a(P1_M3KD+ift).ne.0.0) rrir3=.true.
-        if (a(P1_M3K+ift).ne.0.0)  rrir4=.true.
+C        if (a(P1_M3K+ift).ne.0.0)  rrir4=.true. !moved to iamm.f
 c        write(*,'(50F10.4)')
 c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
       end do
@@ -503,10 +503,10 @@ c     $       (ovv(1,1,PM_PI2,gamma(gam,itop),ift,itop),ift=-j,j)
         call hadddp(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
      $       ,PI_M3KD)
       end if
-      if (rrir4) then
-        call addo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
-     $      ,a(P1_M3K+ift))
-      end if
+C      if (rrir4) then
+C        call haddo1(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori
+C     $      ,a(P1_M3K+ift))
+C      end if
       rrir1=.false.
       rrir2=.false.
       rrir3=.false.
