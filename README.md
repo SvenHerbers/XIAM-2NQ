@@ -90,6 +90,9 @@ Operators are formulated in the RAS
 | `m2k2` | `Pα**2 ρ**2 Pz**2` |
 | `mk3` | `Pα ρ**3 Pz**3` |
 | `m3k` | `Pα**3 ρ Pz` |
+| `m3k3` | `Pα**3 ρ**3 Pz**3` |
+| `m2k4` | `Pα**2 ρ**4 Pz**4` |
+| `m4k2` | `Pα**4 ρ**2 Pz**2` |
 
 ### Internal rotation - overall rotation distortion Hird
 Mixed PAS/RAS formulation  
