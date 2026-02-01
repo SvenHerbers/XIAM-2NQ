@@ -221,7 +221,7 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
 
   XIAM-2NQ v0.34c - Sven Herbers, 01-February-2026
   - Fixed an error in the implementation of `mk3`,`m3k`,`Dpi4`, and `Dpi6` in cases  where gamma≠0.
-  - `mk3`,`m3k`,`Dpi4`,`Dpi6` moved to Hii for consistency. This change also affects their definition and value in fitting procedures compared to earlier versions.
+  - `mk3`,`m3k`,`Dpi4`,`Dpi6` moved to Hir for consistency. This change also affects their definition and value in fitting procedures compared to earlier versions.
 
   XIAM-2NQ v0.34b - Sven Herbers, 31-January-2026
   - General code clean-up.
