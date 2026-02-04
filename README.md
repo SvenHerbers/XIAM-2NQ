@@ -30,7 +30,10 @@ In expressions where both occur, the RAS `Pz` is identifiable by being enclosed 
 
 
 ### Semi-Rigid Rotor Parameters Hrr
-Here only A reduction (S reduction also available)  
+Here only A reduction (`reduc 0`) but S reduction (`reduc 1`) is also available.
+If the S reduction is chosen, the parameter names stay the same, but some change their meaning.
+The correspondence in S reduction is as follows: `dj,dk,h_j,hjk,h_k,l_j,ljk,lkj,l_k` mean d1,d2,h1,h2,h3,l1,l2,l3,l4
+
 Operators are formulated in the PAS
 
 | `Parameter` | `Operator` |
