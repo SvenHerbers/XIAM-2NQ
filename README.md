@@ -21,6 +21,8 @@ Citation: J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
 
 The executable in the repository is compiled for Jmax = 70, I1max = 5/2, I2max = 5/2, and up to two 3-fold tops.  Dimensions are set at compile time. These numbers can be adjusted in iam.fi and XIAM can be recompiled. However, beyond a certain size the matrix will become too large for memory (memory fixed, not dynamic). If, for example, a much higher Jmax is required for a molecule without quadrupole coupling / double well, DIMQ, DIMQ2, and DIMDW should first be set to "1" in iam.fi.
 
+Example input and output files are available at the example repository [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples) 
+
 ----------------------------------------------------------------------------
 ## Parameter Table
 In this table, `Π = (Pα - ρ Pz)` refers to the relative internal angular momentum in the ρ-Axis System (RAS).
@@ -224,6 +226,12 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
 | `Fxy12,Fxy34,Fyz12,Fyz34,Fxz12,Fxz34` | `Pickett type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency` |
 
 ## Update Notes
+  XIAM-2NQ v0.35d - Sven Herbers, 05-February-2026
+  - A bug was fixed that prevented the simplified single-nucleus quadrupolar coupling with no matrix elements offdiagonal in J to be used with coriolis coupling parameters.
+  - Minor code cleanup (removal of unused arrays).
+  - Reduction of matrix to `2*size(S_H)` instead of `2*DIMTOT` in construction for coupling between vibrational states when using coriolis coupling parameters and `ctrl 1` leading to some speed-up.
+  - An example repository [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples) was created
+  - Methylformate example was moved to dedicated example repository
 
   XIAM-2NQ v0.34c - Sven Herbers, 01-February-2026
   - Fixed an error in the implementation of `mk3`,`m3k`,`Dpi4`, and `Dpi6` in cases  where gamma≠0.
@@ -246,27 +254,22 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
   XIAM-2NQ v0.32 - Sven Herbers, 18-January-2026
   - Implementation of octic centrifugal distortion coefficients for Watson A and Watson S reduction (reduc 0 or reduc 1)
   - Many new parameters available in Hird and Hir
-  - Updated Example-Methylformate treating the subset of v=0, Jmax=40, Kamax=15 lines. The unweighted rms of XIAM on this subset is 89 kHz; RAM36 global fits on the complete set of lines yield 66 kHz rms within this subset. 
 
   XIAM-2NQ v0.25 -> v0.29 - Sven Herbers, 05-January-2026
   - Many new parameters available in Hird and Hir, parameter table added to readme.md.
   - Minor code cleanup (removal/replacement of some functions)
-  - Added Example-Methylformate treating the subset of v=0, Jmax=30, Kamax=10 lines. The unweighted rms of XIAM on this subset is 61 kHz; RAM36 global fits on the complete set of lines yield 54 kHz rms within this subset. 
 
   XIAM-2NQ v0.24b - Sven Herbers, 17-June-2025 
-
   - The XIAM-2NQ Publication is out! Updated go-to citation to J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
   - Removed some unnecessary comments from iam.fi
 
   XIAM-2NQ v0.24 - Sven Herbers, 31-Jan-2025 
-
   A small update to the iamint.f file:
   - An error was fixed that caused int 3 predictions to not work if no spin was present.
   - Modifications were made to allow for intensitiy predictions with J>100, if iam.fi 
     is modified accordingly and XIAM is recompiled. 
 
   XIAM-2NQ v0.23 -  Sven Herbers, 6-Jan-2025
-  
   This is an updated version of XIAM-NQ with severale changes, the most important one
 being the implementation of exact quadrupole coupling for two nuclei. 
 
