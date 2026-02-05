@@ -1075,11 +1075,11 @@ C     fistat > 0  Eigenvalues for differential quotient
       integer j, gam, f, ib, npar, fistat, is, f1
       real*8  h(DIMTOT,DIMTOT),evh(DIMTOT)
       real*8  hs(2,DIMTOT,DIMTOT),evhs(2,DIMTOT)
-      real*8  h1out(DIMTOT,DIMTOT),evh1out(DIMTOT)! outputs will be written to these
-      real*8  h2out(DIMTOT,DIMTOT),evh2out(DIMTOT)! For each of the two couble states.
+C      real*8  h1out(DIMTOT,DIMTOT),evh1out(DIMTOT)! outputs will be written to these
+C      real*8  h2out(DIMTOT,DIMTOT),evh2out(DIMTOT)! For each of the two couble states.
       real*8  h_2(2*DIMTOT,2*DIMTOT), evh_2(2*DIMTOT)
-      real*8  hresort(2*DIMTOT,2*DIMTOT) !Turns out the diagonalization likely works only if I blocksort first.
-      real*8  evhresort(2*DIMTOT)
+C      real*8  hresort(2*DIMTOT,2*DIMTOT) !Turns out the diagonalization likely works only if I blocksort first.
+C      real*8  evhresort(2*DIMTOT)
       integer sorti(2*DIMTOT)
       integer counti,countis
       real*8  evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
@@ -1132,17 +1132,17 @@ C     work
       masave=.false.
       h=0.0
       h_2=0.0
-	  h1out=0.0
-	  h2out=0.0
-      hresort=0.0
-      evhresort=0.0
+C      h1out=0.0
+C      h2out=0.0
+C      hresort=0.0
+C      evhresort=0.0
       sorti=0
       counti= 0
       countis=0
-	  evh1out=0.0
-	  evh2out=0.0
-	  counter1=0
-	  counter2=0
+C      evh1out=0.0
+C      evh2out=0.0
+      counter1=0
+      counter2=0
       if (ib.le.2) then
         ibl=1
         ibu=2
@@ -1167,7 +1167,7 @@ C     work
 
       if ((myand(ctlint(C_PRI),AP_ST).ne.0).and.(xde.ge.1))
      $     write(*,'(A,5I3)')
-     $     'starting with J,S,B,F Fit_stat=',J,gam,ibl,f,fistat
+     $     'starting with J,S,B,F Fit_stat=',J,gam,ibl,f1,fistat
       fnpre='xiam'
       if (gam.eq.0) ctlint(C_NTOP)=0
       complex=.false.
@@ -1191,11 +1191,6 @@ C     initialize the quantum no.s qvk
         end do
       end do
       size(S_H)=i
-      do ivr=1, size(S_H)
-        do ivc=1, size(S_H)
-          h(ivr,ivc)=0.0
-        end do
-      end do
 
       do itop=1, ctlint(C_NTOP)
         do ivr=1, size(S_VV)
@@ -1303,7 +1298,7 @@ C     build the rotated D^{T} E_{K v \sigma} D
 C        if (usert.eq.0) then
 C          call bld1vjk(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori)
 C        else
-        call bld2vjk(j,gam,f
+        call bld2vjk(j,gam,f1
      $         ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
 
 C        end if
@@ -1314,7 +1309,7 @@ c      write(*,*) 'bld2vjk',mclock()-t1
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
       end if
 C      t1=mclock()
-      call addrig_old(j,gam,f
+      call addrig_old(j,gam,f1
      $     ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
      
 
@@ -1462,7 +1457,7 @@ C        if (usert.eq.0) then
 C          call bld1vjk(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori)
 C        else
 
-        call bld2vjk(j,gam,f
+        call bld2vjk(j,gam,f1
      $         ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
 C        end if
 
@@ -1472,15 +1467,15 @@ c      write(*,*) 'bld2vjk',mclock()-t1
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
       end if
 C      t1=mclock()
-      call addrig(j,gam,f
+      call addrig_old(j,gam,f1
      $     ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
         
 
 C---
 C      t1=mclock()
-        do i=1, DIMTOT
-          do ie=1, DIMTOT
-            h_2(i+DIMTOT,ie+DIMTOT)=h(i,ie) !copying 2nd h to h2
+        do i=1, size(S_H)
+          do ie=1, size(S_H)
+            h_2(i+size(S_H),ie+size(S_H))=h(i,ie) !copying 2nd h to h2
           end do
         end do
         
@@ -1525,22 +1520,22 @@ C             --- Sven 25-07-2024
 C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
        if (Gz .ne. 0.0) then
          do ik=1, 2*j+1
-           h_2(ik,DIMTOT+ik)=Gz*1.0*(ik-1-j)! on complex off diag Gordy_Cook eq 7.135 p290 
+           h_2(ik,size(S_H)+ik)=Gz*1.0*(ik-1-j)! on complex off diag Gordy_Cook eq 7.135 p290 
          end do !  
        end if 
        if (Gy .ne. 0.0) then
          do ik=1, 2*j
-             h_2(ik,DIMTOT+ik+1)=h_2(ik,DIMTOT+ik+1)+0.5*Gy
+             h_2(ik,size(S_H)+ik+1)=h_2(ik,size(S_H)+ik+1)+0.5*Gy
      $                *sqrt(1.0*(j-(ik-1-j))*(j+(ik-1-j)+1)) ! on complex off diag
-             h_2(ik+1,DIMTOT+ik)=h_2(ik+1,DIMTOT+ik)+0.5*Gy
+             h_2(ik+1,size(S_H)+ik)=h_2(ik+1,size(S_H)+ik)+0.5*Gy
      $                *-1.0*sqrt(1.0*(j-(ik-1-j))*(j+(ik-1-j)+1)) ! on complex off diag
          end do
        end if 
        if (Gx .ne. 0.0) then
          do ik=2, 2*j+1
-             h_2(DIMTOT+ik,ik-1)=h_2(DIMTOT+ik,ik-1)+0.5*Gx
+             h_2(size(S_H)+ik,ik-1)=h_2(size(S_H)+ik,ik-1)+0.5*Gx
      $                *sqrt(1.0*(j+(ik-1-j))*(j-(ik-1-j)+1)) ! on real off diag
-              h_2(DIMTOT+ik-1,ik)=h_2(DIMTOT+ik-1,ik)+0.5*Gx
+              h_2(size(S_H)+ik-1,ik)=h_2(size(S_H)+ik-1,ik)+0.5*Gx
      $                *sqrt(1.0*(j+(ik-1-j))*(j-(ik-1-j)+1)) ! on real off diag
          end do 
        end if
@@ -1555,9 +1550,9 @@ C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
      $          *(j*(j+1)-(ik-j)*((ik-j)-1))
 
            end if 
-             h_2(ik,DIMTOT+ik+2)=h_2(ik,DIMTOT+ik+2) 
+             h_2(ik,size(S_H)+ik+2)=h_2(ik,size(S_H)+ik+2) 
      $        +sqrt(fjn)*Fxy
-             h_2(ik+2,DIMTOT+ik)=h_2(ik+2,DIMTOT+ik)
+             h_2(ik+2,size(S_H)+ik)=h_2(ik+2,size(S_H)+ik)
      $         -1.0*sqrt(fjn)*Fxy
          end do
        end if        
@@ -1565,19 +1560,21 @@ C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
        ! FYZ is put on the imaginary
        if (Fyz .ne. 0.0) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
          do ik=1, 2*j
-             h_2(ik,DIMTOT+ik+1)=h_2(ik,DIMTOT+ik+1)+0.5*(2*(ik-1-j)+1)
+             h_2(ik,size(S_H)+ik+1)=
+     $  h_2(ik,size(S_H)+ik+1)+0.5*(2*(ik-1-j)+1)
      $  *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*Fyz
-             h_2(ik+1,DIMTOT+ik)=h_2(ik+1,DIMTOT+ik)-0.5*(2*(ik-1-j)+1)
+             h_2(ik+1,size(S_H)+ik)=
+     $  h_2(ik+1,size(S_H)+ik)-0.5*(2*(ik-1-j)+1)
      $  *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*Fyz 
          end do
        end if        
        !FXZ is put on the real
        if (Fxz .ne. 0.0) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
          do ik=1, 2*j
-            h_2(DIMTOT+ik+1,ik)=h_2(DIMTOT+ik+1,ik)+(0.5* 
+            h_2(size(S_H)+ik+1,ik)=h_2(size(S_H)+ik+1,ik)+(0.5* 
      $         (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
      $          *Fxz
-             h_2(DIMTOT+ik,ik+1)=h_2(DIMTOT+ik,ik+1)+(0.5*
+             h_2(size(S_H)+ik,ik+1)=h_2(size(S_H)+ik,ik+1)+(0.5*
      $          (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
      $          *Fxz
          end do
@@ -1596,28 +1593,24 @@ C        The problem is that there can be 0 energy levels e.g. J=0.
 C        however the diagonalization routine does not accept zero entries. 
 C        This means I have to check, if for both rotational states the entries are zero.
 C        If this is not the case, I will add a small offset to the one that is non zero
-        do i = 1, size(S_H) ! it is probably better to fix this using size(S_H)... but for now.
+        do i = 1, 2*size(S_H) !
          check1=abs(h_2(i,i))    
          if (check1.le.1.0e-14) then
              h_2(i,i)=5.0e-14 
          end if
-         check2=abs(h_2(DIMTOT+i,DIMTOT+i))    
-         if (check2.le.1.0e-14) then
-          h_2(DIMTOT+i,DIMTOT+i)=5.0e-14 
-         end if
         end do     
              
          
-      hresort(1:size(S_H),1:size(S_H))=
-     $ h_2(1:size(S_H),1:size(S_H))  ! Diagonal Block lower state
-      hresort(size(S_H)+1:2*size(S_H),size(S_H)+1:2*size(S_H))=
-     $ h_2(DIMTOT+1:DIMTOT+size(S_H),DIMTOT+1:DIMTOT+size(S_H))  ! Diagonal Block upper state
-      hresort(1:size(S_H),size(S_H)+1:2*size(S_H))=
-     $ h_2(1:size(S_H),DIMTOT+1:DIMTOT+size(S_H))     ! Offdiagonal 1
-      hresort(size(S_H)+1:2*size(S_H),1:size(S_H))=  
-     $ h_2(DIMTOT+1:DIMTOT+size(S_H),1:size(S_H))     ! Offdiagonal 2
+C      hresort(1:size(S_H),1:size(S_H))= !resorting should not be needed anymore since DIMTOT was replaced with size(S_H) in construction
+C     $ h_2(1:size(S_H),1:size(S_H))  ! Diagonal Block lower state
+C      hresort(size(S_H)+1:2*size(S_H),size(S_H)+1:2*size(S_H))=
+C     $ h_2(DIMTOT+1:DIMTOT+size(S_H),DIMTOT+1:DIMTOT+size(S_H))  ! Diagonal Block upper state
+C      hresort(1:size(S_H),size(S_H)+1:2*size(S_H))=
+C     $ h_2(1:size(S_H),DIMTOT+1:DIMTOT+size(S_H))     ! Offdiagonal 1
+C      hresort(size(S_H)+1:2*size(S_H),1:size(S_H))=  
+C     $ h_2(DIMTOT+1:DIMTOT+size(S_H),1:size(S_H))     ! Offdiagonal 2
 
-        h_2=hresort
+C        h_2=hresort
         
         call htrid3 (2*DIMTOT,2*size(s_h),h_2,evh_2,e_2,e2_2,tau_2)
         call tql2 (2*DIMTOT,2*size(s_h),evh_2,e_2,zr_2,ierr)
