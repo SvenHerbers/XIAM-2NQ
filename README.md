@@ -204,7 +204,7 @@ They can be particularly helpful for 1st order corrections, when dealing with tw
 
 ### Nuclear quadrupole coupling parameters
 For first or second nucleus.  
-Matrix Elements given in J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
+Matrix elements given in J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
 
 | `Parameter` |
 |-------------|
