@@ -203,7 +203,8 @@ They can be particularly helpful for 1st order corrections, when dealing with tw
 | `DzS1, DzS2,.. DzS11` |
 
 ### Nuclear quadrupole coupling parameters
-for first or second nucleus
+For first or second nucleus.  
+Matrix Elements given in J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
 
 | `Parameter` |
 |-------------|
