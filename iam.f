@@ -71,8 +71,8 @@ C     real*8  ab(DIMPAR)
 C      write(*,'(A,$)') ' Calculation date and time: '
       call mydate()
       write(*,*)
-      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.34d -' 
-     $                  ,'By Sven Herbers 05-February-2026' 
+      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.35 -' 
+     $                  ,'By Sven Herbers 06-February-2026' 
       write(*,*) 'sven_herbers@web.de'
       write(*,*) 'Cite: J. Chem. Phys., 2025, '
      $         ,'162, 234304, DOI: 10.1063/5.0267651 ' 
@@ -1436,41 +1436,47 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P_GZ34  ) /'Gz34    '/, parfit(P_GZ34  ) /1/ !Herbers2024 Wilsons coriolis coupling  
       data parstr(P_FXY3  ) /'Fxy34   '/, parfit(P_FXY3  ) /1/ !Herbers2024 Picketts coriolis coupling 
       data parstr(P_FYZ3  ) /'Fyz34   '/, parfit(P_FYZ3  ) /1/ !Herbers2024 Picketts coriolis coupling 
-      data parstr(P_FXZ3  ) /'Fxz34   '/, parfit(P_FXZ3  ) /1/ !Herbers2024 Picketts coriolis coupling       
+      data parstr(P_FXZ3  ) /'Fxz34   '/, parfit(P_FXZ3  ) /1/ !Herbers2024 Picketts coriolis coupling 
+      data parstr(P_WQXY1 ) /'chixy12 '/, parfit(P_WQXY1 ) /1/ !Herbers2026 Nguyen & Stahl used parameters of this type to deal with off-diags of a tunneling nitrogen nucleus.
+      data parstr(P_WQXZ1 ) /'chixz12 '/, parfit(P_WQXZ1 ) /1/ !Herbers2026
+      data parstr(P_WQYZ1 ) /'chiyz12 '/, parfit(P_WQYZ1 ) /1/ !Herbers2026
+      data parstr(P_WQXY3 ) /'chixy34 '/, parfit(P_WQXY3 ) /1/ !Herbers2026
+      data parstr(P_WQXZ3 ) /'chixz34 '/, parfit(P_WQXZ3 ) /1/ !Herbers2026
+      data parstr(P_WQYZ3 ) /'chiyz34 '/, parfit(P_WQYZ3 ) /1/ !Herbers2026
       data parstr(P_DX1   ) /'DxS1    '/, parfit(P_DX1   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DX2   ) /'DxS2    '/, parfit(P_DX2   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5
-      data parstr(P_DX3   ) /'DxS3    '/, parfit(P_DX3   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5
-      data parstr(P_DX4   ) /'DxS4    '/, parfit(P_DX4   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5
-      data parstr(P_DX5   ) /'DxS5    '/, parfit(P_DX5   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5      
-      data parstr(P_DX6   ) /'DxS6    '/, parfit(P_DX6   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DX7   ) /'DxS7    '/, parfit(P_DX7   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DX8   ) /'DxS8    '/, parfit(P_DX8   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5  
-      data parstr(P_DX9   ) /'DxS9    '/, parfit(P_DX9   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5  
-      data parstr(P_DX10  ) /'DxS10   '/, parfit(P_DX10  ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DX11  ) /'DxS11   '/, parfit(P_DX11  ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DY1   ) /'DyS1    '/, parfit(P_DY1   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DY2   ) /'DyS2    '/, parfit(P_DY2   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5
-      data parstr(P_DY3   ) /'DyS3    '/, parfit(P_DY3   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5
-      data parstr(P_DY4   ) /'DyS4    '/, parfit(P_DY4   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5
-      data parstr(P_DY5   ) /'DyS5    '/, parfit(P_DY5   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5   
-      data parstr(P_DY6   ) /'DyS6    '/, parfit(P_DY6   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DY7   ) /'DyS7    '/, parfit(P_DY7   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DY8   ) /'DyS8    '/, parfit(P_DY8   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5  
-      data parstr(P_DY9   ) /'DyS9    '/, parfit(P_DY9   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5  
-      data parstr(P_DY10  ) /'DyS10   '/, parfit(P_DY10  ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DY11  ) /'DyS11   '/, parfit(P_DY11  ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DZ1   ) /'DzS1    '/, parfit(P_DZ1   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DZ2   ) /'DzS2    '/, parfit(P_DZ2   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5
-      data parstr(P_DZ3   ) /'DzS3    '/, parfit(P_DZ3   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5
-      data parstr(P_DZ4   ) /'DzS4    '/, parfit(P_DZ4   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5
-      data parstr(P_DZ5   ) /'DzS5    '/, parfit(P_DZ5   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DZ6   ) /'DzS6    '/, parfit(P_DZ6   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DZ7   ) /'DzS7    '/, parfit(P_DZ7   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DZ8   ) /'DzS8    '/, parfit(P_DZ8   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5  
-      data parstr(P_DZ9   ) /'DzS9    '/, parfit(P_DZ9   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5  
-      data parstr(P_DZ10  ) /'DzS10   '/, parfit(P_DZ10  ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DZ11  ) /'DzS11   '/, parfit(P_DZ11  ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5       
-      data parstr(P_DUMP  ) /'dummy   '/, parfit(P_DUMP  ) /1/ !Herbers2024 A dummy parameter not used for anything.                                             
+      data parstr(P_DX2   ) /'DxS2    '/, parfit(P_DX2   ) /1/ 
+      data parstr(P_DX3   ) /'DxS3    '/, parfit(P_DX3   ) /1/ 
+      data parstr(P_DX4   ) /'DxS4    '/, parfit(P_DX4   ) /1/ 
+      data parstr(P_DX5   ) /'DxS5    '/, parfit(P_DX5   ) /1/ 
+      data parstr(P_DX6   ) /'DxS6    '/, parfit(P_DX6   ) /1/ 
+      data parstr(P_DX7   ) /'DxS7    '/, parfit(P_DX7   ) /1/ 
+      data parstr(P_DX8   ) /'DxS8    '/, parfit(P_DX8   ) /1/ 
+      data parstr(P_DX9   ) /'DxS9    '/, parfit(P_DX9   ) /1/ 
+      data parstr(P_DX10  ) /'DxS10   '/, parfit(P_DX10  ) /1/ 
+      data parstr(P_DX11  ) /'DxS11   '/, parfit(P_DX11  ) /1/ 
+      data parstr(P_DY1   ) /'DyS1    '/, parfit(P_DY1   ) /1/ 
+      data parstr(P_DY2   ) /'DyS2    '/, parfit(P_DY2   ) /1/ 
+      data parstr(P_DY3   ) /'DyS3    '/, parfit(P_DY3   ) /1/ 
+      data parstr(P_DY4   ) /'DyS4    '/, parfit(P_DY4   ) /1/ 
+      data parstr(P_DY5   ) /'DyS5    '/, parfit(P_DY5   ) /1/ 
+      data parstr(P_DY6   ) /'DyS6    '/, parfit(P_DY6   ) /1/ 
+      data parstr(P_DY7   ) /'DyS7    '/, parfit(P_DY7   ) /1/ 
+      data parstr(P_DY8   ) /'DyS8    '/, parfit(P_DY8   ) /1/ 
+      data parstr(P_DY9   ) /'DyS9    '/, parfit(P_DY9   ) /1/ 
+      data parstr(P_DY10  ) /'DyS10   '/, parfit(P_DY10  ) /1/ 
+      data parstr(P_DY11  ) /'DyS11   '/, parfit(P_DY11  ) /1/ 
+      data parstr(P_DZ1   ) /'DzS1    '/, parfit(P_DZ1   ) /1/ 
+      data parstr(P_DZ2   ) /'DzS2    '/, parfit(P_DZ2   ) /1/ 
+      data parstr(P_DZ3   ) /'DzS3    '/, parfit(P_DZ3   ) /1/ 
+      data parstr(P_DZ4   ) /'DzS4    '/, parfit(P_DZ4   ) /1/ 
+      data parstr(P_DZ5   ) /'DzS5    '/, parfit(P_DZ5   ) /1/ 
+      data parstr(P_DZ6   ) /'DzS6    '/, parfit(P_DZ6   ) /1/ 
+      data parstr(P_DZ7   ) /'DzS7    '/, parfit(P_DZ7   ) /1/ 
+      data parstr(P_DZ8   ) /'DzS8    '/, parfit(P_DZ8   ) /1/ 
+      data parstr(P_DZ9   ) /'DzS9    '/, parfit(P_DZ9   ) /1/ 
+      data parstr(P_DZ10  ) /'DzS10   '/, parfit(P_DZ10  ) /1/ 
+      data parstr(P_DZ11  ) /'DzS11   '/, parfit(P_DZ11  ) /1/ 
+      data parstr(P_DUMP  ) /'dummy   '/, parfit(P_DUMP  ) /1/ !Herbers2024 A dummy parameter not used for anything.   
       data parstr(P_QZ    ) /'chi_z   '/, parfit(P_QZ    ) /0/
       data parstr(P_QD    ) /'chi_-   '/, parfit(P_QD    ) /0/
       data parstr(P_QXY   ) /'chi_xy  '/, parfit(P_QXY   ) /0/

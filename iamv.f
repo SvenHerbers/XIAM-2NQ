@@ -1108,8 +1108,8 @@ C     work
       real*8  zr_2(DIMTOT*2,DIMTOT*2),zi_2(DIMTOT*2,DIMTOT*2)
       real*8  zrs(2,DIMTOT,DIMTOT),zis(2,DIMTOT,DIMTOT)
       real*8  dedp(DIMPAR)
-      real*8  Gx,Gy,Gz,Fxy,Fxz,Fyz
-      real*8  check1,check2
+      real*8  Gx,Gy,Gz,Fxy,Fxz,Fyz,Chixy,Chiyz,Chixz
+      real*8  check1,check2               
       real*8  fjn
       integer id,ie,i,iv,ik,itop,ivr,ivc,ir,ic,it1,it2,ikr,ikc
       integer ibl, ibu, ibselect
@@ -1117,6 +1117,7 @@ C     work
       integer ruse(DIMVV,DIMVV,DIMTOP)
       integer counter1
       integer counter2
+      real*8 dj,djj1,e1,djjc,di,dii1,df,dff1,dg
       character*30 fmtstr
       character*30 fmtstr2
       character*4 fnpre
@@ -1143,6 +1144,28 @@ C      evh1out=0.0
 C      evh2out=0.0
       counter1=0
       counter2=0
+
+      dj=dble(j)
+      djj1=dj*(dj+1.0)
+      e1=0.0
+C     djjc is used for spin rotation coupling to prevent a division by zero
+C     for J=0
+      djjc=1.0
+      if ((ctlint(C_SPIN).ne.0).and.(j.gt.0).and.(f1.ge.0)) then
+        di=dble(ctlint(C_SPIN))/2.0d0
+        dii1=di*(di+1.0)
+        df=dble(f1)/2.0d0!using f1 here
+        dff1=df*(df+1.0)
+        djjc=djj1
+        dg=dff1-dii1-djj1
+        if (ctlint(C_SPIN).gt.1) then
+          e1= (0.75*dg*(dg+1.0)-dii1*djj1)
+     $         /(2.0*di*(2.0*di-1.0)*djj1*(2.0*dj-1.0)*(2.0*dj+3.0))
+        else
+          e1=0.0
+        end if
+      end if
+      
       if (ib.le.2) then
         ibl=1
         ibu=2
@@ -1170,12 +1193,10 @@ C      evh2out=0.0
      $     'starting with J,S,B,F Fit_stat=',J,gam,ibl,f1,fistat
       fnpre='xiam'
       if (gam.eq.0) ctlint(C_NTOP)=0
-      complex=.false.
-      do i=1,ctlint(C_NTOP)
-        if (al(PI_GAMA+(i-1)*DIMPIR+DIMPRR).ne.0.0) complex=.true.
-      end do
+      complex=.true. ! this marks the hamiltonian as containing complex matrix elements in several subroutines. Not sure if putting it false for certain parametersets really speeds things up, I will keep it as true for now
+
       usert = 1
-      if ((al(P_QYZ).ne.0.0).or.(al(P_QXY).ne.0.0)) complex=.true.
+
 
       size(S_K)=2*j+1
 C     initialize the quantum no.s qvk
@@ -1293,11 +1314,6 @@ C     initialize the quantum no.s qvk
       end if
 
       if (gam.ne.0) then 
-C      t1=mclock()
-C     build the rotated D^{T} E_{K v \sigma} D
-C        if (usert.eq.0) then
-C          call bld1vjk(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori)
-C        else
         call bld2vjk(j,gam,f1
      $         ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
 
@@ -1311,8 +1327,6 @@ c      write(*,*) 'bld2vjk',mclock()-t1
 C      t1=mclock()
       call addrig_old(j,gam,f1
      $     ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
-     
-
 C---
 C      t1=mclock()
        do i=1, DIMTOT
@@ -1451,17 +1465,9 @@ C     Starting a copy with ibu
       end if
 
       if (gam.ne.0) then 
-C      t1=mclock()
-C     build the rotated D^{T} E_{K v \sigma} D
-C        if (usert.eq.0) then
-C          call bld1vjk(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori)
-C        else
 
         call bld2vjk(j,gam,f1
      $         ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
-C        end if
-
-c      write(*,*) 'bld2vjk',mclock()-t1
 
       else
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
@@ -1495,12 +1501,15 @@ C      This is likely due to inconsistensies in phase convention in my implement
 C      For now, I discourage mixing G and F parameters until this disagreement is fixed.
 C      
 C             --- Sven 25-07-2024
-       Gz  = 0.0
-       Gy  = 0.0
-       Gx  = 0.0
-       Fxy = 0.0
-       Fxz = 0.0
-       Fyz = 0.0
+       Gz    = 0.0
+       Gy    = 0.0
+       Gx    = 0.0
+       Fxy   = 0.0
+       Fxz   = 0.0
+       Fyz   = 0.0
+       Chixy = 0.0
+       Chixz = 0.0
+       Chiyz = 0.0
        if (ib.le.2) then
          Gz =al(P_GZ12)
          Gy =al(P_GY12)
@@ -1508,13 +1517,19 @@ C             --- Sven 25-07-2024
          Fxy=al(P_FXY1)
          Fxz=al(P_FXZ1)
          Fyz=al(P_FYZ1)
+         Chixy=al(P_WQXY1)*(-1.0) !Sign change to match relative signs in spfit output !these are offdiagonal nqcc matrix elements but used offdiagonal in v. Matrix elements offdiagonal in J neglected.
+         Chiyz=al(P_WQYZ1)*(-1.0) !
+         Chixz=al(P_WQXZ1)*(-1.0) !
        else
          Gz =al(P_GZ34)
          Gy =al(P_GY34)
          Gx =al(P_GX34)
-         Fxy=al(P_FXY3)
-         Fxz=al(P_FXZ3)
-         Fyz=al(P_FYZ3)      
+         Fxy=al(P_FXY3)  
+         Fxz=al(P_FXZ3)!
+         Fyz=al(P_FYZ3)!      
+         Chixy=al(P_WQXY3)*(-1.0)
+         Chiyz=al(P_WQYZ3)*(-1.0)
+         Chixz=al(P_WQXZ3)*(-1.0)
        end if
         
 C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
@@ -1541,7 +1556,7 @@ C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
        end if
        
        !FXY is imaginary!Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
-       if (Fxy .ne. 0.0) then !and based on doi.org/10.1063/1.1677430
+       if ((Fxy .ne. 0.0).or.(Chixy .ne. 0.0)) then !and based on doi.org/10.1063/1.1677430
          do ik=1, 2*j-1
            if(j.eq.1)then
              fjn=(0.5*j*(j+1))**2
@@ -1551,32 +1566,32 @@ C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
 
            end if 
              h_2(ik,size(S_H)+ik+2)=h_2(ik,size(S_H)+ik+2) 
-     $        +sqrt(fjn)*Fxy
+     $        +sqrt(fjn)*(Fxy-2*Chixy*e1)
              h_2(ik+2,size(S_H)+ik)=h_2(ik+2,size(S_H)+ik)
-     $         -1.0*sqrt(fjn)*Fxy
+     $         -1.0*sqrt(fjn)*(Fxy-2*Chixy*e1)
          end do
        end if        
        
        ! FYZ is put on the imaginary
-       if (Fyz .ne. 0.0) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
+       if ((Fyz .ne. 0.0).or.(Chiyz .ne. 0.0)) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
          do ik=1, 2*j
              h_2(ik,size(S_H)+ik+1)=
      $  h_2(ik,size(S_H)+ik+1)+0.5*(2*(ik-1-j)+1)
-     $  *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*Fyz
+     $  *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*(Fyz-2.0*Chiyz*e1)
              h_2(ik+1,size(S_H)+ik)=
      $  h_2(ik+1,size(S_H)+ik)-0.5*(2*(ik-1-j)+1)
-     $  *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*Fyz 
+     $  *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*(Fyz-2.0*Chiyz*e1)
          end do
        end if        
        !FXZ is put on the real
-       if (Fxz .ne. 0.0) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
+       if ((Fxz .ne. 0.0).or.(Chixz .ne. 0.0)) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
          do ik=1, 2*j
             h_2(size(S_H)+ik+1,ik)=h_2(size(S_H)+ik+1,ik)+(0.5* 
      $         (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
-     $          *Fxz
+     $          *(Fxz-2.0*Chixz*e1)
              h_2(size(S_H)+ik,ik+1)=h_2(size(S_H)+ik,ik+1)+(0.5*
      $          (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
-     $          *Fxz
+     $          *(Fxz-2.0*Chixz*e1)
          end do
        end if        
        
