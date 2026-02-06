@@ -224,9 +224,14 @@ Can only be used with the “old” approximate nuclear quadrupole coupling (ele
 | `E` | `Energy-offset assignable to the various vibrational states` |
 | `Gx12,Gx34,Gy12,Gy34,Gz12,Gz34` | `Wilson type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Pickett type at the moment, due to a likely phase inconsistency` |
 | `Fxy12,Fxy34,Fyz12,Fyz34,Fxz12,Fxz34` | `Pickett type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency` |
+| `chixy12,chixy34,chiyz12,chiyz34,chixz12,chixz34` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
-  XIAM-2NQ v0.35d - Sven Herbers, 05-February-2026
+  XIAM-2NQ v0.35 - Sven Herbers, 05-February-2026
+  - Parameters of type `chixy12` to be used with Pickett type Coriolis coupling were added (see parameter table)
+  - Added updated near-experimental accuracy example fit (4.4 kHz rms) of Diethylamine to [example repository](https://github.com/SvenHerbers/XIAM-2NQ_Examples) based on dataset in J. Chem. Phys. 135, 024310 (2011) DOI: [10.1063/1.3607992](https://doi.org/10.1063/1.3607992). 
+
+  XIAM-2NQ v0.34d - Sven Herbers, 05-February-2026
   - A bug was fixed that prevented the simplified single-nucleus quadrupolar coupling with no matrix elements offdiagonal in J to be used with coriolis coupling parameters.
   - Minor code cleanup (removal of unused arrays).
   - Reduction of matrix to `2*size(S_H)` instead of `2*DIMTOT` in construction for coupling between vibrational states when using coriolis coupling parameters and `ctrl 1` leading to some speed-up.
