@@ -215,14 +215,18 @@ for first or second nucleus
 
 ### Vibrational state interaction parameters
 Parameter E is always available. 
-For Wilson and Pickett coriolis coupling parameters, vibrational coupling mode must be activated by setting control parameter ctrl to  `ctrl 1`.
+For Wilson and Pickett Coriolis coupling parameters, vibrational coupling mode must be activated by setting control parameter ctrl to  `ctrl 1`.
 Can only be used with the “old” approximate nuclear quadrupole coupling (elements off diagonal in J neglected)  with a single quadrupolar nucleus.  
+
+Reference Wilson parameters: J. Chem. Phys. 4, 313–316 (1936) https://doi.org/10.1063/1.1749846  
+Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) https://doi.org/10.1063/1.1677430
+
 
 
 | `Parameter` | `Description` |
 |------------|---------------|
 | `E` | `Energy-offset assignable to the various vibrational states` |
-| `Gx12,Gx34,Gy12,Gy34,Gz12,Gz34` | `Wilson type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Pickett type at the moment, due to a likely phase inconsistency` |
+| `Gx12,Gx34,Gy12,Gy34,Gz12,Gz34` | `Wilson type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Pickett type at the moment, due to a likely phase inconsistency.` |
 | `Fxy12,Fxy34,Fyz12,Fyz34,Fxz12,Fxz34` | `Pickett type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency` |
 | `chixy12,chixy34,chiyz12,chiyz34,chixz12,chixz34` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
