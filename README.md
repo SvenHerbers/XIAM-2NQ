@@ -174,7 +174,7 @@ Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, 
 
 ### Top-Top coupling term Hii
 
-The top–top coupling parameters are implemented by forming symmetrized pairwise products of the single-top operators. The operators, or how their matrix representations are put together, is shown for the 2 top case in the table below.
+The top–top coupling parameters are implemented by forming symmetrized pairwise products of the single-top operators. The operators, or how their matrix representations are put together, are shown for the 2 top case in the table below.
 
 | `Parameter` | `Operator` |
 |------------|------------|
