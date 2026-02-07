@@ -28,7 +28,8 @@ Example input and output files are available at the example repository [github.c
 In this table, `Π = (Pα - ρ Pz)` refers to the relative internal angular momentum in the ρ-Axis System (RAS).
 
 The operator `Pz` is used with a double meaning, referring either to the z axis in the RAS or in the Principal Axis System (PAS).  
-In expressions where both occur, the RAS `Pz` is identifiable by being enclosed between two Wigner small-d matrices, `dt` and `d`, indicating the rotation from the RAS to the PAS.
+In expressions where both occur, the RAS `Pz` is identifiable by being enclosed between two Wigner small-d matrices, `dt` and `d`, indicating the rotation from the RAS to the PAS.  
+The Wigner small-d matrix only depends on `beta` and J. In situations where an additional rotation about the x-axis `gamma` is required, the corresponding phase factors are included in the code but omitted from the tables for clarity.
 
 
 ### Semi-Rigid Rotor Parameters Hrr
