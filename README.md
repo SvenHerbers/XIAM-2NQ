@@ -238,7 +238,7 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) https://doi.
 | `chixy12,chixy34,chiyz12,chiyz34,chixz12,chixz34` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
-  XIAM-2NQ v0.35 - Sven Herbers, 05-February-2026
+  XIAM-2NQ v0.35 - Sven Herbers, 06-February-2026
   - Parameters of type `chixy12` to be used with Pickett type Coriolis coupling were added (see parameter table)
   - Added updated near-experimental accuracy example fit (4.4 kHz rms) of Diethylamine to [example repository](https://github.com/SvenHerbers/XIAM-2NQ_Examples) based on dataset in J. Chem. Phys. 135, 024310 (2011) DOI: [10.1063/1.3607992](https://doi.org/10.1063/1.3607992). 
 
