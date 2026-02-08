@@ -1,7 +1,7 @@
 # XIAM-2NQ
-XIAM-2NQ is a spectral fitting code that handles up to two quadrupolar nuclei and 4 internal rotors. It is an extension of the original XIAM code by Hartwig, available at the PROSPE (http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.
-The repository contains all source files which can be compiled using the make file to create a linux applications. Alternatively, the files can be compiled in steps using the ifortran compiler by intel.
-XIAMi2NQ.exe is a compiled executable using the Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32 (Version 2021.13.1).
+XIAM-2NQ is a spectral fitting program for molecules containing up to two quadrupolar nuclei and four internal rotors. It extends the original XIAM code by Hartwig which is available at the [PROSPE](http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.
+This repository provides the complete source code required to build the program. A makefile is included for straightforward compilation on Linux systems. Alternatively, the source files can be compiled step-by-step using the Intel ifortran compiler.
+XIAMi2NQ.exe was built with the Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32 (Version 2021.13.1).
 Compilation was carried out using the following command line entries: <br/> 
 ifort -c iamint.f <br/> 
 ifort -c iamio.f <br/> 
@@ -17,21 +17,16 @@ ifort -c iam.f <br/>
 
 ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f <br/> 
 
-Citation: J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
+Citation: J. Chem. Phys. 162, 234304 (2025) [DOI: 10.1063/5.0267651](https://doi.org/10.1063/5.0267651)
 
-The executable in the repository is compiled for Jmax = 70, I1max = 5/2, I2max = 5/2, and up to two 3-fold tops.  Dimensions are set at compile time. These numbers can be adjusted in iam.fi and XIAM can be recompiled. However, beyond a certain size the matrix will become too large for memory (memory fixed, not dynamic). If, for example, a much higher Jmax is required for a molecule without quadrupole coupling / double well, DIMQ, DIMQ2, and DIMDW should first be set to "1" in iam.fi.
+The executable provided in this repository was compiled with the following limits: **Jmax = 70, I1max = 5/2, I2max = 5/2,** and up to **two 3-fold tops**. All array dimensions are defined at compile time. These limits can be modified in `iam.fi`, after which the program must be recompiled. Be aware that memory allocation in XIAM-2NQ is static. Increasing these limits beyond a certain point may cause the Hamiltonian matrix to exceed available memory. If significantly larger Jmax values are required for molecules without quadrupole coupling and without a double-well potential, it is recommended to first set `DIMQ=1`, `DIMQ2=1`, and `DIMDW=1` in `iam.fi`.
 
-Example input and output files are available at the example repository [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples) 
+Example input and output files are provided in the example repository [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples) 
 
 ----------------------------------------------------------------------------
 ## Parameter Table
 In this table, `Π = (Pα - ρ Pz)` refers to the relative internal angular momentum in the ρ-Axis System (RAS).
-
-The operator `Pz` is used with a double meaning, referring either to the z axis in the RAS or in the Principal Axis System (PAS).  
-In expressions where both occur, the RAS `Pz` is identifiable by being enclosed between two Wigner small-d matrices, `dt` and `d`, indicating the rotation from the RAS to the PAS.  
-The Wigner small-d matrix only depends on `beta` and J. In situations where an additional rotation about the x-axis `gamma` is required, the corresponding phase factors are included in the code but omitted from the tables for clarity.
-
-
+  
 ### Semi-Rigid Rotor Parameters Hrr
 Here only A reduction (`reduc 0`) but S reduction (`reduc 1`) is also available.
 If the S reduction is chosen, the parameter names stay the same, but some change their meaning.
@@ -101,9 +96,12 @@ Operators are formulated in the RAS
 | `m4k2` | `Pα**4 ρ**2 Pz**2` |
 
 ### Internal rotation - overall rotation distortion Hird
-Mixed PAS/RAS formulation  
-RAS operators are rotated into PAS, then multiplied with PAS operators  
-Rotation is indicated by dt(O)d, with d representing the wigner small d matrix, and dt its transposed
+ 
+For these mixed terms, operators defined in the rotor axis system (RAS) are first rotated into the principal axis system (PAS) and then combined with operators expressed directly in the PAS.
+The rotation is performed using Wigner small-d matrices in the form `dt(O)d`.
+
+The operator `Pz` is used with a dual meaning, referring either to the z-axis in the RAS or in the PAS. In expressions where both appear, the RAS `Pz` can be identified by its placement between two Wigner small-d matrices,`dt` and `d`, which indicate the rotation from the RAS to the PAS.
+The Wigner small-d matrix depends only on the angle `beta` and the rotational quantum number J. In cases where an additional rotation about the x-axis (`gamma`) is required, the corresponding phase factors are included in the code but omitted from the tables for clarity.
 
 | `Parameter` | `Operator` |
 |------------|------------|
@@ -199,8 +197,8 @@ For three tops, the Hamiltonian contribution associated with `F12` for example w
 
 ### First order local parameters
 
-These parameters multiply with Px,Py,Pz in the PAS, but can be defined for each Species separately (up to 11 species possible).  
-They can be particularly helpful for 1st order corrections, when dealing with two low barrier coupling rotors, when the few coupling parameters available in XIAM (F12,Vcc,Vss) reach their limits.
+These parameters multiply the operators Px, Py, and Pz in the principal axis system (PAS). They can be defined independently for each species (up to 11 species supported).
+They are particularly useful for introducing first-order corrections in systems with two low-barrier, coupled internal rotors, where the standard coupling parameters available in XIAM (F12, Vcc, Vss) are no longer sufficient to capture the observed interactions.
 
 | `Parameter` |
 |-------------|
@@ -210,7 +208,7 @@ They can be particularly helpful for 1st order corrections, when dealing with tw
 
 ### Nuclear quadrupole coupling parameters
 For first or second nucleus.  
-Matrix elements given in J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
+Matrix elements given in J. Chem. Phys. 162, 234304 (2025) DOI: [10.1063/5.0267651](https://doi.org/10.1063/5.0267651)
 
 | `Parameter` |
 |-------------|
@@ -225,8 +223,8 @@ Parameter E is always available.
 For Wilson and Pickett Coriolis coupling parameters, vibrational coupling mode must be activated by setting control parameter ctrl to  `ctrl 1`.
 Can only be used with the “old” approximate nuclear quadrupole coupling (elements off diagonal in J neglected)  with a single quadrupolar nucleus.  
 
-Reference Wilson parameters: J. Chem. Phys. 4, 313–316 (1936) https://doi.org/10.1063/1.1749846  
-Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) https://doi.org/10.1063/1.1677430
+Reference Wilson parameters: J. Chem. Phys. 4, 313–316 (1936) DOI: [10.1063/1.1749846](https://doi.org/10.1063/1.1749846)  
+Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.1063/1.1677430](https://doi.org/10.1063/1.1677430)
 
 
 
@@ -262,7 +260,7 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) https://doi.
 
   Sven Herbers, 28-January-2026
   - Updated Example-Methylformate fit of the subset of v=0, Jmax=50, Kamax=20 lines. The unweighted rms of XIAM on this subset is 95 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
-  - Added a fit to Example-Methylformate treating the *complete* set (49 parameters, Jmax=62, Kamax=27, fmax= 668.1 GHz, fmin= 1.6 GHz, 6976 assignments) of v=0 lines from the v=0,1 dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009). [https://doi.org/10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM fits on this subset is 145 kHz; RAM36 global fits on the complete set of lines yield 75 kHz rms within this subset. 
+  - Added a fit to Example-Methylformate treating the *complete* set (49 parameters, Jmax=62, Kamax=27, fmax= 668.1 GHz, fmin= 1.6 GHz, 6976 assignments) of v=0 lines from the v=0,1 dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009) DOI: [10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM fits on this subset is 145 kHz; RAM36 global fits on the complete set of lines yield 75 kHz rms within this subset. 
 
   XIAM-2NQ v0.34 - Sven Herbers, 25-January-2026
   - Many new parameters available in Hird and Hir, parameter table will be updated in the following days.
