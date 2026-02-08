@@ -182,7 +182,7 @@ The top–top coupling parameters are implemented by forming symmetrized pairwis
 | `Vcc` | `0.5*[dt1 cos(nα1) d1 * dt2 cos(nα2) d2 `<br>`+  dt2 cos(nα2) d2 * dt1 cos(nα1) d1]` |
 | `Vss` | `-0.5*[dt1 sin(nα1) d1 * dt2 sin(nα2) d2  `<br>`+ dt2 sin(nα2) d2 * dt1 sin(nα1) d1 ]  ` |
 
-For three tops, the Hamiltonian contribution associated with `F12` for example would be  
+For three tops, the operator associated with `F12` for example would be  
 `   dt1 Π1 d1 * dt2 Π2 d2 +  dt2 Π2 d2 * dt1 Π1 d1 `<br>`+ dt1 Π1 d1 * dt3 Π3 d3 +  dt3 Π3 d3 * dt1 Π1 d1 `<br>`+ dt2 Π2 d2 * dt3 Π3 d3 +  dt3 Π3 d3 * dt2 Π2 d2` 
 
 ### Other parameters
