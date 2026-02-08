@@ -1,7 +1,8 @@
 # XIAM-2NQ
-XIAM-2NQ is a spectral fitting program for molecules containing up to two quadrupolar nuclei and four internal rotors. It extends the original XIAM code by Hartwig which is available at the [PROSPE](http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.
+XIAM-2NQ is a spectral fitting program for molecules containing up to two quadrupolar nuclei and four internal rotors. It extends the original XIAM code by Hartwig which is available at the [PROSPE](http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.  
 This repository provides the complete source code required to build the program. A makefile is included for straightforward compilation on Linux systems. Alternatively, the source files can be compiled step-by-step using the Intel ifortran compiler.
-XIAMi2NQ.exe was built with the Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32 (Version 2021.13.1).
+
+XIAMi2NQ.exe was built with the Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32 (Version 2021.13.1).  
 Compilation was carried out using the following command line entries: <br/> 
 ifort -c iamint.f <br/> 
 ifort -c iamio.f <br/> 
@@ -21,7 +22,7 @@ Citation: J. Chem. Phys. 162, 234304 (2025) [DOI: 10.1063/5.0267651](https://doi
 
 The executable provided in this repository was compiled with the following limits: **Jmax = 70, I1max = 5/2, I2max = 5/2,** and up to **two 3-fold tops**. All array dimensions are defined at compile time. These limits can be modified in `iam.fi`, after which the program must be recompiled. Be aware that memory allocation in XIAM-2NQ is static. Increasing these limits beyond a certain point may cause the Hamiltonian matrix to exceed available memory. If significantly larger Jmax values are required for molecules without quadrupole coupling and without a double-well potential, it is recommended to first set `DIMQ=1`, `DIMQ2=1`, and `DIMDW=1` in `iam.fi`.
 
-Example input and output files are provided in the example repository [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples) 
+Example input and output files are provided in the example repository [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples).
 
 ----------------------------------------------------------------------------
 ## Parameter Table
