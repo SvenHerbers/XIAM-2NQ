@@ -111,12 +111,20 @@ C     Header of Input File
       ctlint(C_XPR)=0
       ctlint(C_PRINT)=3
       ctlint(C_NFOLD)=3 
+      ctlint(C_NFOLD1)=0 ! Herbers2026
+      ctlint(C_NFOLD2)=0 ! Herbers2026
+      ctlint(C_NFOLD3)=0 ! Herbers2026
+      ctlint(C_NFOLD4)=0 ! Herbers2026
+C      ctlint(C_DW12SL)=0 ! Herbers2026
+C      ctlint(C_DW12SH)=0 ! Herbers2026
+C      ctlint(C_DW34SL)=0 ! Herbers2026
+C      ctlint(C_DW34SH)=0 ! Herbers2026
+      ctlint(C_DWSOFF)=0 ! Herbers2026 !0 means: pair S1 with S1, S2 with S2 etc.  1 means: pair S1 with S2, S3 with S4 etc.
       ctlint(C_FITSC)=0
       ctlint(C_WOODS)=33
       ctlint(C_ADJF)=0
       ctlpar(C_EPS)=1.0d-12
       ctlint(C_DW)=3 !Herbers2024 default use exact NQC in fitting
-C     ctlint(C_NQI)=0 !Herbers2024 default, printing of approximate hyperfine intensities is off.
       ctlint(C_SORT)=3
       ctlpar(C_DEFER)=1.0d-5
       ctlpar(C_CNVG)=0.999d0
@@ -489,7 +497,8 @@ C     symmetry-species-name beginning with '/'
      $         write(*,'(3X,A,$)') qnostr(MAXQC+is) 
           write(*,'(2X,A,4I4)') 'S  ',(gamma(is,it),it=1,ctlint(C_NTOP))
           do it=1,ctlint(C_NTOP)
-            if (gamma(is,it).gt.DIMSIG) stop 'ERROR: sigma > DIMSIG'
+            if ((gamma(is,it).gt.DIMSIG).and.(gamma(is,it).ne.99))
+     $                               stop 'ERROR: sigma > DIMSIG'
           end do
         end do
       else
@@ -861,13 +870,13 @@ C Q_T numbering of eigenvalues of the whole matrix (with several V''s)
         end if
       end do
  10   continue
-        if (ctlint(C_DW).eq.1) then ! Sven 2024, for DW treatment.
-         if (MODULO(size(S_NB),2).eq.1) then
-            size(S_NB)=size(S_NB)+1
-            write(0,*) 'For DW treatment, the maximum B quanum number', 
-     $          ' is considered to be ', size(S_NB)
-         end if
-        end if
+C        if (ctlint(C_DW).eq.1) then ! Sven 2024, for DW treatment.
+C         if (MODULO(size(S_NB),2).eq.1) then
+C            size(S_NB)=size(S_NB)+1
+C            write(0,*) 'For DW treatment, the maximum B quanum number', 
+C     $          ' is considered to be ', size(S_NB)
+C         end if
+C        end if
       if (stpflg) then
         write(*,*) 'INPUT ERROR(S)' 
         write(0,*) 'INPUT ERROR(S)'
@@ -1222,6 +1231,7 @@ C     print transition list
       integer fp4x
       real*8  reffreq,refcalc,fcalc,ffreq,maxd,dmaxd
       integer maxi,gam
+      integer stopbstr !herbers2026
       logical lfit
       character*1  errstr
       character*10 fp1astr
@@ -1369,13 +1379,22 @@ c     else
         end if
 
         fp1len=19
+        stopbstr=4
         if (size(S_NB).gt.1) then
+         if (qlin(i,Q_B,Q_LO).eq.qlin(i,Q_B,Q_UP)) then
           write(fp1estr,'(A,I2)') 
      $          ' B',qlin(i,Q_B,Q_UP)
           fp1len=fp1len+4
+          stopbstr=4
+         else
+          write(fp1estr,'(A,2I2)') 
+     $             ' B',qlin(i,Q_B,Q_UP),qlin(i,Q_B,Q_LO) !Herbers2026, added case to also print Bup Blo
+          fp1len=fp1len+6
+          stopbstr=6
+         end if
         end if
         fp1str=':'//fp1astr(1:3)//fp1bstr(1:6)//fp1cstr(1:3)
-     $       //fp1dstr(1:6)//fp1estr(1:4)
+     $       //fp1dstr(1:6)//fp1estr(1:stopbstr)
 
         fp2blen=1
         if (ctlint(C_SPIN2).ne.0) then

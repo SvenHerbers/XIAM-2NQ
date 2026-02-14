@@ -832,6 +832,7 @@ C     initialize the quantum no.s qvk
 
       if (masave) then
         do itop=1,ctlint(C_NTOP)
+          if (gamma(gam,itop).eq.99) goto 90 ! Exception for sigma = 99 entry
           write(fnpost,'(I1,I1,A,I1,I1)')
      $         itop,gam,'.j',int(j/10),mod(j,10)
           open(55,file=fnpre//'t'//fnpost,status='unknown')
@@ -847,8 +848,10 @@ C     initialize the quantum no.s qvk
             end do
           end do
           close(55)
+ 90       continue 
         end do
         do itop=1,ctlint(C_NTOP)
+          if (gamma(gam,itop).eq.99) goto 91 ! Exception for sigma = 99 entry
           write(fnpost,'(I1,I1,A,I1,I1)')
      $         itop,gam,'.j',int(j/10),mod(j,10)
           open(56,file=fnpre//'p'//fnpost,status='unknown')
@@ -870,6 +873,7 @@ C     initialize the quantum no.s qvk
             end do
           end do
           close(56)
+ 91       continue 
         end do
         
         do it1=1,ctlint(C_NTOP)
@@ -881,6 +885,7 @@ C     initialize the quantum no.s qvk
             do ic=1, size(S_H)
               tt=1.0d0
               do it2=1,ctlint(C_NTOP)
+                if (gamma(gam,itop).eq.99) goto 92 ! Exception for sigma = 99 entry
                 tt=tt*tori(qvk(ir,Q_K),    qvk(ic,Q_K),
      $                   qvk(ir,Q_V+it2),qvk(ic,Q_V+it2),
      $                   gamma(gam,it2),it2)
@@ -888,6 +893,7 @@ C     initialize the quantum no.s qvk
               write(55,'(D22.14,$)')
      $             rotm(qvk(ikr,Q_K),qvk(ikc,Q_K),1,it1)
      $             *tt
+ 92          continue
             end do
             write(55,*)
           end do
@@ -1072,14 +1078,10 @@ C     fistat > 0  Eigenvalues for differential quotient
 
       implicit none
       include 'iam.fi'
-      integer j, gam, f, ib, npar, fistat, is, f1
+      integer j, gam,gam1,gam2, f, ib, npar, fistat, is, f1
       real*8  h(DIMTOT,DIMTOT),evh(DIMTOT)
       real*8  hs(2,DIMTOT,DIMTOT),evhs(2,DIMTOT)
-C      real*8  h1out(DIMTOT,DIMTOT),evh1out(DIMTOT)! outputs will be written to these
-C      real*8  h2out(DIMTOT,DIMTOT),evh2out(DIMTOT)! For each of the two couble states.
       real*8  h_2(2*DIMTOT,2*DIMTOT), evh_2(2*DIMTOT)
-C      real*8  hresort(2*DIMTOT,2*DIMTOT) !Turns out the diagonalization likely works only if I blocksort first.
-C      real*8  evhresort(2*DIMTOT)
       integer sorti(2*DIMTOT)
       integer counti,countis
       real*8  evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
@@ -1133,17 +1135,16 @@ C     work
       masave=.false.
       h=0.0
       h_2=0.0
-C      h1out=0.0
-C      h2out=0.0
-C      hresort=0.0
-C      evhresort=0.0
       sorti=0
       counti= 0
       countis=0
-C      evh1out=0.0
-C      evh2out=0.0
       counter1=0
       counter2=0
+      
+      gam2=gam
+      gam1=gam
+
+      
 
       dj=dble(j)
       djj1=dj*(dj+1.0)
@@ -1169,22 +1170,27 @@ C     for J=0
       if (ib.le.2) then
         ibl=1
         ibu=2
-        if (ib.eq.1) then
+        if (ib.eq.1) then !ib1 is ib low shall be afilliated with Slow
           ibselect=1
+          call dw_idgam(gam,gam1,gam2,ibselect)!,1,0)
         else
           ibselect=2
+          call dw_idgam(gam,gam1,gam2,ibselect)!,1,0)
         end if
       else
         ibl=3
         ibu=4  
         if (ib.eq.3) then
          ibselect=1
+         call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
         else
-         ibselect=2
+          ibselect=2
+          call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
         endif
       end if     
       al=atot(:,ibl)
       au=atot(:,ibu)  
+C      write(*,*) gam,gam1, gam2
 
       if (ctlint(C_EVAL).gt.3)   masave=.true.
 
@@ -1192,7 +1198,7 @@ C     for J=0
      $     write(*,'(A,5I3)')
      $     'starting with J,S,B,F Fit_stat=',J,gam,ibl,f1,fistat
       fnpre='xiam'
-      if (gam.eq.0) ctlint(C_NTOP)=0
+      if (gam1.eq.0) ctlint(C_NTOP)=0
       complex=.true. ! this marks the hamiltonian as containing complex matrix elements in several subroutines. Not sure if putting it false for certain parametersets really speeds things up, I will keep it as true for now
 
       usert = 1
@@ -1235,86 +1241,8 @@ C     initialize the quantum no.s qvk
         end do
       end do
 
-      if ((myand(ctlint(C_PRI),AP_ST).ne.0).and.(xde.ge.1)) then
-        write(fmtstr,'(A,I1,A,I2,A)') '(',ctlint(C_NTOP),'I2,A,'
-     $       ,size(S_VV),'I3)'
-        write(*,*) fmtstr
-        do itop=1, ctlint(C_NTOP)
-          write(*,'(A,I3)') ' ruse array for top', itop 
-          do ivr=1, size(S_VV)
-            write(*,fmtstr)(qvv(ivr,it2,ibl),it2=1,ctlint(C_NTOP))
-     $           ,' | ',(ruse(ivr,ivc,itop),ivc=1, size(S_VV))
-          end do
-        end do
-      end if 
-
-      if (masave) then
-        do itop=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         itop,gam,'.j',int(j/10),mod(j,10)
-          open(55,file=fnpre//'t'//fnpost,status='unknown')
-          write(55,*) size(S_V+itop)*size(S_K),0,0
-          do ivr=1, size(S_V+itop)
-            do ikr=1, size(S_K)
-              write(55,*)
-     $             ((rotm(qvk(ikr,Q_K),qvk(ikc,Q_K),1,itop)
-     $             *tori(qvk(ikr,Q_K),qvk(ikc,Q_K),ivr,ivc
-     $             ,gamma(gam,itop),itop)
-     $             ,ikc=1,size(S_K))
-     $             ,ivc=1, size(S_V+itop))
-            end do
-          end do
-          close(55)
-        end do
-        do itop=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         itop,gam,'.j',int(j/10),mod(j,10)
-          open(56,file=fnpre//'p'//fnpost,status='unknown')
-          write(56,*) size(S_V+itop)*size(S_K),0,0
-          do ivr=1, size(S_V+itop)
-            do ikr=1, size(S_K)
-              do ivc=1, size(S_V+itop)
-                do ikc=1, size(S_K)
-                  if (qvk(ikr,Q_K).eq.qvk(ikc,Q_K)) then
-                    write(56,'(D22.14,$)')
-     $                   ovv(ivr,ivc,PM_PI,gamma(gam,itop)
-     $                   ,qvk(ikr,Q_K),itop)
-                  else
-                    write(56,'(D22.14,$)') 0.0
-                  end if
-                end do
-              end do
-              write(56,*)
-            end do
-          end do
-          close(56)
-        end do
-        
-        do it1=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         it1,gam,'.j',int(j/10),mod(j,10)
-          open(55,file=fnpre//'r'//fnpost,status='unknown')
-          write(55,*) size(S_H),0,0
-          do ir=1, size(S_H)
-            do ic=1, size(S_H)
-              tt=1.0d0
-              do it2=1,ctlint(C_NTOP)
-                tt=tt*tori(qvk(ir,Q_K),    qvk(ic,Q_K),
-     $                   qvk(ir,Q_V+it2),qvk(ic,Q_V+it2),
-     $                   gamma(gam,it2),it2)
-              end do
-              write(55,'(D22.14,$)')
-     $             rotm(qvk(ikr,Q_K),qvk(ikc,Q_K),1,it1)
-     $             *tt
-            end do
-            write(55,*)
-          end do
-          close(55)
-        end do
-      end if
-
-      if (gam.ne.0) then 
-        call bld2vjk(j,gam,f1
+      if (gam1.ne.0) then 
+        call bld2vjk(j,gam1,f1
      $         ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
 
 C        end if
@@ -1325,7 +1253,7 @@ c      write(*,*) 'bld2vjk',mclock()-t1
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
       end if
 C      t1=mclock()
-      call addrig_old(j,gam,f1
+      call addrig_old(j,gam1,f1
      $     ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
 C---
 C      t1=mclock()
@@ -1386,94 +1314,16 @@ C     Starting a copy with ibu
         end do
       end do
 
-      if ((myand(ctlint(C_PRI),AP_ST).ne.0).and.(xde.ge.1)) then
-        write(fmtstr,'(A,I1,A,I2,A)') '(',ctlint(C_NTOP),'I2,A,'
-     $       ,size(S_VV),'I3)'
-        write(*,*) fmtstr
-        do itop=1, ctlint(C_NTOP)
-          write(*,'(A,I3)') ' ruse array for top', itop 
-          do ivr=1, size(S_VV)
-            write(*,fmtstr)(qvv(ivr,it2,ibu),it2=1,ctlint(C_NTOP))
-     $           ,' | ',(ruse(ivr,ivc,itop),ivc=1, size(S_VV))
-          end do
-        end do
-      end if 
+      if (gam2.ne.0) then 
 
-      if (masave) then
-        do itop=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         itop,gam,'.j',int(j/10),mod(j,10)
-          open(55,file=fnpre//'t'//fnpost,status='unknown')
-          write(55,*) size(S_V+itop)*size(S_K),0,0
-          do ivr=1, size(S_V+itop)
-            do ikr=1, size(S_K)
-              write(55,*)
-     $             ((rotm(qvk(ikr,Q_K),qvk(ikc,Q_K),1,itop)
-     $             *tori(qvk(ikr,Q_K),qvk(ikc,Q_K),ivr,ivc
-     $             ,gamma(gam,itop),itop)
-     $             ,ikc=1,size(S_K))
-     $             ,ivc=1, size(S_V+itop))
-            end do
-          end do
-          close(55)
-        end do
-        do itop=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         itop,gam,'.j',int(j/10),mod(j,10)
-          open(56,file=fnpre//'p'//fnpost,status='unknown')
-          write(56,*) size(S_V+itop)*size(S_K),0,0
-          do ivr=1, size(S_V+itop)
-            do ikr=1, size(S_K)
-              do ivc=1, size(S_V+itop)
-                do ikc=1, size(S_K)
-                  if (qvk(ikr,Q_K).eq.qvk(ikc,Q_K)) then
-                    write(56,'(D22.14,$)')
-     $                   ovv(ivr,ivc,PM_PI,gamma(gam,itop)
-     $                   ,qvk(ikr,Q_K),itop)
-                  else
-                    write(56,'(D22.14,$)') 0.0
-                  end if
-                end do
-              end do
-              write(56,*)
-            end do
-          end do
-          close(56)
-        end do
-        
-        do it1=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         it1,gam,'.j',int(j/10),mod(j,10)
-          open(55,file=fnpre//'r'//fnpost,status='unknown')
-          write(55,*) size(S_H),0,0
-          do ir=1, size(S_H)
-            do ic=1, size(S_H)
-              tt=1.0d0
-              do it2=1,ctlint(C_NTOP)
-                tt=tt*tori(qvk(ir,Q_K),    qvk(ic,Q_K),
-     $                   qvk(ir,Q_V+it2),qvk(ic,Q_V+it2),
-     $                   gamma(gam,it2),it2)
-              end do
-              write(55,'(D22.14,$)')
-     $             rotm(qvk(ikr,Q_K),qvk(ikc,Q_K),1,it1)
-     $             *tt
-            end do
-            write(55,*)
-          end do
-          close(55)
-        end do
-      end if
-
-      if (gam.ne.0) then 
-
-        call bld2vjk(j,gam,f1
+        call bld2vjk(j,gam2,f1
      $         ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
 
       else
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
       end if
 C      t1=mclock()
-      call addrig_old(j,gam,f1
+      call addrig_old(j,gam2,f1
      $     ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
         
 
@@ -1520,7 +1370,7 @@ C             --- Sven 25-07-2024
          Chixy=al(P_WQXY1)*(-1.0) !Sign change to match relative signs in spfit output !these are offdiagonal nqcc matrix elements but used offdiagonal in v. Matrix elements offdiagonal in J neglected.
          Chiyz=al(P_WQYZ1)*(-1.0) !
          Chixz=al(P_WQXZ1)*(-1.0) !
-       else
+       else if (ib.le.4) then
          Gz =al(P_GZ34)
          Gy =al(P_GY34)
          Gx =al(P_GX34)
@@ -2651,8 +2501,6 @@ C     Watson S off diagonal k/k+8                                     !Herbers20
 
 C----------------------------------------------------------------------
 
-
-
       subroutine vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,ri)
       implicit none
       include 'iam.fi'
@@ -2675,6 +2523,7 @@ C----------------------------------------------------------------------
             t1=1.0d0
             t2=1.0d0
             do itop=1, ctlint(C_NTOP)
+              if (gamma(gam,itop).eq.99) goto 92 ! Exception for sigma = 99 entry
               voff=size(S_MINV+itop)-1
               t1=t1*tori
      $             (qvk(ir,Q_K),qvk(ic+off,Q_K)
@@ -2686,6 +2535,7 @@ C----------------------------------------------------------------------
      $             ,qvk(ir+off,Q_V+itop)-voff
      $             ,qvk(ic,Q_V+itop)-voff
      $             ,gamma(gam,itop),itop)
+ 92         continue 
             end do  
             if (ri.eq.0) then
               vor(ir)    =vor(ir    )+vr(ic+off)*t*t2
@@ -3920,4 +3770,82 @@ C      Simple routine that takes array, sorts it Array And Indicies, order of Ar
 C
        return
        end
+C---------------------
+       subroutine dw_idgam(gam,gam1,gam2,ibselect)!,case12,case34) !herbers2026 - For cross species tunneling matrix elemets.
+       implicit none
+       include 'iam.fi'
+       integer gam, gam1, gam2,ibselect
+C       logical case12, case34
        
+       if (ctlint(C_DWSOFF).eq.1) then 
+        if (MODULO(gam,2).eq.1) then
+         if (ibselect.eq.1) then
+          gam1=gam
+          gam2=gam+1
+         end if
+         if (ibselect.eq.2) then
+          gam1=gam+1
+          gam2=gam
+         end if
+        else !if modulu=0, even gams
+         if (ibselect.eq.1) then
+          gam1=gam
+          gam2=gam-1
+         end if
+         if (ibselect.eq.2) then
+          gam1=gam-1
+          gam2=gam
+         end if
+        end if
+       end if
+       
+C       if (case12) then
+C        if (ibselect.eq.1) then
+C            if (ctlint(C_DW12SL).ne.0) then 
+C                if      (gam.eq.ctlint(C_DW12SL)) then
+C                gam2=ctlint(C_DW12SH)           
+C                end if
+C                if      (gam.eq.ctlint(C_DW12SH)) then
+C                gam2=ctlint(C_DW12SL)
+C                end if
+C            endif
+C        end if
+C        if (ibselect.eq.2) then
+C            if (ctlint(C_DW12SL).ne.0) then 
+C                if      (gam.eq.ctlint(C_DW12SL)) then
+C                gam1=ctlint(C_DW12SH)           
+C                end if
+C                if      (gam.eq.ctlint(C_DW12SH)) then
+C                gam1=ctlint(C_DW12SL)
+C                end if
+C            endif
+C        end if
+C       end if
+C
+C       if (case34) then
+C        if (ibselect.eq.1) then
+C            if (ctlint(C_DW34SL).ne.0) then 
+C                if      (gam.eq.ctlint(C_DW34SL)) then
+C                gam2=ctlint(C_DW34SH)           
+C                end if
+C                if      (gam.eq.ctlint(C_DW34SH)) then
+C                gam2=ctlint(C_DW34SL)
+C                end if
+C            endif
+C        end if
+C        if (ibselect.eq.2) then
+C            if (ctlint(C_DW34SL).ne.0) then 
+C                if      (gam.eq.ctlint(C_DW34SL)) then
+C                gam1=ctlint(C_DW34SH)           
+C                end if
+C                if      (gam.eq.ctlint(C_DW34SH)) then
+C                gam1=ctlint(C_DW34SL)
+C                end if
+C            endif
+C        end if
+C       end if
+       
+       if (gam1.gt.size(S_G)) gam1=gam ! Error correction 
+       if (gam2.gt.size(S_G)) gam2=gam
+       return 
+       end

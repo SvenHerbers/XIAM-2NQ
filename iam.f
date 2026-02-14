@@ -71,8 +71,8 @@ C     real*8  ab(DIMPAR)
 C      write(*,'(A,$)') ' Calculation date and time: '
       call mydate()
       write(*,*)
-      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.35 -' 
-     $                  ,'By Sven Herbers 06-February-2026' 
+      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.38 -' 
+     $                  ,'By Sven Herbers 14-February-2026' 
       write(*,*) 'sven_herbers@web.de'
       write(*,*) 'Cite: J. Chem. Phys., 2025, '
      $         ,'162, 234304, DOI: 10.1063/5.0267651 ' 
@@ -937,9 +937,15 @@ C  !!!!!!!!!!!!!!!!!!  ntop !!!!!!!!!!!!!!!!!!!
         ntop=ctlint(C_NTOP)
         if (gam.eq.0) ctlint(C_NTOP)=0
       if (ctlint(C_DW).eq.1) then ! IF-DW
-        call calvjk_d(j,gam,qf,ib,qf1,evalv,ovv,rotm,rott,tori
+        if (((ib.le.4).and.(size(S_NB).ge.4)).or.
+     $       ((ib.le.2).and.(size(S_NB).ge.2))) then ! only use tunneling matrix if two states that mix are defined.
+         call calvjk_d(j,gam,qf,ib,qf1,evalv,ovv,rotm,rott,tori
      $    ,a,qmv,ifit,dfit,palc,pali,npar,fistat
      $    ,hsdw,evhsdw)      
+        else
+         call calvjk(j,gam,qf,ib,qf1,h,evalv,ovv,rotm,rott,tori
+     $    ,a(1,ib),qmv,ifit(1,ib),dfit,palc,pali,npar,fistat,evh)
+        end if
       else ! ELSE-DW
        if ((ctlint(C_DW).eq.3).and.((ctlint(C_SPIN).ne.0))) then !IF-Q
           if (mod(qf,2).eq.1) then  !IF-ODD-F
@@ -1086,6 +1092,7 @@ C     work
       end do
       do isig=1,size(S_G)
         do itop=1,ctlint(C_NTOP) 
+          if (gamma(isig,itop).eq.99) goto 91          !Herbers2026 adding S 99 option to skip rotor 
           if (myand(ctlint(C_WOODS),4).eq.0) then
             size(S_FIRV+itop)=size(S_MINV+itop)
             size(S_MAXV+itop)=size(S_V+itop)
@@ -1134,7 +1141,7 @@ C     work
      $             ,k
      $             ,maxm
      $             ,size(S_FIRV+itop)
-     $             ,size(S_MAXV+itop),ai)
+     $             ,size(S_MAXV+itop),ai,itop)
             end do
             if ((myand(ctlint(C_PRI),AP_MO).ne.0).and.(xde.ge.1)) then
               write(*,'(A,5I3)') ' itop,sigma,k,B,fistat'
@@ -1157,6 +1164,7 @@ C     work
             call caltori(sigma,itop,mvec,tori,fistat
      $           ,maxm,size(S_FIRV+itop), size(S_MAXV+itop))
           end if
+ 91     continue !Herbers2026, 99 skips the rotor
         end do ! itop
       end do ! isig
 
@@ -1876,6 +1884,15 @@ c      data ctlstr(C_WOOD3) /'woods3'/
 c      data ctlstr(C_WOOD4) /'woods4'/
       data ctlstr(C_NDATA) /'ndata '/
       data ctlstr(C_NFOLD) /'nfold '/
+      data ctlstr(C_NFOLD1) /'nfold1'/!Herbers2026
+      data ctlstr(C_NFOLD2) /'nfold2'/!Herbers2026
+      data ctlstr(C_NFOLD3) /'nfold3'/!Herbers2026
+      data ctlstr(C_NFOLD4) /'nfold4'/!Herbers2026
+C      data ctlstr(C_DW12SL) /'DW12Sl'/!Herbers2026
+C      data ctlstr(C_DW12SH) /'DW12Sh'/!Herbers2026
+C      data ctlstr(C_DW34SL) /'DW34Sl'/!Herbers2026
+C      data ctlstr(C_DW34SH) /'DW34Sh'/!Herbers2026
+      data ctlstr(C_DWSOFF) /'DWSoff'/!Herbers2026 !0 means: pair S1 with S1, S2 with S2 etc.  1 means: pair S1 with S2, S3 with S4 etc.
       data ctlstr(C_SPIN ) /'spin  '/
       data ctlstr(C_NTOP ) /'ntop  '/
       data ctlstr(C_ADJF ) /'adjf  '/

@@ -34,6 +34,7 @@ C      real*8            erk(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
       external myand
       integer myand
 
+
       if (ctlint(C_NTOP).ge.2) then
         if (a(P_FF).ne.0.0) then
           call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,PM_PI,PM_PI
@@ -617,6 +618,7 @@ C     $     (myand(ctlint(C_WOODS),64).eq.0)) then   ! don't use Demaisons metho
       if (myand(ctlint(C_WOODS),4).ne.0) then ! torsional integrals
         itest=itest+1
         do itop=1, ctlint(C_NTOP)
+          if (gamma(gam,itop).eq.99) goto 93 ! Exception for sigma = 99 entry
           off=size(S_MINV+itop)-size(S_FIRV+itop)
           do ikr=1, size(S_K)
             do ikc=1, size(S_K)
@@ -641,6 +643,7 @@ C     $     (myand(ctlint(C_WOODS),64).eq.0)) then   ! don't use Demaisons metho
               end do
             end do
           end do
+ 93       continue 
         end do
       end if
 
@@ -651,6 +654,7 @@ C     $     (myand(ctlint(C_WOODS),64).ne.0)) then ! use Demaisons method
       if (myand(ctlint(C_WOODS),4).eq.0) then
         itest=itest+1
         do itop=1, ctlint(C_NTOP)
+          if (gamma(gam,itop).eq.99) goto 92 ! Exception for sigma = 99 entry
           off=size(S_MINV+itop)-size(S_FIRV+itop)
           do ikr=1, size(S_K)
             do ikc=1, size(S_K)
@@ -666,6 +670,7 @@ C     $     (myand(ctlint(C_WOODS),64).ne.0)) then ! use Demaisons method
               end do
             end do
           end do
+ 92       continue
         end do
       end if
       if (itest.ne.1) stop 'Error: rotating in rotevl' 
@@ -675,6 +680,7 @@ C     multiply torsional integrals of one top like Demaison
       if (myand(ctlint(C_WOODS),64).ne.0) then 
         itest=itest+1
         do itop=1, ctlint(C_NTOP)
+          if (gamma(gam,itop).eq.99) goto 91 ! Exception for sigma = 99 entry
           off=size(S_MINV+itop)-size(S_FIRV+itop)
           do ikr=1, size(S_K)
             do ikc=1, size(S_K)
@@ -689,6 +695,7 @@ C     multiply torsional integrals of one top like Demaison
               end do
             end do
           end do
+ 91     continue 
         end do
       end if
       if (itest.gt.1) stop ' ERROR: tori two times multiplied '
@@ -737,11 +744,13 @@ C     work
             else                                ! use kronecker 
               tt=1.0
               do it=1,ctlint(C_NTOP)      ! supply tor.int. of the other tops
+                if (gamma(gam,it).eq.99) goto 91 ! Exception for sigma = 99 entry
                 if (it.ne.itop) tt=tt*tori(qvk(ir,Q_K)
      $               ,qvk(ic,Q_K)
      $               ,qvk(ir,Q_V+it)-size(S_MINV+it)+1
      $               ,qvk(ic,Q_V+it)-size(S_MINV+it)+1
      $               ,gamma(gam,it),it)
+ 91             continue 
               end do
             end if
             rt=rott(qvk(ir,Q_K)
@@ -1787,10 +1796,12 @@ C     work
             else                                ! use kronecker 
               tt=1.0
               do it=1,ctlint(C_NTOP)      ! supply tor.int. of the other tops
+                if (gamma(gam,it).eq.99) goto 91 ! Exception for sigma = 99 entry
                 if (it.ne.itop) tt=tt*tori(qkr,qkc
      $               ,qvk(ir,Q_V+it)-size(S_MINV+it)+1
      $               ,qvk(ic,Q_V+it)-size(S_MINV+it)+1
      $               ,gamma(gam,it),it)
+ 91            continue
               end do
             end if
             rt=rott(qkr,qkc,vr1,vc1,itop)*tt*ap
@@ -1839,6 +1850,8 @@ C     work
 
       do it1=1, ctlint(C_NTOP)-1
         do it2=it1+1, ctlint(C_NTOP)
+          if (gamma(gam,it1).eq.99) goto 91 ! Exception for sigma = 99 entry
+          if (gamma(gam,it2).eq.99) goto 91 ! Exception for sigma = 99 entry
           do ivr=1, size(S_VV)
             do ivc=1, ivr
              if ((ivr.ne.ivc).or.offv) then
@@ -1859,6 +1872,7 @@ C     work
              end if
             end do
           end do
+ 91        continue
         end do
       end do
      
@@ -2033,6 +2047,7 @@ C     work
 
       if (myand(ctlint(C_WOODS),16).ne.0) then
         do itop=1, ctlint(C_NTOP)
+          if (gamma(gam,itop).eq.99) goto 91 ! Exception for sigma = 99 entry
           if (itop.eq.1) then
             ifs=ifs1
           else
@@ -2105,6 +2120,7 @@ C     work
               end do
             end do
           end do
+ 91       continue 
         end do
       end if
 
@@ -2112,6 +2128,7 @@ C     rotate ifs into rho system for each top without torsional integrals
       if (myand(ctlint(C_WOODS),16).eq.0) then
 
       do itop=1, ctlint(C_NTOP)
+        if (gamma(gam,itop).eq.99) goto 92 ! Exception for sigma = 99 entry
         if (itop.eq.1) then
           ifs=ifs1
         else
@@ -2159,6 +2176,7 @@ C     rotate ifs into rho system for each top without torsional integrals
             end do
           end do
         end do
+ 92   continue 
       end do
       end if
 
@@ -2206,6 +2224,7 @@ C work
       call rotovv(j,gam,f,qvk,a,ovv,rotm,rott,tori,ifs1,ifs2,.false.)
       write(*,*) ' rott '
       do it=1,ctlint(C_NTOP)
+        if (gamma(gam,it).eq.99) goto 92 !skip in case of 99
         do ir=1, size(S_H)
           do ic=1, size(S_H)
             tt=1.0
@@ -2233,6 +2252,7 @@ C work
           write(*,*)
         end do
         write(*,*)
+ 92     continue 
       end do
       return
       end

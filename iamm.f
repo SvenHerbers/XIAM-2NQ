@@ -1,6 +1,6 @@
 C----------------------------------------------------------------------
       subroutine calcm(sigma,h,evalv,ovv,mvec
-     $     ,am,qmv,ifit,k,maxm,minv,sizev,ai)
+     $     ,am,qmv,ifit,k,maxm,minv,sizev,ai,itop)
 C     calculation of the eigenvalues of one matrix with specified sigma
 C     the evalues are put in the field of evalv(1..sizev)
 C     the matrix_elements are in ovv(1..sizev,1..sizev,x)
@@ -11,6 +11,7 @@ C     the matrix_elements are in ovv(1..sizev,1..sizev,x)
       real*8  am(DIMPM), ai(DIMPIR)!Herbers2026
       real*8  mvec(DIMM,DIMV)
       integer qmv(DIMV),ifit(DIMOVV)
+      integer itop
 
 C     work
       real*8  e(DIMTOT),d(DIMTOT)
@@ -29,7 +30,7 @@ C     work
 
 c      write(*,*) (am(ic),ic=1,DIMPM)
 c      write(*,*) (qmv(ic),ic=1,DIMV)
-      call buildm(sigma,h,am,ao,qm,sizem,k,ai)
+      call buildm(sigma,h,am,ao,qm,sizem,k,ai,itop)
 c      write(*,'(2I3,40F12.4)') k,sigma,(h(ic,ic),ic=1,sizem)
       call hdiag(DIMTOT,sizem,h,d,e,ierr)
       if (ierr.ne.0) then
@@ -53,12 +54,13 @@ C       ovv(ir,ir,PM_E)=d(ir+minv-1)
       end      
 
 C----------------------------------------------------------------------
-      subroutine buildm(sigma,h,am,ao,qm,sizem,k,ai)
+      subroutine buildm(sigma,h,am,ao,qm,sizem,k,ai,itop)
       implicit none
       include 'iam.fi'
       integer sigma, qm(DIMTOT), sizem, k
       real*8  h(DIMTOT,DIMTOT)
       real*8  am(DIMPM),ao(DIMOVV), ai(DIMPIR)!Herbers2026
+      integer itop,fold
  
 C     work
       integer im,iv,mm
@@ -68,8 +70,17 @@ C     work
 
 C     initialize the quantum no  qm
       mm=sizem/2
+      fold=ctlint(C_NFOLD)
+      if ((itop.eq.1).and.(ctlint(C_NFOLD1).ne.0)) 
+     $     fold=ctlint(C_NFOLD1)
+      if ((itop.eq.2).and.(ctlint(C_NFOLD2).ne.0)) 
+     $     fold=ctlint(C_NFOLD2)
+      if ((itop.eq.3).and.(ctlint(C_NFOLD3).ne.0)) 
+     $     fold=ctlint(C_NFOLD3)
+      if ((itop.eq.4).and.(ctlint(C_NFOLD4).ne.0)) 
+     $     fold=ctlint(C_NFOLD4)
       do im=1, sizem
-        qm(im)=ctlint(C_NFOLD)*(im-mm-1)+sigma
+        qm(im)=fold*(im-mm-1)+sigma
       end do
 
       do im=DIMPM+1, DIMOVV

@@ -60,7 +60,7 @@ C     max. allowed number of tops
         parameter (DIMTOT=DIM2J1 * DIMVV)
 
       integer DIMGAM
-        parameter (DIMGAM=(3**DIMTOP)/2+1)
+        parameter (DIMGAM=(3**(DIMTOP))+1)!Herbers 2026, removed devision by two to allow many more 99 enries to "quench" the rotor. originally (3**(DIMTOP))/2+1
       integer gamma(DIMGAM,0:DIMTOP)
 
 C     array dimensions for data
@@ -181,7 +181,7 @@ C                                DIMENSION DIMPM
         parameter (PM_PI  =13)
         parameter (PM_COS =14)
         parameter (PM_SIN =15)
-        parameter (PM_PI2 =16)
+        parameter (PM_PI2 =16) ! this should stay at maximum value.
 C                                DIMENSION DIMOVV
 
       integer PI_VN1, PI_VN2, PI_F, PI_RHO
@@ -884,6 +884,9 @@ C   control integers
       integer C_PRI  ,C_XPR  ,C_NCYCL,C_RED
       integer C_WOODS,C_ADJF 
       integer C_NDATA,C_NFOLD,C_SPIN, C_NTOP
+      integer C_NFOLD1,C_NFOLD2,C_NFOLD3,C_NFOLD4
+C      integer C_DW12SL,C_DW12SH,C_DW34SL,C_DW34SH
+      integer C_DWSOFF
       integer C_SVDER,C_LAST, C_FITSC
       integer C_MAXM, C_MAXV
       integer C_QSUM !Herbers2023 adding qsum control
@@ -916,7 +919,16 @@ C       parameter (C_MAXV=C_MAXV1-1)
         parameter (C_DW= 21) !
         parameter (C_SPIN2 =22) !h2024
         parameter (C_SORT =23) !h2024
-        parameter (C_LAST =23) 
+        parameter (C_NFOLD1=24)
+        parameter (C_NFOLD2=25)
+        parameter (C_NFOLD3=26)
+        parameter (C_NFOLD4=27)
+C        parameter (C_DW12SL=28)
+C        parameter (C_DW12SH=29)
+C        parameter (C_DW34SL=30)
+C        parameter (C_DW34SH=31)
+        parameter (C_DWSOFF=28)!DWSoff 0 means: pair S1 with S1, S2 with S2 etc.  1 means: pair S1 with S2, S3 with S4 etc.
+        parameter (C_LAST  =28) 
       integer C_ROFIT, C_EPS, C_DEFER, C_WEIGF, C_CNVG
       integer C_LMBDA, C_FRQLO,C_FRQUP,C_INTLM, C_TEMP
         parameter (C_ROFIT=C_LAST+1, C_EPS  =C_LAST+2)
@@ -926,6 +938,7 @@ C       parameter (C_MAXV=C_MAXV1-1)
         parameter (C_FRQUP=C_LAST+8, C_INTLM=C_LAST+9)      
         parameter (C_TEMP=C_LAST+10)      
         parameter (C_QSUM=C_LAST+11)!Herbers2023 adding qsum parameter
+   
         
       integer   DIMCINT, DIMCPAR
 
