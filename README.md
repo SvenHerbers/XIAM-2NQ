@@ -180,7 +180,7 @@ The top–top coupling parameters are implemented by forming symmetrized pairwis
 |------------|------------|
 | `F12` | `dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1` |
 | `Vcc` | `0.5*[dt1 cos(nα1) d1 * dt2 cos(nα2) d2 `<br>`+  dt2 cos(nα2) d2 * dt1 cos(nα1) d1]` |
-| `Vss` | `-0.5*[dt1 sin(nα1) d1 * dt2 sin(nα2) d2  `<br>`+ dt2 sin(nα2) d2 * dt1 sin(nα1) d1 ]  ` |
+| `Vss` | `0.5*[dt1 sin(nα1) d1 * dt2 sin(nα2) d2  `<br>`+ dt2 sin(nα2) d2 * dt1 sin(nα1) d1]  ` |<!-- I first thought there was a negative sign for Vss due to line 56 in iamv2.f showing multiplication with -0.5. However, the expected negative sign in iamm.f line line 178 is also missing. These two multiplications with -1.0 make the whole expression positive again. -->
 
 For three tops, the operator associated with `F12` for example would be  
 `   dt1 Π1 d1 * dt2 Π2 d2 +  dt2 Π2 d2 * dt1 Π1 d1 `<br>`+ dt1 Π1 d1 * dt3 Π3 d3 +  dt3 Π3 d3 * dt1 Π1 d1 `<br>`+ dt2 Π2 d2 * dt3 Π3 d3 +  dt3 Π3 d3 * dt2 Π2 d2` 
