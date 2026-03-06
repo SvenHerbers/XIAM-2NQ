@@ -237,60 +237,63 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 | `chixy12,chixy34,chiyz12,chiyz34,chixz12,chixz34` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
-  XIAM-2NQ v0.38 - Sven Herbers, 14-February-2026
+  XIAM-2NQ v0.38b - 07-March-2026
+  - fixed a bug in `iamv.f` that prevented the use of analytic gradients when a single quadrupolar nucleus was present and `ctrl 0`.
+
+  XIAM-2NQ v0.38 - 14-February-2026
   - `iamio.f` **update**: For cross-B (cross-vibrational-state) transitions, both `Bup` and `Blo` are now printed in the output.
   -  **Rotor fold control**: Added control parameters `nfold1`, `nfold2`, `nfold3`, and `nfold4`. These override the global `nfold` value for specific rotors and define their individual fold numbers. This enables mixed fold numbers within one fit (e.g., `nfold1 3`, `nfold2 2` for CH3 and OH tunneling).
   - **Species definition ignore flag**: Added ignore flag `99` in species definitions. Example: `S 0 1` refers to the first rotor in σ=0 and the second rotor in σ=1. `S 0 99` refers to the first rotor in σ=0 while the second rotor is ignored in the calculation.
   - `DWSoff` **control parameter**. Added control parameter `DWSoff`. Default `DWSoff 0` couples between B1-B2 and B3-B4 within the same symmetry species (S1<->S1, S2<->S2, S3<->S3, S4<->S4...)  `DWSoff 1` enables cross-species coupling (S1<->S2, S2<->S1, S3<->S4, S4<->S3,...). This allows inclusion of Coriolis-type coupling parameters between species, relevant for OH tunneling when the OH group is treated as a twofold rotor.
 
-  XIAM-2NQ v0.35 - Sven Herbers, 06-February-2026
+  XIAM-2NQ v0.35 - 06-February-2026
   - Parameters of type `chixy12` to be used with Pickett type Coriolis coupling were added (see parameter table)
   - Added updated near-experimental accuracy example fit (4.4 kHz rms) of Diethylamine to [example repository](https://github.com/SvenHerbers/XIAM-2NQ_Examples) based on dataset in J. Chem. Phys. 135, 024310 (2011) DOI: [10.1063/1.3607992](https://doi.org/10.1063/1.3607992). 
 
-  XIAM-2NQ v0.34d - Sven Herbers, 05-February-2026
+  XIAM-2NQ v0.34d - 05-February-2026
   - A bug was fixed that prevented the simplified single-nucleus quadrupolar coupling with no matrix elements offdiagonal in J to be used with coriolis coupling parameters.
   - Minor code cleanup (removal of unused arrays).
   - Reduction of matrix to `2*size(S_H)` instead of `2*DIMTOT` in construction for coupling between vibrational states when using coriolis coupling parameters and `ctrl 1` leading to some speed-up.
   - An example repository [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples) was created
   - Methylformate example was moved to dedicated example repository
 
-  XIAM-2NQ v0.34c - Sven Herbers, 01-February-2026
+  XIAM-2NQ v0.34c - 01-February-2026
   - Fixed an error in the implementation of `mk3`,`m3k`,`Dpi4`, and `Dpi6` in cases  where gamma≠0.
   - `mk3`,`m3k`,`Dpi4`,`Dpi6` moved to Hir for consistency. This change also affects their definition and value in fitting procedures compared to earlier versions.
 
-  XIAM-2NQ v0.34b - Sven Herbers, 31-January-2026
+  XIAM-2NQ v0.34b - 31-January-2026
   - General code clean-up.
   - Renamed parameters for consistency: `DFm2` to `Fm2`, `mkD` to `mk-`.
   - Redefined `Fk2` to multiply with `ρ**2 Pz**2 Π**2` instead of `ρ Pz**2 Π**2` for consistency.
   - Reorded print-out of parameters to group them together by J,K,-,JJ,JK,KK,-j,-k,zx.
   - Streamlined matrix initialization and Hamiltonian construction in the exact quadrupole-coupling routines. For quadrupole-containing fits, this leads to noticeable performance improvements: from a few percent up to a factor of ~5, depending on `iam.fi` pre-compilation settings and the dataset.
 
-  Sven Herbers, 28-January-2026
+  28-January-2026
   - Updated Example-Methylformate fit of the subset of v=0, Jmax=50, Kamax=20 lines. The unweighted rms of XIAM on this subset is 95 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
   - Added a fit to Example-Methylformate treating the *complete* set (49 parameters, Jmax=62, Kamax=27, fmax= 668.1 GHz, fmin= 1.6 GHz, 6976 assignments) of v=0 lines from the v=0,1 dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009) DOI: [10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM fits on this subset is 145 kHz; RAM36 global fits on the complete set of lines yield 75 kHz rms within this subset. 
 
-  XIAM-2NQ v0.34 - Sven Herbers, 25-January-2026
+  XIAM-2NQ v0.34 - 25-January-2026
   - Many new parameters available in Hird and Hir, parameter table will be updated in the following days.
 
-  XIAM-2NQ v0.32 - Sven Herbers, 18-January-2026
+  XIAM-2NQ v0.32 - 18-January-2026
   - Implementation of octic centrifugal distortion coefficients for Watson A and Watson S reduction (reduc 0 or reduc 1)
   - Many new parameters available in Hird and Hir
 
-  XIAM-2NQ v0.25 -> v0.29 - Sven Herbers, 05-January-2026
+  XIAM-2NQ v0.25 -> v0.29 - 05-January-2026
   - Many new parameters available in Hird and Hir, parameter table added to readme.md.
   - Minor code cleanup (removal/replacement of some functions)
 
-  XIAM-2NQ v0.24b - Sven Herbers, 17-June-2025 
+  XIAM-2NQ v0.24b - 17-June-2025 
   - The XIAM-2NQ Publication is out! Updated go-to citation to J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
   - Removed some unnecessary comments from iam.fi
 
-  XIAM-2NQ v0.24 - Sven Herbers, 31-Jan-2025 
+  XIAM-2NQ v0.24 - 31-Jan-2025 
   A small update to the iamint.f file:
   - An error was fixed that caused int 3 predictions to not work if no spin was present.
   - Modifications were made to allow for intensitiy predictions with J>100, if iam.fi 
     is modified accordingly and XIAM is recompiled. 
 
-  XIAM-2NQ v0.23 -  Sven Herbers, 6-Jan-2025
+  XIAM-2NQ v0.23 - 6-Jan-2025
   This is an updated version of XIAM-NQ with severale changes, the most important one
 being the implementation of exact quadrupole coupling for two nuclei. 
 
