@@ -2651,7 +2651,7 @@ C----------------------------------------------------------------------
           do il=1, ctlint(C_NDATA) 
             do iq=1,2
               if (      (j  .eq.qlin(il,Q_J,iq))
-     $             .and.(f  .eq.qlin(il,Q_F,iq))
+     $             .and.(f  .eq.qlin(il,Q_F1,iq))!Herbers2026 f=f1 is the new condition after implementation of a second nucleus...
      $             .and.(gam.eq.qlin(il,Q_S,iq))
      $             .and.(t  .eq.qlin(il,Q_T,iq))
      $             .and.(ib .eq.qlin(il,Q_B,iq))) then
