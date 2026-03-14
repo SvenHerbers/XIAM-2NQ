@@ -71,8 +71,8 @@ C     real*8  ab(DIMPAR)
 C      write(*,'(A,$)') ' Calculation date and time: '
       call mydate()
       write(*,*)
-      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.38b -' 
-     $                  ,'By Sven Herbers 07-March-2026' 
+      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.40 -' 
+     $                  ,'By Sven Herbers 14-March-2026' 
       write(*,*) 'sven_herbers@web.de'
       write(*,*) 'Cite: J. Chem. Phys., 2025, '
      $         ,'162, 234304, DOI: 10.1063/5.0267651 ' 
@@ -1432,7 +1432,7 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P_LJKD  ) /'ljk     '/, parfit(P_LJKD  ) /0/
       data parstr(P_LKJD  ) /'lkj     '/, parfit(P_LKJD  ) /0/
       data parstr(P_LKD   ) /'l_k     '/, parfit(P_LKD   ) /0/
-      data parstr(P_E     ) /'E       '/, parfit(P_E     ) /1/ !Herbers2023
+      data parstr(P_E     ) /'E       '/, parfit(P_E     ) /0/ !Herbers2023
       data parstr(P_GX12  ) /'Gx12    '/, parfit(P_GX12  ) /1/ !Herbers2024 Wilsons coriolis coupling   The parameterts were tested against SPFIT SPCAT, while all combinations of Gx,y,z OR Fxy,xz,yz reproduced the 
       data parstr(P_GY12  ) /'Gy12    '/, parfit(P_GY12  ) /1/ !Herbers2024 Wilsons coriolis coupling   simulated spectra, contradictions where found when Mixing the Gs and the Fs. I could not find the error, so I 
       data parstr(P_GZ12  ) /'Gz12    '/, parfit(P_GZ12  ) /1/ !Herbers2024 Wilsons coriolis coupling   do not recommend mixing Gs and Fs at the moment.
@@ -1451,39 +1451,72 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P_WQXY3 ) /'chixy34 '/, parfit(P_WQXY3 ) /1/ !Herbers2026
       data parstr(P_WQXZ3 ) /'chixz34 '/, parfit(P_WQXZ3 ) /1/ !Herbers2026
       data parstr(P_WQYZ3 ) /'chiyz34 '/, parfit(P_WQYZ3 ) /1/ !Herbers2026
-      data parstr(P_DX1   ) /'DxS1    '/, parfit(P_DX1   ) /1/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5 
-      data parstr(P_DX2   ) /'DxS2    '/, parfit(P_DX2   ) /1/ 
-      data parstr(P_DX3   ) /'DxS3    '/, parfit(P_DX3   ) /1/ 
-      data parstr(P_DX4   ) /'DxS4    '/, parfit(P_DX4   ) /1/ 
-      data parstr(P_DX5   ) /'DxS5    '/, parfit(P_DX5   ) /1/ 
-      data parstr(P_DX6   ) /'DxS6    '/, parfit(P_DX6   ) /1/ 
-      data parstr(P_DX7   ) /'DxS7    '/, parfit(P_DX7   ) /1/ 
-      data parstr(P_DX8   ) /'DxS8    '/, parfit(P_DX8   ) /1/ 
-      data parstr(P_DX9   ) /'DxS9    '/, parfit(P_DX9   ) /1/ 
-      data parstr(P_DX10  ) /'DxS10   '/, parfit(P_DX10  ) /1/ 
-      data parstr(P_DX11  ) /'DxS11   '/, parfit(P_DX11  ) /1/ 
-      data parstr(P_DY1   ) /'DyS1    '/, parfit(P_DY1   ) /1/ 
-      data parstr(P_DY2   ) /'DyS2    '/, parfit(P_DY2   ) /1/ 
-      data parstr(P_DY3   ) /'DyS3    '/, parfit(P_DY3   ) /1/ 
-      data parstr(P_DY4   ) /'DyS4    '/, parfit(P_DY4   ) /1/ 
-      data parstr(P_DY5   ) /'DyS5    '/, parfit(P_DY5   ) /1/ 
-      data parstr(P_DY6   ) /'DyS6    '/, parfit(P_DY6   ) /1/ 
-      data parstr(P_DY7   ) /'DyS7    '/, parfit(P_DY7   ) /1/ 
-      data parstr(P_DY8   ) /'DyS8    '/, parfit(P_DY8   ) /1/ 
-      data parstr(P_DY9   ) /'DyS9    '/, parfit(P_DY9   ) /1/ 
-      data parstr(P_DY10  ) /'DyS10   '/, parfit(P_DY10  ) /1/ 
-      data parstr(P_DY11  ) /'DyS11   '/, parfit(P_DY11  ) /1/ 
-      data parstr(P_DZ1   ) /'DzS1    '/, parfit(P_DZ1   ) /1/ 
-      data parstr(P_DZ2   ) /'DzS2    '/, parfit(P_DZ2   ) /1/ 
-      data parstr(P_DZ3   ) /'DzS3    '/, parfit(P_DZ3   ) /1/ 
-      data parstr(P_DZ4   ) /'DzS4    '/, parfit(P_DZ4   ) /1/ 
-      data parstr(P_DZ5   ) /'DzS5    '/, parfit(P_DZ5   ) /1/ 
-      data parstr(P_DZ6   ) /'DzS6    '/, parfit(P_DZ6   ) /1/ 
-      data parstr(P_DZ7   ) /'DzS7    '/, parfit(P_DZ7   ) /1/ 
-      data parstr(P_DZ8   ) /'DzS8    '/, parfit(P_DZ8   ) /1/ 
-      data parstr(P_DZ9   ) /'DzS9    '/, parfit(P_DZ9   ) /1/ 
-      data parstr(P_DZ10  ) /'DzS10   '/, parfit(P_DZ10  ) /1/ 
-      data parstr(P_DZ11  ) /'DzS11   '/, parfit(P_DZ11  ) /1/ 
+      data parstr(P_DBJ1  ) /'S1_BJ   '/, parfit(P_DBJ1  ) /0/ !Herbers 2026 Same as BJ BK B-. but separate for S1,2,3,4,5... 
+      data parstr(P_DBJ2  ) /'S2_BJ   '/, parfit(P_DBJ2  ) /0/ 
+      data parstr(P_DBJ3  ) /'S3_BJ   '/, parfit(P_DBJ3  ) /0/ 
+      data parstr(P_DBJ4  ) /'S4_BJ   '/, parfit(P_DBJ4  ) /0/ 
+      data parstr(P_DBJ5  ) /'S5_BJ   '/, parfit(P_DBJ5  ) /0/ 
+      data parstr(P_DBJ6  ) /'S6_BJ   '/, parfit(P_DBJ6  ) /0/ 
+      data parstr(P_DBJ7  ) /'S7_BJ   '/, parfit(P_DBJ7  ) /0/ 
+      data parstr(P_DBJ8  ) /'S8_BJ   '/, parfit(P_DBJ8  ) /0/ 
+      data parstr(P_DBJ9  ) /'S9_BJ   '/, parfit(P_DBJ9  ) /0/ 
+      data parstr(P_DBJ10 ) /'S10_BJ  '/, parfit(P_DBJ10 ) /0/ 
+      data parstr(P_DBJ11 ) /'S11_BJ  '/, parfit(P_DBJ11 ) /0/ 
+      data parstr(P_DBK1  ) /'S1BK    '/, parfit(P_DBK1  ) /0/ 
+      data parstr(P_DBK2  ) /'S2_BK   '/, parfit(P_DBK2  ) /0/ 
+      data parstr(P_DBK3  ) /'S3_BK   '/, parfit(P_DBK3  ) /0/ 
+      data parstr(P_DBK4  ) /'S4_BK   '/, parfit(P_DBK4  ) /0/ 
+      data parstr(P_DBK5  ) /'S5_BK   '/, parfit(P_DBK5  ) /0/ 
+      data parstr(P_DBK6  ) /'S6_BK   '/, parfit(P_DBK6  ) /0/ 
+      data parstr(P_DBK7  ) /'S7_BK   '/, parfit(P_DBK7  ) /0/ 
+      data parstr(P_DBK8  ) /'S8_BK   '/, parfit(P_DBK8  ) /0/ 
+      data parstr(P_DBK9  ) /'S9_BK   '/, parfit(P_DBK9  ) /0/ 
+      data parstr(P_DBK10 ) /'S10_BK  '/, parfit(P_DBK10 ) /0/ 
+      data parstr(P_DBK11 ) /'S11_BK  '/, parfit(P_DBK11 ) /0/ 
+      data parstr(P_DBD1  ) /'S1_B-   '/, parfit(P_DBD1  ) /0/ 
+      data parstr(P_DBD2  ) /'S2_B-   '/, parfit(P_DBD2  ) /0/ 
+      data parstr(P_DBD3  ) /'S3_B-   '/, parfit(P_DBD3  ) /0/ 
+      data parstr(P_DBD4  ) /'S4_B-   '/, parfit(P_DBD4  ) /0/ 
+      data parstr(P_DBD5  ) /'S5_B-   '/, parfit(P_DBD5  ) /0/ 
+      data parstr(P_DBD6  ) /'S6_B-   '/, parfit(P_DBD6  ) /0/ 
+      data parstr(P_DBD7  ) /'S7_B-   '/, parfit(P_DBD7  ) /0/ 
+      data parstr(P_DBD8  ) /'S8_B-   '/, parfit(P_DBD8  ) /0/ 
+      data parstr(P_DBD9  ) /'S9_B-   '/, parfit(P_DBD9  ) /0/ 
+      data parstr(P_DBD10 ) /'S10_B-  '/, parfit(P_DBD10 ) /0/ 
+      data parstr(P_DBD11 ) /'S11_B-  '/, parfit(P_DBD11 ) /0/ 
+      data parstr(P_DX1   ) /'S1_Dx   '/, parfit(P_DX1   ) /0/ !Same as P_x P_y P_z by hartwig but separate for S1,2,3,4,5...
+      data parstr(P_DX2   ) /'S2_Dx   '/, parfit(P_DX2   ) /0/ 
+      data parstr(P_DX3   ) /'S3_Dx   '/, parfit(P_DX3   ) /0/ 
+      data parstr(P_DX4   ) /'S4_Dx   '/, parfit(P_DX4   ) /0/ 
+      data parstr(P_DX5   ) /'S5_Dx   '/, parfit(P_DX5   ) /0/ 
+      data parstr(P_DX6   ) /'S6_Dx   '/, parfit(P_DX6   ) /0/ 
+      data parstr(P_DX7   ) /'S7_Dx   '/, parfit(P_DX7   ) /0/ 
+      data parstr(P_DX8   ) /'S8_Dx   '/, parfit(P_DX8   ) /0/ 
+      data parstr(P_DX9   ) /'S9_Dx   '/, parfit(P_DX9   ) /0/ 
+      data parstr(P_DX10  ) /'S10_Dx  '/, parfit(P_DX10  ) /0/ 
+      data parstr(P_DX11  ) /'S11_Dx  '/, parfit(P_DX11  ) /0/ 
+      data parstr(P_DY1   ) /'S1_Dy   '/, parfit(P_DY1   ) /0/ 
+      data parstr(P_DY2   ) /'S2_Dy   '/, parfit(P_DY2   ) /0/ 
+      data parstr(P_DY3   ) /'S3_Dy   '/, parfit(P_DY3   ) /0/ 
+      data parstr(P_DY4   ) /'S4_Dy   '/, parfit(P_DY4   ) /0/ 
+      data parstr(P_DY5   ) /'S5_Dy   '/, parfit(P_DY5   ) /0/ 
+      data parstr(P_DY6   ) /'S6_Dy   '/, parfit(P_DY6   ) /0/ 
+      data parstr(P_DY7   ) /'S7_Dy   '/, parfit(P_DY7   ) /0/ 
+      data parstr(P_DY8   ) /'S8_Dy   '/, parfit(P_DY8   ) /0/ 
+      data parstr(P_DY9   ) /'S9_Dy   '/, parfit(P_DY9   ) /0/ 
+      data parstr(P_DY10  ) /'S10_Dy  '/, parfit(P_DY10  ) /0/ 
+      data parstr(P_DY11  ) /'S11_Dy  '/, parfit(P_DY11  ) /0/ 
+      data parstr(P_DZ1   ) /'S1_Dz   '/, parfit(P_DZ1   ) /0/ 
+      data parstr(P_DZ2   ) /'S2_Dz   '/, parfit(P_DZ2   ) /0/ 
+      data parstr(P_DZ3   ) /'S3_Dz   '/, parfit(P_DZ3   ) /0/ 
+      data parstr(P_DZ4   ) /'S4_Dz   '/, parfit(P_DZ4   ) /0/ 
+      data parstr(P_DZ5   ) /'S5_Dz   '/, parfit(P_DZ5   ) /0/ 
+      data parstr(P_DZ6   ) /'S6_Dz   '/, parfit(P_DZ6   ) /0/ 
+      data parstr(P_DZ7   ) /'S7_Dz   '/, parfit(P_DZ7   ) /0/ 
+      data parstr(P_DZ8   ) /'S8_Dz   '/, parfit(P_DZ8   ) /0/ 
+      data parstr(P_DZ9   ) /'S9_Dz   '/, parfit(P_DZ9   ) /0/ 
+      data parstr(P_DZ10  ) /'S10_Dz  '/, parfit(P_DZ10  ) /0/ 
+      data parstr(P_DZ11  ) /'S11_Dz  '/, parfit(P_DZ11  ) /0/ 
       data parstr(P_DUMP  ) /'dummy   '/, parfit(P_DUMP  ) /1/ !Herbers2024 A dummy parameter not used for anything.   
       data parstr(P_QZ    ) /'chi_z   '/, parfit(P_QZ    ) /0/
       data parstr(P_QD    ) /'chi_-   '/, parfit(P_QD    ) /0/
@@ -1498,6 +1531,32 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P_FF    ) /'F12     '/, parfit(P_FF    ) /1/
       data parstr(P_VSS   ) /'Vss     '/, parfit(P_VSS   ) /1/
       data parstr(P_VCC   ) /'Vcc     '/, parfit(P_VCC   ) /1/
+      data parstr(P_VCCJ  ) /'DVccJ   '/, parfit(P_VCCJ  ) /1/ !herbers2026
+      data parstr(P_VCCK  ) /'DVccK   '/, parfit(P_VCCK  ) /1/ !herbers2026
+      data parstr(P_VCCD  ) /'DVcc-   '/, parfit(P_VCCD  ) /1/ !herbers2026
+      data parstr(P_VCCK2 ) /'DVccKK  '/, parfit(P_VCCK2 ) /1/ !herbers2026
+      data parstr(P_VCCJ2 ) /'DVccJJ  '/, parfit(P_VCCJ2 ) /1/ !herbers2026
+      data parstr(P_VCC_J ) /'DVcc-j  '/, parfit(P_VCC_J ) /1/ !herbers2026
+      data parstr(P_VCCJK ) /'DVccJK  '/, parfit(P_VCCJK ) /1/ !herbers2026
+      data parstr(P_VCC_K ) /'DVcc-k  '/, parfit(P_VCC_K ) /1/ !herbers2026
+      data parstr(P_FFJ   ) /'DF12J   '/, parfit(P_FFJ   ) /1/ !herbers2026
+      data parstr(P_FFK   ) /'DF12K   '/, parfit(P_FFK   ) /1/ !herbers2026
+      data parstr(P_FFD   ) /'DF12-   '/, parfit(P_FFD   ) /1/ !herbers2026
+      data parstr(P_FFK2  ) /'DF12KK  '/, parfit(P_FFK2  ) /1/ !herbers2026
+      data parstr(P_FFJ2  ) /'DF12JJ  '/, parfit(P_FFJ2  ) /1/ !herbers2026
+      data parstr(P_FF_J  ) /'DF12-j  '/, parfit(P_FF_J  ) /1/ !herbers2026
+      data parstr(P_FFJK  ) /'DF12JK  '/, parfit(P_FFJK  ) /1/ !herbers2026
+      data parstr(P_FF_K  ) /'DF12-k  '/, parfit(P_FF_K  ) /1/ !herbers2026
+      data parstr(P_PP    ) /'P12     '/, parfit(P_PP    ) /1/ !herbers2026
+      data parstr(P_PPJ   ) /'DP12J   '/, parfit(P_PPJ   ) /1/ !herbers2026
+      data parstr(P_PPK   ) /'DP12K   '/, parfit(P_PPK   ) /1/ !herbers2026
+      data parstr(P_PPD   ) /'DP12-   '/, parfit(P_PPD   ) /1/ !herbers2026
+      data parstr(P_PPK2  ) /'DP12KK  '/, parfit(P_PPK2  ) /1/ !herbers2026
+      data parstr(P_PPJ2  ) /'DP12JJ  '/, parfit(P_PPJ2  ) /1/ !herbers2026
+      data parstr(P_PP_J  ) /'DP12-j  '/, parfit(P_PP_J  ) /1/ !herbers2026
+      data parstr(P_PPJK  ) /'DP12JK  '/, parfit(P_PPJK  ) /1/ !herbers2026
+      data parstr(P_PP_K  ) /'DP12-k  '/, parfit(P_PP_K  ) /1/ !herbers2026
+                                                               
                                              
       data parstr(P_CP    ) /'C+      '/, parfit(P_CP    ) /0/
       data parstr(P_CZ    ) /'C_z     '/, parfit(P_CZ    ) /0/
@@ -1564,7 +1623,7 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P1_RHOK2)  /'rhoKK_1 '/,     parfit(P1_RHOK2) /1/ !Herbers2026
       data parstr(P1_RHO_J)  /'rho-j_1 '/,     parfit(P1_RHO_J) /1/ !Herbers2026
       data parstr(P1_RHO_K)  /'rho-k_1 '/,     parfit(P1_RHO_K) /1/ !Herbers2026
-      data parstr(P1_RHOZX)  /'rhozx_1  '/,    parfit(P1_RHOZX) /1/ !Herbers2026      
+      data parstr(P1_RHOZX)  /'rhozx_1  '/,    parfit(P1_RHOZX) /1/ !Herbers2026
       data parstr(P1_MKJ  )    /'mkJ_1   '/,   parfit(P1_MKJ  ) /1/ !Herbers2026
       data parstr(P1_MKK  )    /'mkK_1   '/,   parfit(P1_MKK  ) /1/ !Herbers2026
       data parstr(P1_MKD  )    /'mk-_1   '/,   parfit(P1_MKD  ) /1/ !Herbers2026
@@ -1593,10 +1652,10 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P1_DPI6 )   /'Dpi6_1 '/,     parfit(P1_DPI6 ) /1/ !Herbers2026
       data parstr(P1_ANGX )  /'epsil_1 '/,     parfit(P1_ANGX ) /1/
       data parstr(P1_ANGZ )  /'delta_1 '/,     parfit(P1_ANGZ ) /1/
-      data parstr(P1_BETJ1)  /'betJ1_1 '/,     parfit(P1_BETJ1) /1/ !Herbers2026      
-      data parstr(P1_BETJ2)  /'betJ2_1 '/,     parfit(P1_BETJ2) /1/ !Herbers2026      
-      data parstr(P1_BETJ3)  /'betJ3_1 '/,     parfit(P1_BETJ3) /1/ !Herbers2026      
-      data parstr(P1_BETJ4)  /'betJ4_1 '/,     parfit(P1_BETJ4) /1/ !Herbers2026      
+      data parstr(P1_BETJ1)  /'betJ1_1 '/,     parfit(P1_BETJ1) /1/ !Herbers2026
+      data parstr(P1_BETJ2)  /'betJ2_1 '/,     parfit(P1_BETJ2) /1/ !Herbers2026
+      data parstr(P1_BETJ3)  /'betJ3_1 '/,     parfit(P1_BETJ3) /1/ !Herbers2026
+      data parstr(P1_BETJ4)  /'betJ4_1 '/,     parfit(P1_BETJ4) /1/ !Herbers2026
                                             
       data parstr(P2_VN1  )    /'V1n_2   '/,   parfit(P2_VN1  ) /1/
       data parstr(P2_VN2  )    /'V2n_2   '/,   parfit(P2_VN2  ) /1/
@@ -1651,7 +1710,7 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P2_RHOK2)  /'rhoKK_2 '/,     parfit(P2_RHOK2) /1/ !Herbers2026
       data parstr(P2_RHO_J)  /'rho-j_2 '/,     parfit(P2_RHO_J) /1/ !Herbers2026
       data parstr(P2_RHO_K)  /'rho-k_2 '/,     parfit(P2_RHO_K) /1/ !Herbers2026
-      data parstr(P2_RHOZX)  /'rhozx_2  '/,    parfit(P2_RHOZX) /1/ !Herbers2026      
+      data parstr(P2_RHOZX)  /'rhozx_2  '/,    parfit(P2_RHOZX) /1/ !Herbers2026
       data parstr(P2_MKJ  )    /'mkJ_2   '/,   parfit(P2_MKJ  ) /1/ !Herbers2026
       data parstr(P2_MKK  )    /'mkK_2   '/,   parfit(P2_MKK  ) /1/ !Herbers2026
       data parstr(P2_MKD  )    /'mk-_2   '/,   parfit(P2_MKD  ) /1/ !Herbers2026
@@ -1680,10 +1739,10 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P2_DPI6 )   /'Dpi6_2 '/,     parfit(P2_DPI6 ) /1/ !Herbers2026
       data parstr(P2_ANGX )  /'epsil_2 '/,     parfit(P2_ANGX ) /1/
       data parstr(P2_ANGZ )  /'delta_2 '/,     parfit(P2_ANGZ ) /1/
-      data parstr(P2_BETJ1)  /'betJ1_2 '/,     parfit(P2_BETJ1) /1/ !Herbers2026      
-      data parstr(P2_BETJ2)  /'betJ2_2 '/,     parfit(P2_BETJ2) /1/ !Herbers2026      
-      data parstr(P2_BETJ3)  /'betJ3_2 '/,     parfit(P2_BETJ3) /1/ !Herbers2026      
-      data parstr(P2_BETJ4)  /'betJ4_2 '/,     parfit(P2_BETJ4) /1/ !Herbers2026      
+      data parstr(P2_BETJ1)  /'betJ1_2 '/,     parfit(P2_BETJ1) /1/ !Herbers2026
+      data parstr(P2_BETJ2)  /'betJ2_2 '/,     parfit(P2_BETJ2) /1/ !Herbers2026
+      data parstr(P2_BETJ3)  /'betJ3_2 '/,     parfit(P2_BETJ3) /1/ !Herbers2026
+      data parstr(P2_BETJ4)  /'betJ4_2 '/,     parfit(P2_BETJ4) /1/ !Herbers2026
 
       data parstr(P3_VN1  )    /'V1n_3   '/,   parfit(P3_VN1  ) /1/
       data parstr(P3_VN2  )    /'V2n_3   '/,   parfit(P3_VN2  ) /1/
@@ -1738,7 +1797,7 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P3_RHOK2)  /'rhoKK_3 '/,     parfit(P3_RHOK2) /1/ !Herbers2026
       data parstr(P3_RHO_J)  /'rho-j_3 '/,     parfit(P3_RHO_J) /1/ !Herbers2026
       data parstr(P3_RHO_K)  /'rho-k_3 '/,     parfit(P3_RHO_K) /1/ !Herbers2026
-      data parstr(P3_RHOZX)  /'rhozx_3  '/,    parfit(P3_RHOZX) /1/ !Herbers2026      
+      data parstr(P3_RHOZX)  /'rhozx_3  '/,    parfit(P3_RHOZX) /1/ !Herbers2026
       data parstr(P3_MKJ  )    /'mkJ_3   '/,   parfit(P3_MKJ  ) /1/ !Herbers2026
       data parstr(P3_MKK  )    /'mkK_3   '/,   parfit(P3_MKK  ) /1/ !Herbers2026
       data parstr(P3_MKD  )    /'mk-_3   '/,   parfit(P3_MKD  ) /1/ !Herbers2026
@@ -1767,10 +1826,10 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P3_DPI6 )   /'Dpi6_3 '/,     parfit(P3_DPI6 ) /1/ !Herbers2026
       data parstr(P3_ANGX )  /'epsil_3 '/,     parfit(P3_ANGX ) /1/
       data parstr(P3_ANGZ )  /'delta_3 '/,     parfit(P3_ANGZ ) /1/
-      data parstr(P3_BETJ1)  /'betJ1_3 '/,     parfit(P3_BETJ1) /1/ !Herbers2026      
-      data parstr(P3_BETJ2)  /'betJ2_3 '/,     parfit(P3_BETJ2) /1/ !Herbers2026      
-      data parstr(P3_BETJ3)  /'betJ3_3 '/,     parfit(P3_BETJ3) /1/ !Herbers2026      
-      data parstr(P3_BETJ4)  /'betJ4_3 '/,     parfit(P3_BETJ4) /1/ !Herbers2026      
+      data parstr(P3_BETJ1)  /'betJ1_3 '/,     parfit(P3_BETJ1) /1/ !Herbers2026
+      data parstr(P3_BETJ2)  /'betJ2_3 '/,     parfit(P3_BETJ2) /1/ !Herbers2026
+      data parstr(P3_BETJ3)  /'betJ3_3 '/,     parfit(P3_BETJ3) /1/ !Herbers2026
+      data parstr(P3_BETJ4)  /'betJ4_3 '/,     parfit(P3_BETJ4) /1/ !Herbers2026
 
       data parstr(P4_VN1  )    /'V1n_4   '/,   parfit(P4_VN1  ) /1/
       data parstr(P4_VN2  )    /'V2n_4   '/,   parfit(P4_VN2  ) /1/
@@ -1825,7 +1884,7 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P4_RHOK2)  /'rhoKK_4 '/,     parfit(P4_RHOK2) /1/ !Herbers2026
       data parstr(P4_RHO_J)  /'rho-j_4 '/,     parfit(P4_RHO_J) /1/ !Herbers2026
       data parstr(P4_RHO_K)  /'rho-k_4 '/,     parfit(P4_RHO_K) /1/ !Herbers2026
-      data parstr(P4_RHOZX)  /'rhozx_4  '/,    parfit(P4_RHOZX) /1/ !Herbers2026      
+      data parstr(P4_RHOZX)  /'rhozx_4  '/,    parfit(P4_RHOZX) /1/ !Herbers2026
       data parstr(P4_MKJ  )    /'mkJ_4   '/,   parfit(P4_MKJ  ) /1/ !Herbers2026
       data parstr(P4_MKK  )    /'mkK_4   '/,   parfit(P4_MKK  ) /1/ !Herbers2026
       data parstr(P4_MKD  )    /'mk-_4   '/,   parfit(P4_MKD  ) /1/ !Herbers2026
@@ -1854,10 +1913,10 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P4_DPI6 )   /'Dpi6_4 '/,     parfit(P4_DPI6 ) /1/ !Herbers2026
       data parstr(P4_ANGX )  /'epsil_4 '/,     parfit(P4_ANGX ) /1/
       data parstr(P4_ANGZ )  /'delta_4 '/,     parfit(P4_ANGZ ) /1/
-      data parstr(P4_BETJ1)  /'betJ1_4 '/,     parfit(P4_BETJ1) /1/ !Herbers2026      
-      data parstr(P4_BETJ2)  /'betJ2_4 '/,     parfit(P4_BETJ2) /1/ !Herbers2026      
-      data parstr(P4_BETJ3)  /'betJ3_4 '/,     parfit(P4_BETJ3) /1/ !Herbers2026      
-      data parstr(P4_BETJ4)  /'betJ4_4 '/,     parfit(P4_BETJ4) /1/ !Herbers2026      
+      data parstr(P4_BETJ1)  /'betJ1_4 '/,     parfit(P4_BETJ1) /1/ !Herbers2026
+      data parstr(P4_BETJ2)  /'betJ2_4 '/,     parfit(P4_BETJ2) /1/ !Herbers2026
+      data parstr(P4_BETJ3)  /'betJ3_4 '/,     parfit(P4_BETJ3) /1/ !Herbers2026
+      data parstr(P4_BETJ4)  /'betJ4_4 '/,     parfit(P4_BETJ4) /1/ !Herbers2026
 
       data ctlstr(C_NZYK ) /'nzyk  '/
       data ctlstr(C_NCYCL) /'ncycl '/
@@ -1893,6 +1952,7 @@ C      data ctlstr(C_DW12SH) /'DW12Sh'/!Herbers2026
 C      data ctlstr(C_DW34SL) /'DW34Sl'/!Herbers2026
 C      data ctlstr(C_DW34SH) /'DW34Sh'/!Herbers2026
       data ctlstr(C_DWSOFF) /'DWSoff'/!Herbers2026 !0 means: pair S1 with S1, S2 with S2 etc.  1 means: pair S1 with S2, S3 with S4 etc.
+      data ctlstr(C_PASSGN) /'NoErr'/ !supresses assgn error printing.
       data ctlstr(C_SPIN ) /'spin  '/
       data ctlstr(C_NTOP ) /'ntop  '/
       data ctlstr(C_ADJF ) /'adjf  '/
@@ -1980,6 +2040,6 @@ c    $          ,0,0,0,0,0,0,0,0,0,0,0 /
 
 C      data rpstr(1) /'Ir (a,b,c <-> z,x,y)   '/
 C      data rpstr(2) /'IIr (a,b,c <-> y,z,x)  '/
-C      data rpstr(3) /'IIIr (a,b,c <-> x,y,z) '/					 
+C      data rpstr(3) /'IIIr (a,b,c <-> x,y,z) '/
       end
 

@@ -1641,7 +1641,7 @@ C     work
           voi(iv)=0.0
         end do
         vr(i )=1.0d0
-        call hmulthrr_old(j,gam,f
+        call hmulthrr(j,gam,f
      $       ,qvk,ruse,a,vr,vi,vor,voi,evalv,ovv,rotm,tori,0,0)
         do iv=1, i
           h(i,iv)=h(i,iv)+vor(iv)
@@ -1732,7 +1732,7 @@ C     work
             vor(i)=0.0
             voi(i)=0.0
           end do
-          call hmulthrr_old(j,gam,f
+          call hmulthrr(j,gam,f
      $         ,qvk,ruse,da,vr,vi,vor,voi,evalv,ovv,rotm,tori,ifs,0)
           do i=1, size(S_H)
             dedp(ifs)=dedp(ifs)+vor(i)*vr(i)+voi(i)*vi(i)
@@ -1759,14 +1759,14 @@ C     Hamilton matrix, yielding vor,voi
       real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
       real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
      $     -DIMSIG:DIMSIG,DIMTOP)
-
 C     work
       real*8  dk,dj,djj1,dff,t,t1,t2,djjc
       real*8  e1,df,dff1,di,dii1,dg
       real*8  adelk,adelj,ah2,ah3,ahk,ar6,ahjk,ahj
       real*8  alj,aljk,alkj,alk !Herbers2026
       real*8  al2,al3,al4 !Herbers2026
-      real*8  DXTERM, DYTERM, DZTERM
+      real*8  DXT, DYT, DZT !Herbers2024
+      real*8  DBJ, DBK, DBD !Herbers2026
       integer ik,ir,ic,ivr,ivc,itop
       integer off,voff
       integer myand
@@ -1857,7 +1857,7 @@ C     van Eijck / Typke
      $         + a(P_HJ) *djj1**3
      $         + a(P_HJK)*(djj1**2)*(dk**2)
      $         + a(P_HKJ)*djj1*(dk**4)
-     $         + a(P_HK) *dk**6                      !     $         + a(P_QZ) * e1 * (3.0*(dk**2)-djj1) remvoed
+     $         + a(P_HK) *dk**6                      !     $         + a(P_QZ) * e1 * (3.0*(dk**2)-djj1) remvoed - now shows up in ctrl 0 section
      $         + a(P_CP) * 0.5*dg*(1.0-dk*dk/djjc)
      $         + a(P_CZ) * 0.5*dg*dk*dk/djjc
      $         + a(P_E)  !Herbers2023
@@ -1873,7 +1873,7 @@ C     van Eijck / Typke
           end do
         end do
       end if
-      
+
       if (a(P_PZ) .ne.0.0) then
         do ik=1, size(S_K)
           dk=dble(qvk(ik,Q_K))
@@ -1885,32 +1885,6 @@ C     van Eijck / Typke
           end do
         end do
       end if
-      
-      DZTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)   DZTERM=a(P_DZ1)  !herbers2024
-      if (gam.eq.2)   DZTERM=a(P_DZ2)  !herbers2024
-      if (gam.eq.3)   DZTERM=a(P_DZ3)  !herbers2024
-      if (gam.eq.4)   DZTERM=a(P_DZ4)  !herbers2024
-      if (gam.eq.5)   DZTERM=a(P_DZ5)  !herbers2024
-      if (gam.eq.6)   DZTERM=a(P_DZ6)  !herbers2024
-      if (gam.eq.7)   DZTERM=a(P_DZ7)  !herbers2024
-      if (gam.eq.8)   DZTERM=a(P_DZ8)  !herbers2024
-      if (gam.eq.9)   DZTERM=a(P_DZ9)  !herbers2024
-      if (gam.eq.10)  DZTERM=a(P_DZ10) !herbers2024
-      if (gam.eq.11)  DZTERM=a(P_DZ11) !herbers2024
-      if (DZTERM.ne.0.0) then          !herbers2024
-        do ik=1, size(S_K)             !herbers2024
-          dk=dble(qvk(ik,Q_K))         !herbers2024
-          t=     DZTERM *dk            !herbers2024
-          do ivc=1, size(S_VV)         !herbers2024
-            ic=ik+size(S_K)*(ivc-1)    !herbers2024
-            vor(ic)=vor(ic)+vr(ic)*t   !herbers2024
-            voi(ic)=voi(ic)+vi(ic)*t   !herbers2024
-          end do                       !herbers2024
-        end do                         !herbers2024
-      end if                           !herbers2024
-      
-      
       
       if ((ctlint(C_RED).eq.2).and. 
      $     ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0))) then
@@ -1928,17 +1902,6 @@ C     van Eijck / Typke
         end do
       end if
         
-CC     real off diagonal k/k+1   ! removed 
-C      if ((a(P_QXZ).ne.0.0)) then
-C        off=1
-C        do ik=1, size(S_K)-off
-C          dk=dble(qvk(ik,Q_K))
-C          dff=(1.0+2.0*dk)*dsqrt(djj1-dk*(dk+1.0))
-C          t=    e1* a(P_QXZ) *dff  
-C          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-C        end do
-C      end if
-
 C     real off diagonal k/k+1 ! in XIAM P_PX is real and P_PY gives imaginary, this is flipped convention from Gordy 2.63
       if ((a(P_PX).ne.0.0).or.(a(P_DZX).ne.0.0).or.
      $     (a(P_DZXJ).ne.0.0).or.(a(P_DZXK).ne.0.0)) then!Adding Dab, DabJ, DabK here
@@ -1953,42 +1916,6 @@ C     real off diagonal k/k+1 ! in XIAM P_PX is real and P_PY gives imaginary, t
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
-      
-      
-      
-      DXTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)  DXTERM=a(P_DX1)   !herbers2024
-      if (gam.eq.2)  DXTERM=a(P_DX2)   !herbers2024
-      if (gam.eq.3)  DXTERM=a(P_DX3)   !herbers2024
-      if (gam.eq.4)  DXTERM=a(P_DX4)   !herbers2024
-      if (gam.eq.5)  DXTERM=a(P_DX5)   !herbers2024
-      if (gam.eq.6)  DXTERM=a(P_DX6)   !herbers2024
-      if (gam.eq.7)  DXTERM=a(P_DX7)   !herbers2024
-      if (gam.eq.8)  DXTERM=a(P_DX8)   !herbers2024
-      if (gam.eq.9)  DXTERM=a(P_DX9)   !herbers2024
-      if (gam.eq.10) DXTERM=a(P_DX10)   !herbers2024
-      if (gam.eq.11) DXTERM=a(P_DX11)   !herbers2024
-      if (DXTERM.ne.0.0) then          !herbers2024
-C       real off diagonal k/k+1 
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=  DXTERM *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if      
-
-CC     imaginaer off diagonal k/k+1  ! removed
-C      if ((a(P_QYZ).ne.0.0)) then
-C        off=1
-C        do ik=1, size(S_K)-off
-C          dk=dble(qvk(ik,Q_K))
-C          dff=(1.0+2.0*dk)*dsqrt(djj1-dk*(dk+1.0))
-C          t=    e1* a(P_QYZ) *dff *(-1) ! Sign change added by Sven 2024
-C          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
-C        end do
-C      end if
 
 C     imaginaer off diagonal k/k+1 
       if ((a(P_PY).ne.0.0)) then
@@ -1997,29 +1924,6 @@ C     imaginaer off diagonal k/k+1
           dk=dble(qvk(ik,Q_K))
           dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
           t=   a(P_PY) *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
-        end do
-      end if
-      
-      DYTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)  DYTERM=a(P_DY1)   !herbers2024
-      if (gam.eq.2)  DYTERM=a(P_DY2)   !herbers2024
-      if (gam.eq.3)  DYTERM=a(P_DY3)   !herbers2024
-      if (gam.eq.4)  DYTERM=a(P_DY4)   !herbers2024
-      if (gam.eq.5)  DYTERM=a(P_DY5)   !herbers2024
-      if (gam.eq.6)  DYTERM=a(P_DY6)   !herbers2024
-      if (gam.eq.7)  DYTERM=a(P_DY7)   !herbers2024
-      if (gam.eq.8)  DYTERM=a(P_DY8)   !herbers2024
-      if (gam.eq.9)  DYTERM=a(P_DY9)   !herbers2024
-      if (gam.eq.10) DYTERM=a(P_DY10)   !herbers2024
-      if (gam.eq.11) DYTERM=a(P_DY11)   !herbers2024
-      if (DYTERM.ne.0.0) then          !herbers2024
-C       imaginaer off diagonal k/k+1 
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=   DYTERM *dff
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
         end do
       end if
@@ -2040,7 +1944,7 @@ C     real off diagonal k/k+2
      $         - adelk   *dff*((dk+2.0d0)**2+dk**2)
      $         + ahj*2.0d0*dff*djj1**2
      $         + ahjk*dff*((dk+2.0d0)**2+dk**2)*djj1
-     $         + ahk*dff*((dk+2.0d0)**4+dk**4)   !     $         + a(P_QD) *dff*e1 removed
+     $         + ahk*dff*((dk+2.0d0)**4+dk**4)   !     $         + a(P_QD) *dff*e1 removed - now shows up in ctrl 0 section
      $         + a(P_CD) *0.5*dg*dff/djjc
      $         + alj*2.0d0*dff*djj1**3                        !Herbers2026
      $         + aljk*dff*((dk+2.0d0)**2+dk**2)*djj1**2       !Herbers2026
@@ -2103,148 +2007,29 @@ C     Watson S off diagonal k/k+6
       end if
       
 C     Watson S off diagonal k/k+8                                     !Herbers2026
-      if (al4.ne.0.0) then                                            !Herbers2026
-        off=8                                                         !Herbers2026
-        do ik=1, size(S_K)-off                                        !Herbers2026
-          dk=dble(qvk(ik,Q_K))                                        !Herbers2026
-          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))       !Herbers2026
-     $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))     !Herbers2026
-     $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))     !Herbers2026
-     $         *(djj1-(dk+6.0)*(dk+7.0))*(djj1-(dk+7.0)*(dk+8.0)))    !Herbers2026
-          t=                                                          !Herbers2026
-     $          al4*dff                                               !Herbers2026
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)            !Herbers2026
+      if (al4.ne.0.0) then                                            ! 
+        off=8                                                         ! 
+        do ik=1, size(S_K)-off                                        ! 
+          dk=dble(qvk(ik,Q_K))                                        ! 
+          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))       ! 
+     $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))     ! 
+     $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))     ! 
+     $         *(djj1-(dk+6.0)*(dk+7.0))*(djj1-(dk+7.0)*(dk+8.0)))    ! 
+          t=                                                          ! 
+     $          al4*dff                                               ! 
+          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)            ! 
         end do
       end if
       
-      return
-      end
-
-C----------------------------------------------------------------------
-      subroutine hmulthrr_old(j,gam,f
-     $     ,qvk,ruse,a,vr,vi,vor,voi,evalv,ovv,rotm,tori,ifs,it)
-C     multiply the complex vector vr,vi by the rigid part of the
-C     Hamilton matrix, yielding vor,voi
-      implicit none
-      include 'iam.fi'
-      integer j,gam,f,ifs,it
-      integer qvk(DIMTOT,Q_K:Q_V1+DIMTOP-1)
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      real*8  a(DIMPAR)
-      real*8  vr(DIMTOT),vor(DIMTOT),vi(DIMTOT),voi(DIMTOT)
-      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-
-C     work
-      real*8  dk,dj,djj1,dff,t,t1,t2,djjc
-      real*8  e1,df,dff1,di,dii1,dg
-      real*8  adelk,adelj,ah2,ah3,ahk,ar6,ahjk,ahj
-      real*8  alj,aljk,alkj,alk !Herbers2026
-      real*8  al2,al3,al4 !Herbers2026
-      real*8  DXTERM, DYTERM, DZTERM
-      integer ik,ir,ic,ivr,ivc,itop
-      integer off,voff
-      integer myand
-      external myand
-      if (size(S_H).gt.DIMTOT) stop 'Dimension Error in HMULTHRR'
-
-      dj=dble(j)
-      djj1=dj*(dj+1.0)
-      e1=0.0
-C     djjc is used for spin rotation coupling to prevent a division by zero
-C     for J=0
-      djjc=1.0
-      if ((ctlint(C_SPIN).ne.0).and.(j.gt.0).and.(f.ge.0)) then
-        di=dble(ctlint(C_SPIN))/2.0d0
-        dii1=di*(di+1.0)
-        df=dble(f)/2.0d0
-        dff1=df*(df+1.0)
-        djjc=djj1
-        dg=dff1-dii1-djj1
-        if (ctlint(C_SPIN).gt.1) then
-          e1= (0.75*dg*(dg+1.0)-dii1*djj1)
-     $         /(2.0*di*(2.0*di-1.0)*djj1*(2.0*dj-1.0)*(2.0*dj+3.0))
-        else
-          e1=0.0
-        end if
-      end if
-
-C     the centrifugal distortion parameters
-C     Watson A 
-      if (ctlint(C_RED).eq.0) then
-        adelj=a(P_DJD)
-        adelk=a(P_DKD)
-        ar6  =0.0d0
-        ahj  =a(P_HJD)
-        ahjk =a(P_HJKD)
-        ah2  =0.0d0
-        ahk  =a(P_HKD)
-        ah3  =0.0d0
-        alj = a(P_LJD)
-        aljk = a(P_LJKD)
-        alkj = a(P_LKJD)
-        alk  = a(P_LKD)
-      end if
-C     Watson S
-      if (ctlint(C_RED).eq.1) then
-        adelj=-a(P_DJD)
-        adelk=0.0d0
-        ar6  =a(P_DKD)
-        ahj  =a(P_HJD)
-        ahjk =0.0d0
-        ah2  =a(P_HJKD)
-        ahk  =0.0d0
-        ah3  =a(P_HKD)
-        alj = a(P_LJD)
-        al2 = a(P_LJKD)
-        al3 = a(P_LKJD)
-        al4 = a(P_LKD)
-      end if
-C     van Eijck / Typke
-      if (ctlint(C_RED).eq.2) then
-        adelj=a(P_DJD)
-        adelk=0.0d0
-        ar6  =a(P_DKD)
-        ahj  =0.5d0*a(P_HJD)
-        ahjk =0.0d0
-        ah2  =0.25d0*a(P_HJKD)
-        ahk  =0.0d0
-        ah3  =0.125d0*a(P_HKD)
-        alj  =0.5*a(P_LJD) ! no further implementation for octic.
-      end if
-
-      if ( (a(P_BJ) .ne.0.0).or.(a(P_BK) .ne.0.0).or.
-     $     (a(P_DJ) .ne.0.0).or.(a(P_DJK).ne.0.0).or.
-     $     (a(P_DK) .ne.0.0).or.(a(P_HJ ).ne.0.0).or.
-     $     (a(P_HJK).ne.0.0).or.(a(P_HKJ).ne.0.0).or.
-     $     (a(P_HK) .ne.0.0).or.(a(P_QZ) .ne.0.0).or.
-     $     (a(P_LJ) .ne.0.0).or.(a(P_LK) .ne.0.0).or.
-     $     (a(P_LJJK) .ne.0.0).or.(a(P_LJK) .ne.0.0).or.
-     $     (a(P_LKKJ) .ne.0.0).or.
-     $     (a(P_E)  .ne.0.0)) then !Herbers2023
+C------------------------
+C------------------------ Quadrupole ctrl case not 3 (original XIAM or DW)
+C------------------------
+      if (ctlint(C_DW).ne.3) then
+      
+      if ((a(P_QZ) .ne.0.0)) then !Herbers2023
         do ik=1, size(S_K)
           dk=dble(qvk(ik,Q_K))
-          t=     a(P_BJ) *djj1
-     $         + a(P_BK) *dk*dk
-     $         - a(P_DJ) *djj1**2
-     $         - a(P_DJK)*djj1*dk**2
-     $         - a(P_DK) *dk**4
-     $         + a(P_HJ) *djj1**3
-     $         + a(P_HJK)*(djj1**2)*(dk**2)
-     $         + a(P_HKJ)*djj1*(dk**4)
-     $         + a(P_HK) *dk**6
-     $         + a(P_QZ) * e1 * (3.0*(dk**2)-djj1)
-     $         + a(P_CP) * 0.5*dg*(1.0-dk*dk/djjc)
-     $         + a(P_CZ) * 0.5*dg*dk*dk/djjc
-     $         + a(P_E)  !Herbers2023
-     $         + a(P_LJ) *djj1**4                 !Herbers2026
-     $         + a(P_LK) *dk**8                   !Herbers2026
-     $         + a(P_LJK)*(djj1**2)*(dk**4)       !Herbers2026
-     $         + a(P_LJJK)*(djj1**3)*(dk**2)      !Herbers2026
-     $         + a(P_LKKJ)*(djj1**1)*(dk**6)      !Herbers2026
+          t=     a(P_QZ) * e1 * (3.0*(dk**2)-djj1)
           do ivc=1, size(S_VV)
             ic=ik+size(S_K)*(ivc-1)
             vor(ic)=vor(ic)+vr(ic)*t
@@ -2253,60 +2038,6 @@ C     van Eijck / Typke
         end do
       end if
       
-      if (a(P_PZ) .ne.0.0) then
-        do ik=1, size(S_K)
-          dk=dble(qvk(ik,Q_K))
-          t=     a(P_PZ) *dk
-          do ivc=1, size(S_VV)
-            ic=ik+size(S_K)*(ivc-1)
-            vor(ic)=vor(ic)+vr(ic)*t
-            voi(ic)=voi(ic)+vi(ic)*t
-          end do
-        end do
-      end if
-      
-      DZTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)   DZTERM=a(P_DZ1)  !herbers2024
-      if (gam.eq.2)   DZTERM=a(P_DZ2)  !herbers2024
-      if (gam.eq.3)   DZTERM=a(P_DZ3)  !herbers2024
-      if (gam.eq.4)   DZTERM=a(P_DZ4)  !herbers2024
-      if (gam.eq.5)   DZTERM=a(P_DZ5)  !herbers2024
-      if (gam.eq.6)   DZTERM=a(P_DZ6)  !herbers2024
-      if (gam.eq.7)   DZTERM=a(P_DZ7)  !herbers2024
-      if (gam.eq.8)   DZTERM=a(P_DZ8)  !herbers2024
-      if (gam.eq.9)   DZTERM=a(P_DZ9)  !herbers2024
-      if (gam.eq.10)  DZTERM=a(P_DZ10) !herbers2024
-      if (gam.eq.11)  DZTERM=a(P_DZ11) !herbers2024
-      if (DZTERM.ne.0.0) then          !herbers2024
-        do ik=1, size(S_K)             !herbers2024
-          dk=dble(qvk(ik,Q_K))         !herbers2024
-          t=     DZTERM *dk            !herbers2024
-          do ivc=1, size(S_VV)         !herbers2024
-            ic=ik+size(S_K)*(ivc-1)    !herbers2024
-            vor(ic)=vor(ic)+vr(ic)*t   !herbers2024
-            voi(ic)=voi(ic)+vi(ic)*t   !herbers2024
-          end do                       !herbers2024
-        end do                         !herbers2024
-      end if                           !herbers2024
-      
-      
-      
-      if ((ctlint(C_RED).eq.2).and. 
-     $     ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0))) then
-        do ik=1, size(S_K)
-          dk=dble(qvk(ik,Q_K))
-          dff=  (djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
-     $         +(djj1-dk*(dk-1.0))*(djj1-(dk-1.0)*(dk-2.0))
-     $         -2.0d0*(djj1-dk**2)**2
-          t=  (ar6 + ah2*djj1)*dff
-          do ivc=1, size(S_VV)
-            ic=ik+size(S_K)*(ivc-1)
-            vor(ic)=vor(ic)+vr(ic)*t
-            voi(ic)=voi(ic)+vi(ic)*t
-          end do
-        end do
-      end if
-        
 C     real off diagonal k/k+1 
       if ((a(P_QXZ).ne.0.0)) then
         off=1
@@ -2317,45 +2048,7 @@ C     real off diagonal k/k+1
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
-
-C     real off diagonal k/k+1 ! in XIAM P_PX is real and P_PY gives imaginary, this is flipped convention from Gordy 2.63
-      if ((a(P_PX).ne.0.0).or.(a(P_DZX).ne.0.0).or.
-     $     (a(P_DZXJ).ne.0.0).or.(a(P_DZXK).ne.0.0)) then!Adding Dab, DabJ, DabK here
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=  a(P_PX)*dff
-     $       +a(P_DZX)*(dk+(dk+1.0))*dff
-     $       +a(P_DZXJ)*(dk+(dk+1.0))*djj1*dff
-     $       +a(P_DZXK)*(dk**3+(dk+1.0)**3)*dff     
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if
       
-      DXTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)  DXTERM=a(P_DX1)   !herbers2024
-      if (gam.eq.2)  DXTERM=a(P_DX2)   !herbers2024
-      if (gam.eq.3)  DXTERM=a(P_DX3)   !herbers2024
-      if (gam.eq.4)  DXTERM=a(P_DX4)   !herbers2024
-      if (gam.eq.5)  DXTERM=a(P_DX5)   !herbers2024
-      if (gam.eq.6)  DXTERM=a(P_DX6)   !herbers2024
-      if (gam.eq.7)  DXTERM=a(P_DX7)   !herbers2024
-      if (gam.eq.8)  DXTERM=a(P_DX8)   !herbers2024
-      if (gam.eq.9)  DXTERM=a(P_DX9)   !herbers2024
-      if (gam.eq.10) DXTERM=a(P_DX10)   !herbers2024
-      if (gam.eq.11) DXTERM=a(P_DX11)   !herbers2024
-      if (DXTERM.ne.0.0) then          !herbers2024
-C       real off diagonal k/k+1 
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=  DXTERM *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if      
-
 C     imaginaer off diagonal k/k+1 
       if ((a(P_QYZ).ne.0.0)) then
         off=1
@@ -2366,81 +2059,7 @@ C     imaginaer off diagonal k/k+1
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
         end do
       end if
-
-C     imaginaer off diagonal k/k+1 
-      if ((a(P_PY).ne.0.0)) then
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=   a(P_PY) *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
-        end do
-      end if
       
-      DYTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)  DYTERM=a(P_DY1)   !herbers2024
-      if (gam.eq.2)  DYTERM=a(P_DY2)   !herbers2024
-      if (gam.eq.3)  DYTERM=a(P_DY3)   !herbers2024
-      if (gam.eq.4)  DYTERM=a(P_DY4)   !herbers2024
-      if (gam.eq.5)  DYTERM=a(P_DY5)   !herbers2024
-      if (gam.eq.6)  DYTERM=a(P_DY6)   !herbers2024
-      if (gam.eq.7)  DYTERM=a(P_DY7)   !herbers2024
-      if (gam.eq.8)  DYTERM=a(P_DY8)   !herbers2024
-      if (gam.eq.9)  DYTERM=a(P_DY9)   !herbers2024
-      if (gam.eq.10) DYTERM=a(P_DY10)   !herbers2024
-      if (gam.eq.11) DYTERM=a(P_DY11)   !herbers2024
-      if (DYTERM.ne.0.0) then          !herbers2024
-C       imaginaer off diagonal k/k+1 
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=   DYTERM *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
-        end do
-      end if
-      
-C     real off diagonal k/k+2 
-      if ((a(P_BD).ne.0.0).or.(adelj.ne.0.0).or.
-     $    (adelk.ne.0.0).or.(a(P_QD).ne.0.0).or.
-     $    (ahj.ne.0.0).or.(a(P_CD).ne.0.0).or.
-     $    (ahjk.ne.0.0).or.(ahk.ne.0.0).or.(alj.ne.0.0).or.
-     $    (aljk.ne.0.0).or.(alkj.ne.0.0).or.(alk.ne.0.0)
-     $     ) then
-        off=2
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0)))
-          t=     a(P_BD) *dff
-     $         - adelj   *2.0d0*dff*djj1
-     $         - adelk   *dff*((dk+2.0d0)**2+dk**2)
-     $         + ahj*2.0d0*dff*djj1**2
-     $         + ahjk*dff*((dk+2.0d0)**2+dk**2)*djj1
-     $         + ahk*dff*((dk+2.0d0)**4+dk**4)
-     $         + a(P_QD) *dff*e1
-     $         + a(P_CD) *0.5*dg*dff/djjc
-     $         + alj*2.0d0*dff*djj1**3                        !Herbers2026
-     $         + aljk*dff*((dk+2.0d0)**2+dk**2)*djj1**2       !Herbers2026
-     $         + alkj*dff*((dk+2.0d0)**4+dk**4)*djj1          !Herbers2026
-     $         + alk*dff*((dk+2.0d0)**6+dk**6)                !Herbers2026
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if
-
-      if ((ctlint(C_RED).eq.2).and.(ah3.ne.0.0d0)) then
-        off=2
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0)))
-     $         *((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
-     $         +(djj1-dk*(dk-1.0))*(djj1-(dk-1.0)*(dk-2.0))
-     $         +(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0)))
-          t=  ah3*dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if
-
 C     imaginaer off diagonal k/k+2 
       if ((a(P_QXY).ne.0.0)) then
         off=2
@@ -2452,50 +2071,105 @@ C     imaginaer off diagonal k/k+2
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
         end do
       end if
- 
-C     Watson S off diagonal k/k+4 (evtl. change dff)
-      if ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0).or.(al2.ne.0.0d0)) then
-        off=4
+      
+C     real off diagonal k/k+2 
+      if ((a(P_QD).ne.0.0)) then
+        off=2
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
-          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
-     $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))) 
-          t=   
-     $          ar6*dff + ah2*djj1*dff + al2*djj1**2*dff
+          dff=0.5d0*dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0)))
+          t=     a(P_QD) *dff*e1
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
+      
+      end if
+C------------------------
+C------------------------ End of qudrupole ctrol case ne 3
+C------------------------
+      
+C------------------------
+C------------------------ Species Semi-Local Treatment
+C------------------------
 
-C     Watson S off diagonal k/k+6 
-      if ((ah3.ne.0.0d0).or.(al3.ne.0.0)) then
-        off=6
+C------------------------ 2nd order
+      DBJ=0.0;DBK=0.0;DBD=0.0!herbers2026 : I added these to allow for Delta BJ , Delta BK, Delta B- for the different Species without introducing new sets of constants
+      if (gam.le.11) then    !Implementation only up to 11
+      DBJ=a(P_DBJ1+gam-1) ;DBK=a(P_DBK1+gam-1) ;DBD=a(P_DBD1+gam-1)  ! assumes sequential defintion of the P_DBJ1, P_DBJ2... which is the case, I promise!
+      end if 
+      
+      if (DBJ.ne.0.0) then          !
+        do ik=1, size(S_K)
+          dk=dble(qvk(ik,Q_K))
+          t=     DBJ *djj1
+          do ivc=1, size(S_VV)
+            ic=ik+size(S_K)*(ivc-1)
+            vor(ic)=vor(ic)+vr(ic)*t
+            voi(ic)=voi(ic)+vi(ic)*t
+          end do
+        end do
+      end if
+      if (DBK.ne.0.0) then          !
+        do ik=1, size(S_K)
+          dk=dble(qvk(ik,Q_K))
+          t=     DBK *dk*dk
+          do ivc=1, size(S_VV)
+            ic=ik+size(S_K)*(ivc-1)
+            vor(ic)=vor(ic)+vr(ic)*t
+            voi(ic)=voi(ic)+vi(ic)*t
+          end do
+        end do
+      end if
+      if (DBD.ne.0.0) then          !
+        off=2
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
-          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
-     $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))
-     $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))) 
-          t=   
-     $          ah3*dff+al3*djj1*dff
+          dff=0.5d0*dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0)))
+          t=     DBD*dff
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
       
-C     Watson S off diagonal k/k+8                                     !Herbers2026
-      if (al4.ne.0.0) then                                            !Herbers2026
-        off=8                                                         !Herbers2026
-        do ik=1, size(S_K)-off                                        !Herbers2026
-          dk=dble(qvk(ik,Q_K))                                        !Herbers2026
-          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))       !Herbers2026
-     $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))     !Herbers2026
-     $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))     !Herbers2026
-     $         *(djj1-(dk+6.0)*(dk+7.0))*(djj1-(dk+7.0)*(dk+8.0)))    !Herbers2026
-          t=                                                          !Herbers2026
-     $          al4*dff                                               !Herbers2026
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)            !Herbers2026
+C------------------------ 1st order
+      DZT=0.0;DXT=0.0;DYT=0.0 !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
+      if (gam.le.11) then     !Implementation only up to 11
+      DZT=a(P_DZ1+gam-1) ;DXT=a(P_DX1+gam-1) ;DYT=a(P_DY1+gam-1)  ! assumes sequential defintion of the P_DBJ1, P_DBJ2...
+      end if 
+      
+      if (DZT.ne.0.0) then           
+        do ik=1, size(S_K)              
+          dk=dble(qvk(ik,Q_K))          
+          t=     DZT *dk             
+          do ivc=1, size(S_VV)          
+            ic=ik+size(S_K)*(ivc-1)     
+            vor(ic)=vor(ic)+vr(ic)*t    
+            voi(ic)=voi(ic)+vi(ic)*t    
+          end do                        
+        end do                          
+      end if                            
+      if (DXT.ne.0.0) then          !herbers2024
+C       real off diagonal k/k+1 
+        off=1
+        do ik=1, size(S_K)-off
+          dk=dble(qvk(ik,Q_K))
+          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
+          t=  DXT *dff
+          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
+        end do
+      end if      
+      if (DYT.ne.0.0) then          !herbers2024
+C       imaginaer off diagonal k/k+1 
+        off=1
+        do ik=1, size(S_K)-off
+          dk=dble(qvk(ik,Q_K))
+          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
+          t=   DYT *dff
+          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
         end do
       end if
-      
-      
+C------------------------
+C------------------------ End of Species Semi-Local Treatment
+C------------------------
       return
       end
 
@@ -2898,8 +2572,10 @@ c        end do
           kdegen=.true.
           call maxof(h,DIMTOT,DIMTOT,size(S_H),icc,1,bestvk,scndvk,
      $         besth1,scndh1)
+          if (ctlint(C_PASSGN).eq.0) then !herbers2026, added option to supress error assgn print
           if (abs(qvk(bestvk(1),Q_K)).ne.abs(qvk(bestk(icc),Q_K)))
      $         write(*,*) 'ERROR in assgn: K trouble',j,gam,icc 
+          end if 
           qmk(icc,Q_K)=sign(qvk(bestvk(1),Q_K),
      $         int(besth1(1)*scndh1(1)*10000.0))
           qmk(icc,Q_K2)=qmk(icc,Q_K)

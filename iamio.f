@@ -120,6 +120,7 @@ C      ctlint(C_DW12SH)=0 ! Herbers2026
 C      ctlint(C_DW34SL)=0 ! Herbers2026
 C      ctlint(C_DW34SH)=0 ! Herbers2026
       ctlint(C_DWSOFF)=0 ! Herbers2026 !0 means: pair S1 with S1, S2 with S2 etc.  1 means: pair S1 with S2, S3 with S4 etc.
+      ctlint(C_PASSGN)=0
       ctlint(C_FITSC)=0
       ctlint(C_WOODS)=33
       ctlint(C_ADJF)=0
