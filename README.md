@@ -181,9 +181,26 @@ The top–top coupling parameters are implemented by forming symmetrized pairwis
 | `F12` | `dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1` |
 | `Vcc` | `0.5*[dt1 cos(nα1) d1 * dt2 cos(nα2) d2 `<br>`+  dt2 cos(nα2) d2 * dt1 cos(nα1) d1]` |
 | `Vss` | `0.5*[dt1 sin(nα1) d1 * dt2 sin(nα2) d2  `<br>`+ dt2 sin(nα2) d2 * dt1 sin(nα1) d1]  ` |<!-- I first thought there was a negative sign for Vss due to line 56 in iamv2.f showing multiplication with -0.5. However, the expected negative sign in iamm.f line line 178 is also missing. These two multiplications with -1.0 make the whole expression positive again. -->
+| `P12` | `dt1 Π1**2 d1 * dt2 Π2**2 d2 `<br>`+ dt2 Π2**2 d2 * dt1 Π1**2 d1` |
 
 For three tops, the operator associated with `F12` for example would be  
 `   dt1 Π1 d1 * dt2 Π2 d2 +  dt2 Π2 d2 * dt1 Π1 d1 `<br>`+ dt1 Π1 d1 * dt3 Π3 d3 +  dt3 Π3 d3 * dt1 Π1 d1 `<br>`+ dt2 Π2 d2 * dt3 Π3 d3 +  dt3 Π3 d3 * dt2 Π2 d2` 
+
+Additional higher-order top–top coupling terms for `F12`, `Vcc`, and `P12` are now available. These terms have not yet been thoroughly tested, as no suitable use case has been identified so far. Feel free to experiment with them, and please let me know if you find a situation where they are useful. 
+Parameters of type `-k` are not listed in the table. However, approximate implementations are available to the user using a nested anti-commutator of the form `{Pz**2,{Px**2 - Py**2,O}}`, where O denotes the operator associated with the respective parameters `F12`, `Vcc`, or `P12`. This differs from the `-k` implementation in `Hird`, where all operator permutations are taken into account. 
+| `Parameter` | `Operator` |
+|------------|------------|
+| `DF12J` | `P**2(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)` |
+| `DF12K` | `Pz**2(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)`<br>`+(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)Pz**2` |
+| `DF12-` | `(Px**2 - Py**2)(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)`<br>`+(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)(Px**2 - Py**2)` |
+| `DF12JJ` | `P**4(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)` |
+| `DF12JK` | `P**2(Pz**2(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)`<br>`+(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)Pz**2)` |
+| `DF12KK` | `Pz**4(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)`<br>`+(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)Pz**4` |
+| `DF12-j` | `P**2[(Px**2 - Py**2)(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)`<br>`+(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)(Px**2 - Py**2)]` |
+| `DVccJ` | `P**2(0.5*[dt1 cos(nα1) d1 * dt2 cos(nα2) d2 `<br>`+  dt2 cos(nα2) d2 * dt1 cos(nα1) d1])`|
+| `...` | `...`|
+| `DP12J` | `P**2(dt1 Π1**2 d1 * dt2 Π2**2 d2 `<br>`+ dt2 Π2**2 d2 * dt1 Π1**2 d1)`|
+| `...` | `...`|
 
 ### Other parameters
 
@@ -196,16 +213,29 @@ For three tops, the operator associated with `F12` for example would be
 | `gamma` | `rotation about x axis` |
 | `betJ1` `betJ2` `betJ3` `betJ4` | `Parameters to add P**2 dependence to beta.`<br/>`beta_total = beta + betJ1*(J(J+1))+ betJ2*(J(J+1))**2+ betJ3*(J(J+1))**3+ betJ4*(J(J+1))**4` |
 
-### First order local parameters
+### Local parameters
+Mixing in local parameters to arrive at semi-local fits is particularly useful in systems with two low-barrier, coupled internal rotors, where the standard coupling parameters available in XIAM (F12, Vcc, Vss) are no longer sufficient to capture the observed interactions. The local parameters can be defined independently for each species (up to 11 species supported).
 
-These parameters multiply the operators Px, Py, and Pz in the principal axis system (PAS). They can be defined independently for each species (up to 11 species supported).
-They are particularly useful for introducing first-order corrections in systems with two low-barrier, coupled internal rotors, where the standard coupling parameters available in XIAM (F12, Vcc, Vss) are no longer sufficient to capture the observed interactions.
+#### First order local parameters
+These parameters multiply the operators `Px`, `Py`, and `Pz` in the principal axis system (PAS). 
 
 | `Parameter` |
 |-------------|
-| `DxS1, DxS2,.. DxS11` |
-| `DyS1, DyS2,.. DyS11` |
-| `DzS1, DzS2,.. DzS11` |
+| `S1_Dx, S2_Dx,.. S11_Dx` |
+| `S1_Dy, S2_Dy,.. S11_Dy` |
+| `S1_Dz, S2_Dz,.. S11_Dz` |
+
+#### Second order local parameters
+These parameters multiply the operators `P**2`, `Pz**2` and `Px**2-Py**2` in the principal axis system (PAS). 
+When fit together with global `BJ`, `BK`, and `B-` these parameters represent the differences between global and effective species specific rotational constants. E.g. `BJ_S2,eff = BJ + S2_BJ`.
+Unlike their global equivalents, these local parameters are not used in the derivation of internal rotation parameters and in the calculation of `rho`.
+
+| `Parameter` |
+|-------------|
+| `S1_BJ, S2_BJ,.. S11_BJ` |
+| `S1_BK, S2_BK,.. S11_BK` |
+| `S1_B-, S2_B-,.. S11_B-` |
+
 
 ### Nuclear quadrupole coupling parameters
 For first or second nucleus.  
@@ -237,6 +267,14 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 | `chixy12,chixy34,chiyz12,chiyz34,chixz12,chixz34` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
+  XIAM-2NQ v0.40 - 14-March-2026
+  - Unified the subroutines `hmulthrr` and `hmulthrr_old`; `hmulthrr_old` has been removed.
+  - Updated the naming convention for first-order local types from `DxS2` to `S2_Dx`.
+  - Added second-order local parameters `S1_BJ`, `S2_BJ`, … `S1_BK`, `S2_BK`, … `S1_B-`, `S2_B-`.
+  - Added parameter `P12` to `Hii`.
+  - Added higher-order parameters to `Hii`. These parameters have not yet been thoroughly tested; see the parameter table for details.
+  - Added the control parameter `NoErr`. When set to `1`, this suppresses assignment warning messages, which can otherwise dominate the output file when using an excited torsional basis.
+
   XIAM-2NQ v0.38b - 07-March-2026
   - fixed a bug in `iamv.f` that prevented the use of analytic gradients when a single quadrupolar nucleus was present and `ctrl 0`.
 
