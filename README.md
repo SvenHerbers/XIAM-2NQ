@@ -267,7 +267,7 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 | `chixy12,chixy34,chiyz12,chiyz34,chixz12,chixz34` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
-  XIAM-2NQ v0.40b - 16-March-2026
+  XIAM-2NQ v0.40c - 16-March-2026
   - Fixed an error in handling `S 0` (rigid-rigid) lines in `hmulthrr` which lead to wrong results wenn used together with offdiagonal `chiyz34` or `S11_` parameters.
 
   XIAM-2NQ v0.40 - 14-March-2026
