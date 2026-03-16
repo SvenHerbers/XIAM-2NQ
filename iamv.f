@@ -2094,7 +2094,7 @@ C------------------------
 
 C------------------------ 2nd order
       DBJ=0.0;DBK=0.0;DBD=0.0!herbers2026 : I added these to allow for Delta BJ , Delta BK, Delta B- for the different Species without introducing new sets of constants
-      if (gam.le.11) then    !Implementation only up to 11
+      if ((gam.le.11).and.(gam.ge.1)) then    !Exclude S0, Implementation only up to 11
       DBJ=a(P_DBJ1+gam-1) ;DBK=a(P_DBK1+gam-1) ;DBD=a(P_DBD1+gam-1)  ! assumes sequential defintion of the P_DBJ1, P_DBJ2... which is the case, I promise!
       end if 
       
