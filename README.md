@@ -269,6 +269,7 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 ## Update Notes
   XIAM-2NQ v0.40b - 16-March-2026
   - Fixed an error in handling `S 0` (rigid-rigid) lines in `hmulthrr` which lead to wrong results wenn used together with offdiagonal `chiyz34` or `S11_` parameters.
+
   XIAM-2NQ v0.40 - 14-March-2026
   - Unified the subroutines `hmulthrr` and `hmulthrr_old`; `hmulthrr_old` has been removed.
   - Updated the naming convention for first-order local types from `DxS2` to `S2_Dx`.
