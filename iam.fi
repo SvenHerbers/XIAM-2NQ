@@ -4,7 +4,7 @@ C   Important array dimensions, to be set before compiling
 C
 C   maximal J quantum number
       integer DIMJ
-C       parameter (DIMJ=30)
+C       parameter (DIMJ=30) 
         parameter (DIMJ=71)  
 
 C   maximal number of v-blocks in the last diagonalisation.

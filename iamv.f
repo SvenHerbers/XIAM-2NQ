@@ -2132,7 +2132,7 @@ C------------------------ 2nd order
       
 C------------------------ 1st order
       DZT=0.0;DXT=0.0;DYT=0.0 !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.le.11) then     !Implementation only up to 11
+      if ((gam.le.11).and.(gam.ge.1)) then      !Implementation only up to 11
       DZT=a(P_DZ1+gam-1) ;DXT=a(P_DX1+gam-1) ;DYT=a(P_DY1+gam-1)  ! assumes sequential defintion of the P_DBJ1, P_DBJ2...
       end if 
       
