@@ -262,11 +262,17 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 | `Parameter` | `Description` |
 |------------|---------------|
 | `E` | `Energy-offset assignable to the various vibrational states` |
-| `Gx12,Gx34,Gy12,Gy34,Gz12,Gz34` | `Wilson type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Pickett type at the moment, due to a likely phase inconsistency.` |
-| `Fxy12,Fxy34,Fyz12,Fyz34,Fxz12,Fxz34` | `Pickett type Coriolis coupling parameters for coupling between states 1&2 and 3&4. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency` |
-| `chixy12,chixy34,chiyz12,chiyz34,chixz12,chixz34` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
+| `Gx12,Gx34,Gx56,Gy12,Gy34,Gy56,Gz12,Gz34,Gz56` | `Wilson type Coriolis coupling parameters for coupling between states 1&2, 3&4, and 5&6. Should not be mixed with Pickett type at the moment, due to a likely phase inconsistency.` |
+| `Fxy12,Fxy34,Fxy56,Fyz12,Fyz34,Fyz56,Fxz12,Fxz34,Fxz56` | `Pickett type Coriolis coupling parameters for coupling between states 1&2, 3&4, and 5&6. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency` |
+| `chixy12,chixy34,chixy56,chiyz12,chiyz34,chiyz56,chixz12,chixz34,chixz56` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
+
+  XIAM-2NQ v0.43 - 06-April-2026
+  - Added coupling parameters for vibrational states 5 and 6 (e.g. `Fxz56`)
+  - Increased the dimensions in `iam.fi` to support up to six distinct sets of rotational constants within a single fit.
+  - Introduced the control parameter `DWVoff`. When using `ctrl 1` and the different sets of rotational constants are supposed to correspond to separate torsional states in a split-basis treatment, this parameter should be set to 1 to ensure proper treatment of cross-torsional coupling (no example case yet).
+    
   XIAM-2NQ v0.40c - 16-March-2026
   - Fixed an error in handling `S 0` (rigid-rigid) lines in `hmulthrr` which lead to wrong results wenn used together with offdiagonal `chiyz34` or `S11_` parameters.
 
