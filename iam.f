@@ -71,8 +71,8 @@ C     real*8  ab(DIMPAR)
 C      write(*,'(A,$)') ' Calculation date and time: '
       call mydate()
       write(*,*)
-      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.40c -' 
-     $                  ,'By Sven Herbers 16-March-2026' 
+      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.43 -' 
+     $                  ,'By Sven Herbers 06-April-2026' 
       write(*,*) 'sven_herbers@web.de'
       write(*,*) 'Cite: J. Chem. Phys., 2025, '
      $         ,'162, 234304, DOI: 10.1063/5.0267651 ' 
@@ -891,6 +891,7 @@ C     work
           end do
           size(S_V+itop)=maxi-mini+1
           size(S_MINV+itop)=mini
+
           if (size(S_V+itop).lt.0) stop 'error in calc2'
         end do
 
@@ -937,7 +938,8 @@ C  !!!!!!!!!!!!!!!!!!  ntop !!!!!!!!!!!!!!!!!!!
         ntop=ctlint(C_NTOP)
         if (gam.eq.0) ctlint(C_NTOP)=0
       if (ctlint(C_DW).eq.1) then ! IF-DW
-        if (((ib.le.4).and.(size(S_NB).ge.4)).or.
+        if ( ((ib.le.6).and.(size(S_NB).ge.6)).or.
+     $       ((ib.le.4).and.(size(S_NB).ge.4)).or.
      $       ((ib.le.2).and.(size(S_NB).ge.2))) then ! only use tunneling matrix if two states that mix are defined.
          call calvjk_d(j,gam,qf,ib,qf1,evalv,ovv,rotm,rott,tori
      $    ,a,qmv,ifit,dfit,palc,pali,npar,fistat
@@ -1445,12 +1447,21 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P_FXY3  ) /'Fxy34   '/, parfit(P_FXY3  ) /1/ !Herbers2024 Picketts coriolis coupling 
       data parstr(P_FYZ3  ) /'Fyz34   '/, parfit(P_FYZ3  ) /1/ !Herbers2024 Picketts coriolis coupling 
       data parstr(P_FXZ3  ) /'Fxz34   '/, parfit(P_FXZ3  ) /1/ !Herbers2024 Picketts coriolis coupling 
+      data parstr(P_GX56  ) /'Gx56    '/, parfit(P_GX56  ) /1/ !Herbers2026 Wilsons coriolis coupling  
+      data parstr(P_GY56  ) /'Gy56    '/, parfit(P_GY56  ) /1/ !Herbers2026 Wilsons coriolis coupling  
+      data parstr(P_GZ56  ) /'Gz56    '/, parfit(P_GZ56  ) /1/ !Herbers2026 Wilsons coriolis coupling  
+      data parstr(P_FXY5  ) /'Fxy56   '/, parfit(P_FXY5  ) /1/ !Herbers2026 Picketts coriolis coupling 
+      data parstr(P_FYZ5  ) /'Fyz56   '/, parfit(P_FYZ5  ) /1/ !Herbers2026 Picketts coriolis coupling 
+      data parstr(P_FXZ5  ) /'Fxz56   '/, parfit(P_FXZ5  ) /1/ !Herbers2026 Picketts coriolis coupling 
       data parstr(P_WQXY1 ) /'chixy12 '/, parfit(P_WQXY1 ) /1/ !Herbers2026 Nguyen & Stahl used parameters of this type to deal with off-diags of a tunneling nitrogen nucleus.
       data parstr(P_WQXZ1 ) /'chixz12 '/, parfit(P_WQXZ1 ) /1/ !Herbers2026
       data parstr(P_WQYZ1 ) /'chiyz12 '/, parfit(P_WQYZ1 ) /1/ !Herbers2026
       data parstr(P_WQXY3 ) /'chixy34 '/, parfit(P_WQXY3 ) /1/ !Herbers2026
       data parstr(P_WQXZ3 ) /'chixz34 '/, parfit(P_WQXZ3 ) /1/ !Herbers2026
       data parstr(P_WQYZ3 ) /'chiyz34 '/, parfit(P_WQYZ3 ) /1/ !Herbers2026
+      data parstr(P_WQXY5 ) /'chixy56 '/, parfit(P_WQXY5 ) /1/ !Herbers2026
+      data parstr(P_WQXZ5 ) /'chixz56 '/, parfit(P_WQXZ5 ) /1/ !Herbers2026
+      data parstr(P_WQYZ5 ) /'chiyz56 '/, parfit(P_WQYZ5 ) /1/ !Herbers2026
       data parstr(P_DBJ1  ) /'S1_BJ   '/, parfit(P_DBJ1  ) /0/ !Herbers 2026 Same as BJ BK B-. but separate for S1,2,3,4,5... 
       data parstr(P_DBJ2  ) /'S2_BJ   '/, parfit(P_DBJ2  ) /0/ 
       data parstr(P_DBJ3  ) /'S3_BJ   '/, parfit(P_DBJ3  ) /0/ 
@@ -1952,6 +1963,7 @@ C      data ctlstr(C_DW12SH) /'DW12Sh'/!Herbers2026
 C      data ctlstr(C_DW34SL) /'DW34Sl'/!Herbers2026
 C      data ctlstr(C_DW34SH) /'DW34Sh'/!Herbers2026
       data ctlstr(C_DWSOFF) /'DWSoff'/!Herbers2026 !0 means: pair S1 with S1, S2 with S2 etc.  1 means: pair S1 with S2, S3 with S4 etc.
+      data ctlstr(C_DWVOFF) /'DWVoff'/!Herbers2026 !DWVoff is required if the Bs are associated to different Vs 
       data ctlstr(C_PASSGN) /'NoErr'/ !supresses assgn error printing.
       data ctlstr(C_SPIN ) /'spin  '/
       data ctlstr(C_NTOP ) /'ntop  '/

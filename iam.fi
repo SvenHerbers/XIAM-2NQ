@@ -27,7 +27,7 @@ C   Hamiltonian
 
 C   maximum number of v basis funktions for one top
       integer DIMV
-        parameter (DIMV=5)
+        parameter (DIMV=6)
 
 C   maximum number of transitions 
       integer DIMLIN
@@ -35,7 +35,7 @@ C   maximum number of transitions
 
 C   maximum number of different sets of paramaters 
       integer DIMVB
-        parameter(DIMVB=5)
+        parameter(DIMVB=6)
         
 C Number that defines the matrix size of the exact quadrupole treatment
       integer DIMQ
@@ -65,7 +65,7 @@ C     max. allowed number of tops
 
 C     array dimensions for data
       integer DIMPRR, DIMPIR, DIMPAR, DIMPM, MAXPAR
-        parameter (DIMPRR=160)  !Herbers2026 102
+        parameter (DIMPRR=169)  !Herbers2026 
         parameter (DIMPIR=86)  !Herbers2026
         parameter (DIMPAR=DIMPRR + DIMPIR*DIMTOP)
         parameter (MAXPAR=DIMPRR + DIMPIR*MAXTOP)
@@ -311,10 +311,16 @@ C ********                    DIMENSION: DIMPIR
       integer P_CP,  P_CZ,  P_CD
       integer P_MUX, P_MUY, P_MUZ
       integer P_PX,  P_PY,  P_PZ
-      integer P_E, P_GZ12, P_GX12, P_GY12  !Herbers2023/2024
+      integer P_E !Herbers2023/
+      integer P_GZ12, P_GX12, P_GY12  !Herbers2024
       integer P_GZ34, P_GX34, P_GY34  !Herbers2024
-      integer P_FXY1, P_FYZ1, P_FXZ1, P_FXY3, P_FYZ3, P_FXZ3     !Herbers2024
-      integer P_WQXY1, P_WQXZ1, P_WQYZ1, P_WQXY3, P_WQXZ3, P_WQYZ3      
+      integer P_GZ56, P_GX56, P_GY56  !Herbers2026
+      integer P_FXY1, P_FYZ1, P_FXZ1  !Herbers2024
+      integer P_FXY3, P_FYZ3, P_FXZ3  !Herbers2024
+      integer P_FXY5, P_FYZ5, P_FXZ5  !Herbers2026
+      integer P_WQXY1, P_WQXZ1, P_WQYZ1 !Herbers2026
+      integer P_WQXY3, P_WQXZ3, P_WQYZ3 !Herbers2026 the WQ parameters are offdiagonal quad tensor elements used in tunneling treatements (off diag in tunnel-vib also)
+      integer P_WQXY5, P_WQXZ5, P_WQYZ5 !Herbers2026
       integer P_DUMP
       integer P_DZ1, P_DZ2, P_DZ3, P_DZ4, P_DZ5  
       integer P_DZ6, P_DZ7, P_DZ8, P_DZ9, P_DZ10, P_DZ11
@@ -474,128 +480,137 @@ C       parameter (P_R6  = 9)
         parameter (P_MUY =37)
         parameter (P_MUZ =38)
 
-        parameter (P_PX   =39 )
-        parameter (P_PY   =40 )
-        parameter (P_PZ   =41 )
-        parameter (P_E    =42 )!Herbers2023
-        parameter (P_GX12 =43 )!Herbers2024
-        parameter (P_GY12 =44 )!Herbers2024
-        parameter (P_GZ12 =45 )!Herbers2024
-        parameter (P_FXY1 =46 )!Herbers2024
-        parameter (P_FYZ1 =47 )!Herbers2024
-        parameter (P_FXZ1 =48 )!Herbers2024
-        parameter (P_GX34 =49 )!Herbers2024
-        parameter (P_GY34 =50 )!Herbers2024
-        parameter (P_GZ34 =51 )!Herbers2024
-        parameter (P_FXY3 =52 )!Herbers2024
-        parameter (P_FYZ3 =53 )!Herbers2024
-        parameter (P_FXZ3 =54 )!Herbers2024
-        parameter (P_WQXY1=55 )!Herbers2026
-        parameter (P_WQXZ1=56 )!Herbers2026
-        parameter (P_WQYZ1=57 )!Herbers2026
-        parameter (P_WQXY3=58 )!Herbers2026
-        parameter (P_WQXZ3=59 )!Herbers2026
-        parameter (P_WQYZ3=60 )!Herbers2026
-        parameter (P_DBJ1 =61 )!Herbers2024
-        parameter (P_DBJ2 =62 )!Herbers2024
-        parameter (P_DBJ3 =63 )!Herbers2024
-        parameter (P_DBJ4 =64 )!Herbers2024
-        parameter (P_DBJ5 =65 )!Herbers2024
-        parameter (P_DBJ6 =66 )!Herbers2024
-        parameter (P_DBJ7 =67 )!Herbers2024
-        parameter (P_DBJ8 =68 )!Herbers2024
-        parameter (P_DBJ9 =69 )!Herbers2024
-        parameter (P_DBJ10=70 )!Herbers2024
-        parameter (P_DBJ11=71 )!Herbers2024
-        parameter (P_DBK1 =72 )!Herbers2024
-        parameter (P_DBK2 =73 )!Herbers2024
-        parameter (P_DBK3 =74 )!Herbers2024
-        parameter (P_DBK4 =75 )!Herbers2024
-        parameter (P_DBK5 =76 )!Herbers2024
-        parameter (P_DBK6 =77 )!Herbers2024
-        parameter (P_DBK7 =78 )!Herbers2024
-        parameter (P_DBK8 =79 )!Herbers2024
-        parameter (P_DBK9 =80 )!Herbers2024
-        parameter (P_DBK10=81 )!Herbers2024
-        parameter (P_DBK11=82 )!Herbers2024
-        parameter (P_DBD1 =83 )!Herbers2024
-        parameter (P_DBD2 =84 )!Herbers2024
-        parameter (P_DBD3 =85 )!Herbers2024
-        parameter (P_DBD4 =86 )!Herbers2024
-        parameter (P_DBD5 =87 )!Herbers2024
-        parameter (P_DBD6 =88 )!Herbers2024
-        parameter (P_DBD7 =89 )!Herbers2024
-        parameter (P_DBD8 =90 )!Herbers2024
-        parameter (P_DBD9 =91 )!Herbers2024
-        parameter (P_DBD10=92 )!Herbers2024    
-        parameter (P_DBD11=93 )!Herbers2024  
-        parameter (P_DX1  =94 )!Herbers2024
-        parameter (P_DX2  =95 )!Herbers2024
-        parameter (P_DX3  =96 )!Herbers2024
-        parameter (P_DX4  =97 )!Herbers2024
-        parameter (P_DX5  =98 )!Herbers2024
-        parameter (P_DX6  =99 )!Herbers2024
-        parameter (P_DX7  =100)!Herbers2024
-        parameter (P_DX8  =101)!Herbers2024
-        parameter (P_DX9  =102)!Herbers2024
-        parameter (P_DX10 =103)!Herbers2024
-        parameter (P_DX11 =104)!Herbers2024
-        parameter (P_DY1  =105)!Herbers2024
-        parameter (P_DY2  =106)!Herbers2024
-        parameter (P_DY3  =107)!Herbers2024
-        parameter (P_DY4  =108)!Herbers2024
-        parameter (P_DY5  =109)!Herbers2024
-        parameter (P_DY6  =110)!Herbers2024
-        parameter (P_DY7  =111)!Herbers2024
-        parameter (P_DY8  =112)!Herbers2024
-        parameter (P_DY9  =113)!Herbers2024
-        parameter (P_DY10 =114)!Herbers2024
-        parameter (P_DY11 =115)!Herbers2024
-        parameter (P_DZ1  =116)!Herbers2024
-        parameter (P_DZ2  =117)!Herbers2024
-        parameter (P_DZ3  =118)!Herbers2024
-        parameter (P_DZ4  =119)!Herbers2024
-        parameter (P_DZ5  =120)!Herbers2024
-        parameter (P_DZ6  =121)!Herbers2024
-        parameter (P_DZ7  =122)!Herbers2024
-        parameter (P_DZ8  =123)!Herbers2024
-        parameter (P_DZ9  =124)!Herbers2024
-        parameter (P_DZ10 =125)!Herbers2024    
-        parameter (P_DZ11 =126)!Herbers2024  
-        parameter (P_Q2Z  =127)!h2024 2nd nucleus quadrupole coupling
-        parameter (P_Q2D  =128)!h2024 2nd nucleus quadrupole coupling
-        parameter (P_Q2XY =129)!h2024 2nd nucleus quadrupole coupling
-        parameter (P_Q2XZ =130)!h2024 2nd nucleus quadrupole coupling
-        parameter (P_Q2YZ =131)!h2024 2nd nucleus quadrupole coupling
-        parameter (P_DZX  =132)!Herbers2026
-        parameter (P_DZXJ =133)!Herbers2026
-        parameter (P_DZXK =134)!Herbers2026
-        parameter (P_VCCJ =135)!Herbers2026
-        parameter (P_VCCK =136)!Herbers2026
-        parameter (P_VCCD =137)!Herbers2026
-        parameter (P_VCCJ2=138)!Herbers2026
-        parameter (P_VCCJK=139)!Herbers2026
-        parameter (P_VCCK2=140)!Herbers2026
-        parameter (P_VCC_J=141)!Herbers2026
-        parameter (P_VCC_K=142)!Herbers2026
-        parameter (P_FFJ = 143)!Herbers2026
-        parameter (P_FFK = 144)!Herbers2026
-        parameter (P_FFD = 145)!Herbers2026
-        parameter (P_FFJ2= 146)!Herbers2026
-        parameter (P_FFJK= 147)!Herbers2026
-        parameter (P_FFK2= 148)!Herbers2026
-        parameter (P_FF_J= 149)!Herbers2026
-        parameter (P_FF_K= 150)!Herbers2026
-        parameter (P_PP  = 151)!Herbers2026
-        parameter (P_PPJ = 152)!Herbers2026
-        parameter (P_PPK = 153)!Herbers2026
-        parameter (P_PPD = 154)!Herbers2026
-        parameter (P_PPJ2= 155)!Herbers2026
-        parameter (P_PPJK= 156)!Herbers2026
-        parameter (P_PPK2= 157)!Herbers2026
-        parameter (P_PP_J= 158)!Herbers2026
-        parameter (P_PP_K= 159)!Herbers2026
-        parameter (P_DUMP =160)!Herbers2024
+        parameter (P_PX   = 39)
+        parameter (P_PY   = 40)
+        parameter (P_PZ   = 41)
+        parameter (P_E    = 42)!Herbers2023
+        parameter (P_GX12 = 43)!Herbers2024
+        parameter (P_GY12 = 44)!Herbers2024
+        parameter (P_GZ12 = 45)!Herbers2024
+        parameter (P_FXY1 = 46)!Herbers2024
+        parameter (P_FYZ1 = 47)!Herbers2024
+        parameter (P_FXZ1 = 48)!Herbers2024
+        parameter (P_GX34 = 49)!Herbers2024
+        parameter (P_GY34 = 50)!Herbers2024
+        parameter (P_GZ34 = 51)!Herbers2024
+        parameter (P_FXY3 = 52)!Herbers2024
+        parameter (P_FYZ3 = 53)!Herbers2024
+        parameter (P_FXZ3 = 54)!Herbers2024
+        parameter (P_GX56 = 55)!Herbers2024
+        parameter (P_GY56 = 56)!Herbers2024
+        parameter (P_GZ56 = 57)!Herbers2024
+        parameter (P_FXY5 = 58)!Herbers2024
+        parameter (P_FYZ5 = 59)!Herbers2024
+        parameter (P_FXZ5 = 60)!Herbers2024
+        parameter (P_WQXY1= 61)!Herbers2026
+        parameter (P_WQXZ1= 62)!Herbers2026
+        parameter (P_WQYZ1= 63)!Herbers2026
+        parameter (P_WQXY3= 64)!Herbers2026
+        parameter (P_WQXZ3= 65)!Herbers2026
+        parameter (P_WQYZ3= 66)!Herbers2026
+        parameter (P_WQXY5= 67)!Herbers2026
+        parameter (P_WQXZ5= 68)!Herbers2026
+        parameter (P_WQYZ5= 69)!Herbers2026
+        parameter (P_DBJ1 = 70)!Herbers2024
+        parameter (P_DBJ2 = 71)!Herbers2024
+        parameter (P_DBJ3 = 72)!Herbers2024
+        parameter (P_DBJ4 = 73)!Herbers2024
+        parameter (P_DBJ5 = 74)!Herbers2024
+        parameter (P_DBJ6 = 75)!Herbers2024
+        parameter (P_DBJ7 = 76)!Herbers2024
+        parameter (P_DBJ8 = 77)!Herbers2024
+        parameter (P_DBJ9 = 78)!Herbers2024
+        parameter (P_DBJ10= 79)!Herbers2024
+        parameter (P_DBJ11= 80)!Herbers2024
+        parameter (P_DBK1 = 81)!Herbers2024
+        parameter (P_DBK2 = 82)!Herbers2024
+        parameter (P_DBK3 = 83)!Herbers2024
+        parameter (P_DBK4 = 84)!Herbers2024
+        parameter (P_DBK5 = 85)!Herbers2024
+        parameter (P_DBK6 = 86)!Herbers2024
+        parameter (P_DBK7 = 87)!Herbers2024
+        parameter (P_DBK8 = 88)!Herbers2024
+        parameter (P_DBK9 = 89)!Herbers2024
+        parameter (P_DBK10= 90)!Herbers2024
+        parameter (P_DBK11= 91)!Herbers2024
+        parameter (P_DBD1 = 92)!Herbers2024
+        parameter (P_DBD2 = 93)!Herbers2024
+        parameter (P_DBD3 = 94)!Herbers2024
+        parameter (P_DBD4 = 95)!Herbers2024
+        parameter (P_DBD5 = 96)!Herbers2024
+        parameter (P_DBD6 = 97)!Herbers2024
+        parameter (P_DBD7 = 98)!Herbers2024
+        parameter (P_DBD8 = 99)!Herbers2024
+        parameter (P_DBD9 =100)!Herbers2024
+        parameter (P_DBD10=101)!Herbers2024    
+        parameter (P_DBD11=102)!Herbers2024  
+        parameter (P_DX1  =103)!Herbers2024
+        parameter (P_DX2  =104)!Herbers2024
+        parameter (P_DX3  =105)!Herbers2024
+        parameter (P_DX4  =106)!Herbers2024
+        parameter (P_DX5  =107)!Herbers2024
+        parameter (P_DX6  =108)!Herbers2024
+        parameter (P_DX7  =109)!Herbers2024
+        parameter (P_DX8  =110)!Herbers2024
+        parameter (P_DX9  =111)!Herbers2024
+        parameter (P_DX10 =112)!Herbers2024
+        parameter (P_DX11 =113)!Herbers2024
+        parameter (P_DY1  =114)!Herbers2024
+        parameter (P_DY2  =115)!Herbers2024
+        parameter (P_DY3  =116)!Herbers2024
+        parameter (P_DY4  =117)!Herbers2024
+        parameter (P_DY5  =118)!Herbers2024
+        parameter (P_DY6  =119)!Herbers2024
+        parameter (P_DY7  =120)!Herbers2024
+        parameter (P_DY8  =121)!Herbers2024
+        parameter (P_DY9  =122)!Herbers2024
+        parameter (P_DY10 =123)!Herbers2024
+        parameter (P_DY11 =124)!Herbers2024
+        parameter (P_DZ1  =125)!Herbers2024
+        parameter (P_DZ2  =126)!Herbers2024
+        parameter (P_DZ3  =127)!Herbers2024
+        parameter (P_DZ4  =128)!Herbers2024
+        parameter (P_DZ5  =129)!Herbers2024
+        parameter (P_DZ6  =130)!Herbers2024
+        parameter (P_DZ7  =131)!Herbers2024
+        parameter (P_DZ8  =132)!Herbers2024
+        parameter (P_DZ9  =133)!Herbers2024
+        parameter (P_DZ10 =134)!Herbers2024    
+        parameter (P_DZ11 =135)!Herbers2024  
+        parameter (P_Q2Z  =136)!h2024 2nd nucleus quadrupole coupling
+        parameter (P_Q2D  =137)!h2024 2nd nucleus quadrupole coupling
+        parameter (P_Q2XY =138)!h2024 2nd nucleus quadrupole coupling
+        parameter (P_Q2XZ =139)!h2024 2nd nucleus quadrupole coupling
+        parameter (P_Q2YZ =140)!h2024 2nd nucleus quadrupole coupling
+        parameter (P_DZX  =141)!Herbers2026
+        parameter (P_DZXJ =142)!Herbers2026
+        parameter (P_DZXK =143)!Herbers2026
+        parameter (P_VCCJ =144)!Herbers2026
+        parameter (P_VCCK =145)!Herbers2026
+        parameter (P_VCCD =146)!Herbers2026
+        parameter (P_VCCJ2=147)!Herbers2026
+        parameter (P_VCCJK=148)!Herbers2026
+        parameter (P_VCCK2=149)!Herbers2026
+        parameter (P_VCC_J=150)!Herbers2026
+        parameter (P_VCC_K=151)!Herbers2026
+        parameter (P_FFJ = 152)!Herbers2026
+        parameter (P_FFK = 153)!Herbers2026
+        parameter (P_FFD = 154)!Herbers2026
+        parameter (P_FFJ2= 155)!Herbers2026
+        parameter (P_FFJK= 156)!Herbers2026
+        parameter (P_FFK2= 157)!Herbers2026
+        parameter (P_FF_J= 158)!Herbers2026
+        parameter (P_FF_K= 159)!Herbers2026
+        parameter (P_PP  = 160)!Herbers2026
+        parameter (P_PPJ = 161)!Herbers2026
+        parameter (P_PPK = 162)!Herbers2026
+        parameter (P_PPD = 163)!Herbers2026
+        parameter (P_PPJ2= 164)!Herbers2026
+        parameter (P_PPJK= 165)!Herbers2026
+        parameter (P_PPK2= 166)!Herbers2026
+        parameter (P_PP_J= 167)!Herbers2026
+        parameter (P_PP_K= 168)!Herbers2026
+        parameter (P_DUMP =169)!Herbers2024
 
 C ********                    DIMENSION: DIMPRR
 
@@ -956,6 +971,7 @@ C   control integers
       integer C_NFOLD1,C_NFOLD2,C_NFOLD3,C_NFOLD4
 C      integer C_DW12SL,C_DW12SH,C_DW34SL,C_DW34SH
       integer C_DWSOFF
+      integer C_DWVOFF
       integer C_PASSGN
       integer C_SVDER,C_LAST, C_FITSC
       integer C_MAXM, C_MAXV
@@ -998,8 +1014,9 @@ C        parameter (C_DW12SH=29)
 C        parameter (C_DW34SL=30)
 C        parameter (C_DW34SH=31)
         parameter (C_DWSOFF=28)!DWSoff 0 means: pair S1 with S1, S2 with S2 etc.  1 means: pair S1 with S2, S3 with S4 etc.
-        parameter (C_PASSGN=29)!Any but 0 means:Supress error asgn printing
-        parameter (C_LAST  =29) 
+        parameter (C_DWVOFF=29)!DWVoff is required if the Bs are associated to different Vs 
+        parameter (C_PASSGN=30)!Any but 0 means:Supress error asgn printing
+        parameter (C_LAST  =31) 
       integer C_ROFIT, C_EPS, C_DEFER, C_WEIGF, C_CNVG
       integer C_LMBDA, C_FRQLO,C_FRQUP,C_INTLM, C_TEMP
         parameter (C_ROFIT=C_LAST+1, C_EPS  =C_LAST+2)

@@ -917,7 +917,7 @@ c      write(*,*) 'bld2vjk',mclock()-t1
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
       end if
 C      t1=mclock()
-      call addrig_old(j,gam,f1
+      call addrig(j,gam,f1
      $     ,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori,complex)
         
 c      write(*,*) 'addrig',mclock()-t1
@@ -1085,15 +1085,28 @@ C     fistat > 0  Eigenvalues for differential quotient
       integer sorti(2*DIMTOT)
       integer counti,countis
       real*8  evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  evalvu(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  evalvl(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
       real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  ovvu(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  ovvl(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
       real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
+      real*8  rotmu(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
+      real*8  rotml(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
       real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
+      real*8  rottu(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
+      real*8  rottl(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
       real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
+     $     -DIMSIG:DIMSIG,DIMTOP)
+      real*8  toriu(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
+     $     -DIMSIG:DIMSIG,DIMTOP)
+      real*8  toril(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
      $     -DIMSIG:DIMSIG,DIMTOP)
       real*8  atot(DIMPAR,DIMVB)
       real*8  al(DIMPAR), au(DIMPAR)
       real*8  palc(DIMFIT,-1:DIMPLC)
       real*8  normi1, normi2 !renormalization in spearted hamiltonian matrices
+      real*8  beta_tot
       integer pali(DIMFIT, 0:DIMPLC,2)
       integer qmv(DIMV),ifittot(DIMPAR,DIMVB),dfit(DIMFIT)
       integer qmvs(2,DIMV)
@@ -1103,6 +1116,7 @@ C     quantum numbers
       integer qvks(2,DIMTOT,Q_K:Q_V+DIMTOP) 
       integer qv(DIMTOT)
       integer qvs(2,DIMTOT)
+      integer oldju, oldjl
 C     work
       real*8  e(DIMTOT),e2(DIMTOT),tau(2,DIMTOT)
       real*8  e_2(2*DIMTOT),e2_2(2*DIMTOT),tau_2(2,2*DIMTOT)
@@ -1119,6 +1133,7 @@ C     work
       integer ruse(DIMVV,DIMVV,DIMTOP)
       integer counter1
       integer counter2
+      integer mini,maxi
       real*8 dj,djj1,e1,djjc,di,dii1,df,dff1,dg
       character*30 fmtstr
       character*30 fmtstr2
@@ -1143,7 +1158,18 @@ C     work
       
       gam2=gam
       gam1=gam
-
+C      if (ctlint(C_DWVOFF).eq.1) then !initialization not needed.
+C        evalvu=evalv
+C        ovvu=ovv
+C        rotmu=rotm
+C        rottu=rott
+C        toriu=tori
+C        evalvl=evalv
+C        ovvl=ovv
+C        rotml=rotm
+C        rottl=rott
+C        toril=tori
+C      end if 
       
 
       dj=dble(j)
@@ -1177,10 +1203,20 @@ C     for J=0
           ibselect=2
           call dw_idgam(gam,gam1,gam2,ibselect)!,1,0)
         end if
-      else
+      else if (ib.le.4) then
         ibl=3
         ibu=4  
         if (ib.eq.3) then
+         ibselect=1
+         call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
+        else
+          ibselect=2
+          call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
+        endif
+       else 
+        ibl=5
+        ibu=6  
+        if (ib.eq.5) then
          ibselect=1
          call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
         else
@@ -1202,7 +1238,55 @@ C      write(*,*) gam,gam1, gam2
       complex=.true. ! this marks the hamiltonian as containing complex matrix elements in several subroutines. Not sure if putting it false for certain parametersets really speeds things up, I will keep it as true for now
 
       usert = 1
-
+C     Copied introt part from iam.f Herbers2026
+C     Recalculation of internal rotation part in case the Bs are affiliated with different Vs
+C     This is repeated for the upper ibu state further down the code.
+C     DWVoff must be set to 1 for the recalculation to be carried out.
+      if (ctlint(C_DWVOFF).eq.1) then
+        size(S_VV)=1
+        do iv=1, DIMVV
+          if (qvv(iv,1,ibl).eq.-1) goto 11
+          size(S_VV)=iv
+        end do
+ 11     continue
+        do itop=1, ctlint(C_NTOP)
+          mini=99
+          maxi=-1
+          do iv=1, size(S_VV)
+            if (qvv(iv,itop,ibl).lt.mini) mini=qvv(iv,itop,ibl) 
+            if (qvv(iv,itop,ibl).gt.maxi) maxi=qvv(iv,itop,ibl) 
+          end do
+          size(S_V+itop)=maxi-mini+1
+          size(S_MINV+itop)=mini
+          if (size(S_V+itop).lt.0) stop 'error in up reint calvjk_d'
+        end do
+       
+            call adjusta(atot(1,ibl),npar,ctlint(C_ADJF))
+C      calc the |m> and |K> part in the rho-system
+           call calmk(ibl,h,evalvl,ovvl,rotml,rottl,toril
+     $          ,atot(1,ibl),qmv,ifittot(1,ibl),npar,fistat,0)
+           h=0.0
+C      set up the rotation matrix  !Herbers2026
+        do itop=1,ctlint(C_NTOP)
+         beta_tot=atot(P1_BETA+DIMPIR*(itop-1),ibl)
+     $      +dble((j*(j+1))**1)*atot(P1_BETJ1+DIMPIR*(itop-1),ibl)
+     $      +dble((j*(j+1))**2)*atot(P1_BETJ2+DIMPIR*(itop-1),ibl)
+     $      +dble((j*(j+1))**3)*atot(P1_BETJ3+DIMPIR*(itop-1),ibl)
+     $      +dble((j*(j+1))**4)*atot(P1_BETJ4+DIMPIR*(itop-1),ibl)
+         oldjl=0
+           call rotate(rotml(-DIMJ,-DIMJ,1,itop)
+     $          ,beta_tot,j,oldjl)
+        end do
+      end if
+C     
+C     End of Recalculation of internal rotation part DWVoff=1 case
+C     
+      
+      do ivr=1, size(S_H) 
+        do ivc=1, size(S_H)
+          h(ivr,ivc)=0.0
+        end do
+      end do
 
       size(S_K)=2*j+1
 C     initialize the quantum no.s qvk
@@ -1242,9 +1326,13 @@ C     initialize the quantum no.s qvk
       end do
 
       if (gam1.ne.0) then 
+      if (ctlint(C_DWVOFF).eq.1) then
+        call bld2vjk(j,gam1,f1
+     $         ,qvk,ruse,h,al,evalvl,ovvl,rotml,rottl,toril,complex)
+      else 
         call bld2vjk(j,gam1,f1
      $         ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
-
+      end if 
 C        end if
 
 c      write(*,*) 'bld2vjk',mclock()-t1
@@ -1253,8 +1341,13 @@ c      write(*,*) 'bld2vjk',mclock()-t1
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
       end if
 C      t1=mclock()
-      call addrig_old(j,gam1,f1
+      if (ctlint(C_DWVOFF).eq.1) then
+      call addrig(j,gam1,f1
+     $     ,qvk,ruse,h,al,evalvl,ovvl,rotml,rottl,toril,complex)
+      else
+      call addrig(j,gam1,f1
      $     ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
+      end if
 C---
 C      t1=mclock()
        do i=1, DIMTOT
@@ -1274,6 +1367,64 @@ C     Starting a copy with ibu
 C     Starting a copy with ibu
 C     Starting a copy with ibu
 C     Starting a copy with ibu
+
+
+C     Recalculation of internal rotation part in case the Bs are affiliated with different Vs
+C     This is repeated for the lower ibl state further up the code.
+C     DWVoff must be set to 1 for the recalculation to be carried out.
+      if (ctlint(C_DWVOFF).eq.1) then
+        size(S_VV)=1
+        do iv=1, DIMVV
+          if (qvv(iv,1,ibu).eq.-1) goto 12
+          size(S_VV)=iv
+        end do
+ 12     continue
+        do itop=1, ctlint(C_NTOP)
+          mini=99
+          maxi=-1
+          do iv=1, size(S_VV)
+            if (qvv(iv,itop,ibu).lt.mini) mini=qvv(iv,itop,ibu) 
+            if (qvv(iv,itop,ibu).gt.maxi) maxi=qvv(iv,itop,ibu) 
+          end do
+          size(S_V+itop)=maxi-mini+1
+          size(S_MINV+itop)=mini
+          if (size(S_V+itop).lt.0) stop 'error in up reint calvjk_d'
+        end do
+
+          call adjusta(atot(1,ibu),npar,ctlint(C_ADJF))
+C     calc the |m> and |K> part in the rho-system
+          call calmk(ibu,h,evalvu,ovvu,rotmu,rottu,toriu
+     $         ,atot(1,ibu),qmv,ifittot(1,ibu),npar,fistat,0)
+C     set up the rotation matrix  !Herbers2026
+        do itop=1,ctlint(C_NTOP)
+        beta_tot=atot(P1_BETA+DIMPIR*(itop-1),ibu)
+     $     +dble((j*(j+1))**1)*atot(P1_BETJ1+DIMPIR*(itop-1),ibu)
+     $     +dble((j*(j+1))**2)*atot(P1_BETJ2+DIMPIR*(itop-1),ibu)
+     $     +dble((j*(j+1))**3)*atot(P1_BETJ3+DIMPIR*(itop-1),ibu)
+     $     +dble((j*(j+1))**4)*atot(P1_BETJ4+DIMPIR*(itop-1),ibu)
+        oldju=0
+          call rotate(rotmu(-DIMJ,-DIMJ,1,itop)
+     $         ,beta_tot,j,oldju)
+        end do
+      end if 
+C     
+C     End of Recalculation of internal rotation part DWVoff=1 case
+C     
+C      write(*,*) "evalvs for comparison."
+C      write(*,*) "evalv:"
+C      do i=1, DIMV
+C        write(*,'(*(E12.5,1X))') evalv(i,:,0,1)
+C      end do
+C      write(*,*) "evalvl:"
+C      do i=1, DIMV
+C        write(*,'(*(E12.5,1X))') evalvl(i,:,0,1)
+C      end do
+C      write(*,*) "evalvu:"
+C      do i=1, DIMV
+C        write(*,'(*(E12.5,1X))') evalvu(i,:,0,1)
+C      end do
+      
+      
       i=0
       do iv=1, size(S_VV)
         do ik=1, size(S_K)
@@ -1315,16 +1466,24 @@ C     Starting a copy with ibu
       end do
 
       if (gam2.ne.0) then 
-
+      if (ctlint(C_DWVOFF).eq.1) then
+        call bld2vjk(j,gam2,f1
+     $         ,qvk,ruse,h,au,evalvu,ovvu,rotmu,rottu,toriu,complex)
+      else
         call bld2vjk(j,gam2,f1
      $         ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
-
+      end if
       else
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
       end if
 C      t1=mclock()
-      call addrig_old(j,gam2,f1
+      if (ctlint(C_DWVOFF).eq.1) then
+      call addrig(j,gam2,f1
+     $     ,qvk,ruse,h,au,evalvu,ovvu,rotmu,rottu,toriu,complex)
+      else
+      call addrig(j,gam2,f1
      $     ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
+      end if
         
 
 C---
@@ -1380,6 +1539,16 @@ C             --- Sven 25-07-2024
          Chixy=al(P_WQXY3)*(-1.0)
          Chiyz=al(P_WQYZ3)*(-1.0)
          Chixz=al(P_WQXZ3)*(-1.0)
+       else if (ib.le.6) then
+         Gz =al(P_GZ56)
+         Gy =al(P_GY56)
+         Gx =al(P_GX56)
+         Fxy=al(P_FXY5)  
+         Fxz=al(P_FXZ5)!
+         Fyz=al(P_FYZ5)!      
+         Chixy=al(P_WQXY5)*(-1.0)
+         Chiyz=al(P_WQYZ5)*(-1.0)
+         Chixz=al(P_WQXZ5)*(-1.0)
        end if
         
 C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
@@ -1613,46 +1782,6 @@ C     work
       end do
       return
       end
-C----------------------------------------------------------------------
-      subroutine addrig_old(j,gam,f,qvk,ruse
-     $     ,h,a,evalv,ovv,rotm,rott,tori,complex)
-      implicit none
-      include 'iam.fi'
-      integer j,gam,f
-      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      real*8  h(DIMTOT,DIMTOT),a(DIMPAR)
-      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-      logical complex
-C     work
-      real*8 vr(DIMTOT), vi(DIMTOT), vor(DIMTOT), voi(DIMTOT)
-      integer i,iv
-
-      do i =1, size(S_H)
-        do iv=1, size(S_H)
-          vr(iv)=0.0
-          vor(iv)=0.0
-          vi(iv)=0.0
-          voi(iv)=0.0
-        end do
-        vr(i )=1.0d0
-        call hmulthrr(j,gam,f
-     $       ,qvk,ruse,a,vr,vi,vor,voi,evalv,ovv,rotm,tori,0,0)
-        do iv=1, i
-          h(i,iv)=h(i,iv)+vor(iv)
-        end do
-        do iv=i+1, size(S_H)
-          h(i,iv)=h(i,iv)+voi(iv)
-        end do
-      end do
-      return
-      end
-
 C----------------------------------------------------------------------
       subroutine hcaldev(vr,vi,j,gam,f,ib,ifit,npar
      $     ,qvk,ruse,a,dedp,evalv,ovv,rotm,tori)
