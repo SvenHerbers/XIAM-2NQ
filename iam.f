@@ -71,8 +71,8 @@ C     real*8  ab(DIMPAR)
 C      write(*,'(A,$)') ' Calculation date and time: '
       call mydate()
       write(*,*)
-      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.43 -' 
-     $                  ,'By Sven Herbers 06-April-2026' 
+      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.43b -' 
+     $                  ,'By Sven Herbers 12-April-2026' 
       write(*,*) 'sven_herbers@web.de'
       write(*,*) 'Cite: J. Chem. Phys., 2025, '
      $         ,'162, 234304, DOI: 10.1063/5.0267651 ' 
@@ -1473,7 +1473,7 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P_DBJ9  ) /'S9_BJ   '/, parfit(P_DBJ9  ) /0/ 
       data parstr(P_DBJ10 ) /'S10_BJ  '/, parfit(P_DBJ10 ) /0/ 
       data parstr(P_DBJ11 ) /'S11_BJ  '/, parfit(P_DBJ11 ) /0/ 
-      data parstr(P_DBK1  ) /'S1BK    '/, parfit(P_DBK1  ) /0/ 
+      data parstr(P_DBK1  ) /'S1_BK    '/, parfit(P_DBK1  ) /0/ 
       data parstr(P_DBK2  ) /'S2_BK   '/, parfit(P_DBK2  ) /0/ 
       data parstr(P_DBK3  ) /'S3_BK   '/, parfit(P_DBK3  ) /0/ 
       data parstr(P_DBK4  ) /'S4_BK   '/, parfit(P_DBK4  ) /0/ 

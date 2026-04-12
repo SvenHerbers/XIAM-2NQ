@@ -1068,8 +1068,8 @@ C     print potential paramaters
         write(*,'((A,F12.6,A,F8.4,A),A,F11.6)')
      $       '        '
      $       ,a(P1_VN1+ift)*incm,' cm +/- ',da(P1_VN1+ift)*incm
-     $       ,' cm ','   s='
-     $       ,4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F))
+     $       ,' cm ','   s = 4V1n/9F = ' !Herbers2026 - added definition of F
+     $       ,4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F+ift))!Herbers2026 - added +ift for correct print of reduced barrier
       end do
       if (a(P1_VN2+ift).ne.0.0d0) then
       do itop=1, ctlint(C_NTOP)
