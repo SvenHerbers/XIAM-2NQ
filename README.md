@@ -278,7 +278,7 @@ This has been corrected to `4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F+ift))` ensuring th
   XIAM-2NQ v0.43 - 06-April-2026
   - Added coupling parameters for vibrational states 5 and 6 (e.g. `Fxz56`)
   - Increased the dimensions in `iam.fi` to support up to six distinct sets of rotational constants within a single fit.
-  - Introduced the control parameter `DWVoff`. When using `ctrl 1` and the different sets of rotational constants are supposed to correspond to separate torsional states in a split-basis treatment, this parameter should be set to 1 to ensure proper treatment of cross-torsional coupling (no example case yet).
+  - Introduced the control parameter `DWVoff`. When using `ctrl 1` DWVoff ensures that the coupled states use their respective internal rotation parts correctly. It should always be turned on if the internal rotation part or the angles `beta` or `gamma` of the two states are not identical.
     
   XIAM-2NQ v0.40c - 16-March-2026
   - Fixed an error in handling `S 0` (rigid-rigid) lines in `hmulthrr` which lead to wrong results wenn used together with offdiagonal `chiyz34` or `S11_` parameters.
