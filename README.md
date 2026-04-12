@@ -268,6 +268,13 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 
 ## Update Notes
 
+
+  XIAM-2NQ v0.43b - 12-April-2026
+  - Fixed a bug in `subroutine prpot` (`iamio.f`): the reduced barrier was incorrectly computed as `4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F))` which always used the F parameter of the first rotor.
+This has been corrected to `4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F+ift))` ensuring the rotor-dependent F is used properly.
+  - Improved output printing: the reduced barrier is now printed as `s = 4V1n/9F =` instead of the previous ambiguous `s =`
+  - Fixed an input read issue: `S1_BK` was previously expected incorrectly under the name `S1BK`; this has now been corrected.
+
   XIAM-2NQ v0.43 - 06-April-2026
   - Added coupling parameters for vibrational states 5 and 6 (e.g. `Fxz56`)
   - Increased the dimensions in `iam.fi` to support up to six distinct sets of rotational constants within a single fit.
