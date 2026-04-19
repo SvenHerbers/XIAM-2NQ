@@ -268,9 +268,8 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 | `chixy12,chixy34,chixy56,chiyz12,chiyz34,chiyz56,chixz12,chixz34,chixz56` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
-  XIAM-2NQ v0.44 - 19 April 2026
-    This release introduces a necessary bug fix for the migration from `ifort` to `ifx`, along with general code cleanup and performance improvements.
-  - Migrated compiler from `ifort` to `ifx`
+  XIAM-2NQ v0.44 - 19-April-2026 <br>
+  This release introduces a necessary bug fix for the migration from `ifort` to `ifx`, along with general code cleanup and performance improvements.
   - General code cleanup (e.g., removal of the obsolete subroutine `hcaldev_old`)
   - Refactored construction of the tunneling off-diagonal matrix (including Pickett’s Fxy parameters and related terms) into a dedicated subroutine `addoffdiags_dw`
   - Fixed a bug in `hmultrr` caused by missing initializations (e.g., `al2 = 0.0`); this issue was tolerated by `ifort` but exposed by `ifx`
