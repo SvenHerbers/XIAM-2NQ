@@ -2,25 +2,26 @@
 XIAM-2NQ is a spectral fitting program for molecules containing up to two quadrupolar nuclei and four internal rotors. It extends the original XIAM code by Hartwig which is available at the [PROSPE](http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.  
 This repository provides the complete source code required to build the program. A makefile is included for straightforward compilation on Linux systems. Alternatively, the source files can be compiled step-by-step using the Intel ifortran compiler.
 
-XIAMi2NQ.exe was built with the Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32 (Version 2021.13.1).  
-Compilation was carried out using the following command line entries: <br/> 
-ifort -c iamint.f <br/> 
-ifort -c iamio.f <br/> 
-ifort -c mgetx.f <br/> 
-ifort -c iamv.f <br/> 
-ifort -c iamlib.f <br/> 
-ifort -c iamfit.f <br/> 
-ifort -c iamv2.f <br/> 
-ifort -c iamadj.f <br/> 
-ifort -c iamm.f <br/> 
-ifort -c iamsys.f <br/> 
-ifort -c iam.f <br/> 
-
-ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f <br/> 
+XIAMi2NQ.exe was built with the Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2025.3.3.
+Compilation was carried out using the following command line entries:
+```
+ifx -c iamint.f
+ifx -c iamio.f
+ifx -c mgetx.f
+ifx -c iamv.f
+ifx -c iamlib.f
+ifx -c iamfit.f
+ifx -c iamv2.f
+ifx -c iamadj.f
+ifx -c iamm.f
+ifx -c iamsys.f
+ifx -c iam.f
+ifx -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f
+```
 
 Citation: J. Chem. Phys. 162, 234304 (2025) [DOI: 10.1063/5.0267651](https://doi.org/10.1063/5.0267651)
 
-The executable provided in this repository was compiled with the following limits: **Jmax = 70, I1max = 5/2, I2max = 5/2,** and up to **two 3-fold tops**. All array dimensions are defined at compile time. These limits can be modified in `iam.fi`, after which the program must be recompiled. Be aware that memory allocation in XIAM-2NQ is static. Increasing these limits beyond a certain point may cause the Hamiltonian matrix to exceed available memory. If significantly larger Jmax values are required for molecules without quadrupole coupling and without a double-well potential, it is recommended to first set `DIMQ=1`, `DIMQ2=1`, and `DIMDW=1` in `iam.fi`.
+The executable provided in this repository was compiled with the following limits: **Jmax = 71, I1max = 5/2, I2max = 5/2,** and up to **two 3-fold tops**. All array dimensions are defined at compile time. These limits can be modified in `iam.fi`, after which the program must be recompiled. Be aware that memory allocation in XIAM-2NQ is static. Increasing these limits beyond a certain point may cause the Hamiltonian matrix to exceed available memory. If significantly larger Jmax values are required for molecules without quadrupole coupling and without a double-well potential, it is recommended to first set `DIMQ=1`, `DIMQ2=1`, and `DIMDW=1` in `iam.fi`.
 
 Example input and output files are provided in the example repository [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples).
 
@@ -267,7 +268,14 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 | `chixy12,chixy34,chixy56,chiyz12,chiyz34,chiyz56,chixz12,chixz34,chixz56` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
-
+  XIAM-2NQ v0.44 - 19 April 2026
+    This release introduces a necessary bug fix for the migration from `ifort` to `ifx`, along with general code cleanup and performance improvements.
+  - Migrated compiler from `ifort` to `ifx`
+  - General code cleanup (e.g., removal of the obsolete subroutine `hcaldev_old`)
+  - Refactored construction of the tunneling off-diagonal matrix (including Pickett’s Fxy parameters and related terms) into a dedicated subroutine `addoffdiags_dw`
+  - Fixed a bug in `hmultrr` caused by missing initializations (e.g., `al2 = 0.0`); this issue was tolerated by `ifort` but exposed by `ifx`
+  - Improved initialization of `h_3` and `h_3NQ2` by aligning submatrix dimensions more closely with actual usage
+  - Minor performance improvement in `calvjk_d` by correcting the loop bound from `DIMTOT` to `size(S_H)` when writing `h` to `h_2` for the lower state.
 
   XIAM-2NQ v0.43b - 12-April-2026
   - Fixed a bug in `subroutine prpot` (`iamio.f`): the reduced barrier was incorrectly computed as `4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F))` which always used the F parameter of the first rotor.
