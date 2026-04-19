@@ -85,6 +85,7 @@ C      real*8  dedp(DIMPAR) ! not used but maybe later
       integer mycounters(DIMQ2,DIMQ+DIMQ2)
       integer hitsJP((DIMQ+DIMQ2),0:1)                         ! remove if not needed.
       integer indicesJP(DIMQ+DIMQ2,0:1,(DIMQ+DIMQ2)*(DIMJ+1)) ! remove if not needed.
+      integer initdim
       character*4 fnpre
 C      character*6 fnpost
       logical masave
@@ -209,9 +210,18 @@ C------Construction of Htot Starts
       noJsinF1s=0
       nJPPMinF1=0
       h_2_sizes=0
-      h_3NQ2=0.0
-      h_3 =0.0
-
+C      h_3NQ2=0.0
+C      h_3 =0.0  
+C      
+      initdim = ((2*maxJ+1)               ! close to max dimension, but a bit overestimating
+     $          * (ctlint(C_SPIN2) + 1)   ! init speed could still be improved tayloring this closer
+     $          * (ctlint(C_SPIN) + 1))    ! to the actual matrix size
+      if (initdim .ge. DIMQ2*DIMQ*DIMTOT) then
+         initdim = DIMQ2*DIMQ*DIMTOT
+      end if
+      h_3NQ2(1:initdim,1:initdim) = 0.0
+      h_3(1:initdim,1:initdim) = 0.0
+      
       do f1=startf1,endf1,2 ! uses a step size of 2
        
        cm=(f1-startf1)/2!count matrices
@@ -1047,7 +1057,7 @@ C      if (usert.eq.0) then
               e(ie)=zr(ie,id)
               e2(ie)=zi(ie,id)
             end do
-            call hcaldev_old(e,e2,j,gam,f1,ib,ifit,npar
+            call hcaldev(e,e2,j,gam,f1,ib,ifit,npar
      $           ,qvk,ruse,a,dedp,evalv,ovv,rotm,tori)
             call devsave(j,gam,f1,ib,qmk(id,Q_T)
      $           ,ifit,dfit,dedp,palc,pali)
@@ -1117,6 +1127,7 @@ C     quantum numbers
       integer qv(DIMTOT)
       integer qvs(2,DIMTOT)
       integer oldju, oldjl
+      integer off1,off2 
 C     work
       real*8  e(DIMTOT),e2(DIMTOT),tau(2,DIMTOT)
       real*8  e_2(2*DIMTOT),e2_2(2*DIMTOT),tau_2(2,2*DIMTOT)
@@ -1230,9 +1241,6 @@ C      write(*,*) gam,gam1, gam2
 
       if (ctlint(C_EVAL).gt.3)   masave=.true.
 
-      if ((myand(ctlint(C_PRI),AP_ST).ne.0).and.(xde.ge.1))
-     $     write(*,'(A,5I3)')
-     $     'starting with J,S,B,F Fit_stat=',J,gam,ibl,f1,fistat
       fnpre='xiam'
       if (gam1.eq.0) ctlint(C_NTOP)=0
       complex=.true. ! this marks the hamiltonian as containing complex matrix elements in several subroutines. Not sure if putting it false for certain parametersets really speeds things up, I will keep it as true for now
@@ -1350,8 +1358,8 @@ C      t1=mclock()
       end if
 C---
 C      t1=mclock()
-       do i=1, DIMTOT
-         do ie=1, DIMTOT
+       do i=1, size(S_H)
+         do ie=1, size(S_H)
            h_2(i,ie)=h(i,ie) !copying h to h2
          end do
        end do 
@@ -1410,19 +1418,6 @@ C     set up the rotation matrix  !Herbers2026
 C     
 C     End of Recalculation of internal rotation part DWVoff=1 case
 C     
-C      write(*,*) "evalvs for comparison."
-C      write(*,*) "evalv:"
-C      do i=1, DIMV
-C        write(*,'(*(E12.5,1X))') evalv(i,:,0,1)
-C      end do
-C      write(*,*) "evalvl:"
-C      do i=1, DIMV
-C        write(*,'(*(E12.5,1X))') evalvl(i,:,0,1)
-C      end do
-C      write(*,*) "evalvu:"
-C      do i=1, DIMV
-C        write(*,'(*(E12.5,1X))') evalvu(i,:,0,1)
-C      end do
       
       
       i=0
@@ -1502,118 +1497,23 @@ C      t1=mclock()
 C      End of copy
 C      End of copy        
 
+        off1=0
+        off2=size(S_H)
+        call addoffdiags_dw(off1,off2,ib,j,f1,al,au,h_2) !
         
-C      The following implementation of Gx,y,z and Fxy, Fyz and Fxz, differes from that in SPFIT/SPCAT       
-C      While if all Fs and all Gs are fit on their own, the Data simulated using SPFIT/SPCAT is reproduced
-C      Mixing the Fs and Gs will lead to disagreement.       
-C      This is likely due to inconsistensies in phase convention in my implementation here.
-C      For now, I discourage mixing G and F parameters until this disagreement is fixed.
-C      
-C             --- Sven 25-07-2024
-       Gz    = 0.0
-       Gy    = 0.0
-       Gx    = 0.0
-       Fxy   = 0.0
-       Fxz   = 0.0
-       Fyz   = 0.0
-       Chixy = 0.0
-       Chixz = 0.0
-       Chiyz = 0.0
-       if (ib.le.2) then
-         Gz =al(P_GZ12)
-         Gy =al(P_GY12)
-         Gx =al(P_GX12)
-         Fxy=al(P_FXY1)
-         Fxz=al(P_FXZ1)
-         Fyz=al(P_FYZ1)
-         Chixy=al(P_WQXY1)*(-1.0) !Sign change to match relative signs in spfit output !these are offdiagonal nqcc matrix elements but used offdiagonal in v. Matrix elements offdiagonal in J neglected.
-         Chiyz=al(P_WQYZ1)*(-1.0) !
-         Chixz=al(P_WQXZ1)*(-1.0) !
-       else if (ib.le.4) then
-         Gz =al(P_GZ34)
-         Gy =al(P_GY34)
-         Gx =al(P_GX34)
-         Fxy=al(P_FXY3)  
-         Fxz=al(P_FXZ3)!
-         Fyz=al(P_FYZ3)!      
-         Chixy=al(P_WQXY3)*(-1.0)
-         Chiyz=al(P_WQYZ3)*(-1.0)
-         Chixz=al(P_WQXZ3)*(-1.0)
-       else if (ib.le.6) then
-         Gz =al(P_GZ56)
-         Gy =al(P_GY56)
-         Gx =al(P_GX56)
-         Fxy=al(P_FXY5)  
-         Fxz=al(P_FXZ5)!
-         Fyz=al(P_FYZ5)!      
-         Chixy=al(P_WQXY5)*(-1.0)
-         Chiyz=al(P_WQYZ5)*(-1.0)
-         Chixz=al(P_WQXZ5)*(-1.0)
-       end if
         
-C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
-       if (Gz .ne. 0.0) then
-         do ik=1, 2*j+1
-           h_2(ik,size(S_H)+ik)=Gz*1.0*(ik-1-j)! on complex off diag Gordy_Cook eq 7.135 p290 
-         end do !  
-       end if 
-       if (Gy .ne. 0.0) then
-         do ik=1, 2*j
-             h_2(ik,size(S_H)+ik+1)=h_2(ik,size(S_H)+ik+1)+0.5*Gy
-     $                *sqrt(1.0*(j-(ik-1-j))*(j+(ik-1-j)+1)) ! on complex off diag
-             h_2(ik+1,size(S_H)+ik)=h_2(ik+1,size(S_H)+ik)+0.5*Gy
-     $                *-1.0*sqrt(1.0*(j-(ik-1-j))*(j+(ik-1-j)+1)) ! on complex off diag
-         end do
-       end if 
-       if (Gx .ne. 0.0) then
-         do ik=2, 2*j+1
-             h_2(size(S_H)+ik,ik-1)=h_2(size(S_H)+ik,ik-1)+0.5*Gx
-     $                *sqrt(1.0*(j+(ik-1-j))*(j-(ik-1-j)+1)) ! on real off diag
-              h_2(size(S_H)+ik-1,ik)=h_2(size(S_H)+ik-1,ik)+0.5*Gx
-     $                *sqrt(1.0*(j+(ik-1-j))*(j-(ik-1-j)+1)) ! on real off diag
-         end do 
-       end if
+C       The problem is that there can be 0 energy levels e.g. J=0. 
+C       however the diagonalization routine does not accept zero entries. 
+C       This means I have to check, if for both rotational states the entries are zero.
+C       If this is not the case, I will add a small offset to the one that is non zero
+        do i = 1, 2*size(S_H) !
+        check1=abs(h_2(i,i))    
+        if (check1.le.1.0e-14) then
+            h_2(i,i)=5.0e-14 
+        end if
+       end do     
        
-       !FXY is imaginary!Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
-       if ((Fxy .ne. 0.0).or.(Chixy .ne. 0.0)) then !and based on doi.org/10.1063/1.1677430
-         do ik=1, 2*j-1
-           if(j.eq.1)then
-             fjn=(0.5*j*(j+1))**2
-           else
-             fjn=0.25*(j*(j+1)-(ik-j)*((ik-j)+1))
-     $          *(j*(j+1)-(ik-j)*((ik-j)-1))
-
-           end if 
-             h_2(ik,size(S_H)+ik+2)=h_2(ik,size(S_H)+ik+2) 
-     $        +sqrt(fjn)*(Fxy-2*Chixy*e1)
-             h_2(ik+2,size(S_H)+ik)=h_2(ik+2,size(S_H)+ik)
-     $         -1.0*sqrt(fjn)*(Fxy-2*Chixy*e1)
-         end do
-       end if        
-       
-       ! FYZ is put on the imaginary
-       if ((Fyz .ne. 0.0).or.(Chiyz .ne. 0.0)) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
-         do ik=1, 2*j
-             h_2(ik,size(S_H)+ik+1)=
-     $  h_2(ik,size(S_H)+ik+1)+0.5*(2*(ik-1-j)+1)
-     $  *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*(Fyz-2.0*Chiyz*e1)
-             h_2(ik+1,size(S_H)+ik)=
-     $  h_2(ik+1,size(S_H)+ik)-0.5*(2*(ik-1-j)+1)
-     $  *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*(Fyz-2.0*Chiyz*e1)
-         end do
-       end if        
-       !FXZ is put on the real
-       if ((Fxz .ne. 0.0).or.(Chixz .ne. 0.0)) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
-         do ik=1, 2*j
-            h_2(size(S_H)+ik+1,ik)=h_2(size(S_H)+ik+1,ik)+(0.5* 
-     $         (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
-     $          *(Fxz-2.0*Chixz*e1)
-             h_2(size(S_H)+ik,ik+1)=h_2(size(S_H)+ik,ik+1)+(0.5*
-     $          (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
-     $          *(Fxz-2.0*Chixz*e1)
-         end do
-       end if        
-       
+        
         do ir=1, 2*size(S_H)
           do ic=1, 2*size(S_H)
             zr_2(ir,ic)=0.0
@@ -1621,30 +1521,6 @@ C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
           zr_2(ir,ir)=1.0
         end do
         ierr=0
-              
-        
-C        The problem is that there can be 0 energy levels e.g. J=0. 
-C        however the diagonalization routine does not accept zero entries. 
-C        This means I have to check, if for both rotational states the entries are zero.
-C        If this is not the case, I will add a small offset to the one that is non zero
-        do i = 1, 2*size(S_H) !
-         check1=abs(h_2(i,i))    
-         if (check1.le.1.0e-14) then
-             h_2(i,i)=5.0e-14 
-         end if
-        end do     
-             
-         
-C      hresort(1:size(S_H),1:size(S_H))= !resorting should not be needed anymore since DIMTOT was replaced with size(S_H) in construction
-C     $ h_2(1:size(S_H),1:size(S_H))  ! Diagonal Block lower state
-C      hresort(size(S_H)+1:2*size(S_H),size(S_H)+1:2*size(S_H))=
-C     $ h_2(DIMTOT+1:DIMTOT+size(S_H),DIMTOT+1:DIMTOT+size(S_H))  ! Diagonal Block upper state
-C      hresort(1:size(S_H),size(S_H)+1:2*size(S_H))=
-C     $ h_2(1:size(S_H),DIMTOT+1:DIMTOT+size(S_H))     ! Offdiagonal 1
-C      hresort(size(S_H)+1:2*size(S_H),1:size(S_H))=  
-C     $ h_2(DIMTOT+1:DIMTOT+size(S_H),1:size(S_H))     ! Offdiagonal 2
-
-C        h_2=hresort
         
         call htrid3 (2*DIMTOT,2*size(s_h),h_2,evh_2,e_2,e2_2,tau_2)
         call tql2 (2*DIMTOT,2*size(s_h),evh_2,e_2,zr_2,ierr)
@@ -1744,6 +1620,7 @@ C      h=hs(ibselect,:,:)
        end 
 
 C----------------------------------------------------------------------
+C----------------------------------------------------------------------
       subroutine addrig(j,gam,f,qvk,ruse
      $     ,h,a,evalv,ovv,rotm,rott,tori,complex)
       implicit none
@@ -1766,9 +1643,7 @@ C     work
       do i =1, size(S_H)
         do iv=1, size(S_H)
           vr(iv)=0.0
-          vor(iv)=0.0
           vi(iv)=0.0
-          voi(iv)=0.0
         end do
         vr(i )=1.0d0
         call hmulthrr(j,gam,f
@@ -1791,7 +1666,7 @@ C     Hellmann-Feynman-Theorem?
       include 'iam.fi'
       real*8  vi(DIMTOT),vr(DIMTOT)
       integer j,gam,f,npar,ib
-      integer qvk(DIMTOT,Q_K:Q_V1+DIMTOP-1), ifit(DIMPAR)
+      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP), ifit(DIMPAR)
       integer ruse(DIMVV,DIMVV,DIMTOP)
       real*8  a(DIMPAR),dedp(DIMPAR)
       real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
@@ -1813,10 +1688,6 @@ C     work
             da(i)=0.0
           end do
           da(ifs)=1.0
-          do i=1, size(S_H)
-            vor(i)=0.0
-            voi(i)=0.0
-          end do
           call hmulthrr(j,gam,f
      $         ,qvk,ruse,da,vr,vi,vor,voi,evalv,ovv,rotm,tori,ifs,0)
           do i=1, size(S_H)
@@ -1826,51 +1697,6 @@ C     work
       end do
       return
       end
-C----------------------------------------------------------------------
-      subroutine hcaldev_old(vr,vi,j,gam,f,ib,ifit,npar
-     $     ,qvk,ruse,a,dedp,evalv,ovv,rotm,tori)
-C     (hermitian) calculation of the < J tau | Op | J tau' >  
-C     Hellmann-Feynman-Theorem? 
-      implicit none
-      include 'iam.fi'
-      real*8  vi(DIMTOT),vr(DIMTOT)
-      integer j,gam,f,npar,ib
-      integer qvk(DIMTOT,Q_K:Q_V1+DIMTOP-1), ifit(DIMPAR)
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      real*8  a(DIMPAR),dedp(DIMPAR)
-      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-C     work
-      real*8  da(DIMPAR)
-      real*8  vor(DIMTOT),voi(DIMTOT)
-      integer i,ifs
-
-      do ifs=1, DIMPRR
-        dedp(ifs)=0.0
-      end do
-      do ifs=1, DIMPRR
-        if (ifit(ifs).ne.0) then
-          do i=1,DIMPRR
-            da(i)=0.0
-          end do
-          da(ifs)=1.0
-          do i=1, size(S_H)
-            vor(i)=0.0
-            voi(i)=0.0
-          end do
-          call hmulthrr(j,gam,f
-     $         ,qvk,ruse,da,vr,vi,vor,voi,evalv,ovv,rotm,tori,ifs,0)
-          do i=1, size(S_H)
-            dedp(ifs)=dedp(ifs)+vor(i)*vr(i)+voi(i)*vi(i)
-          end do
-        end if
-      end do
-      return
-      end
-      
 C----------------------------------------------------------------------
       subroutine hmulthrr(j,gam,f
      $     ,qvk,ruse,a,vr,vi,vor,voi,evalv,ovv,rotm,tori,ifs,it)
@@ -1878,8 +1704,8 @@ C     multiply the complex vector vr,vi by the rigid part of the
 C     Hamilton matrix, yielding vor,voi
       implicit none
       include 'iam.fi'
-      integer j,gam,f,ifs,it
-      integer qvk(DIMTOT,Q_K:Q_V1+DIMTOP-1)
+      integer j,gam,f,ifs,it,ii
+      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
       integer ruse(DIMVV,DIMVV,DIMTOP)
       real*8  a(DIMPAR)
       real*8  vr(DIMTOT),vor(DIMTOT),vi(DIMTOT),voi(DIMTOT)
@@ -1902,6 +1728,10 @@ C     work
       external myand
       if (size(S_H).gt.DIMTOT) stop 'Dimension Error in HMULTHRR'
 
+      do ii=1, size(S_H) !Herbers2026: moved vo initialization from before hmulthrr calls into hmulthrr
+          vor(ii)=0.0
+          voi(ii)=0.0
+      end do
       dj=dble(j)
       djj1=dj*(dj+1.0)
       e1=0.0
@@ -1924,6 +1754,23 @@ C     for J=0
       end if
 
 C     the centrifugal distortion parameters
+C     Initialization
+        adelj= 0.0
+        adelk= 0.0
+        ar6  = 0.0
+        ahj  = 0.0
+        ahjk = 0.0
+        ah2  = 0.0
+        ahk  = 0.0
+        ah3  = 0.0
+        alj =  0.0
+        aljk = 0.0
+        alkj = 0.0
+        alk  = 0.0
+        alj =  0.0
+        al2 =  0.0
+        al3 =  0.0
+        al4 =  0.0
 C     Watson A 
       if (ctlint(C_RED).eq.0) then
         adelj=a(P_DJD)
@@ -2309,7 +2156,7 @@ C----------------------------------------------------------------------
       include 'iam.fi'
       integer ik,off,gam,ri
       real*8  t
-      integer qvk(DIMTOT,Q_K:Q_V1+DIMTOP-1)
+      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
       real*8  vr(DIMTOT),vor(DIMTOT),vi(DIMTOT),voi(DIMTOT)
       real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
      $     -DIMSIG:DIMSIG,DIMTOP)
@@ -3654,3 +3501,151 @@ C       end if
        if (gam2.gt.size(S_G)) gam2=gam
        return 
        end
+C---------------------
+      subroutine addoffdiags_dw(off1,off2,ib,j,f1,al,au,h_2)!Subroutine to add vib-vib corilois coupling. Inputquanta:ib,j,f1, input al,au,h_2 -> output: h_2
+      implicit none                               !f1 is only needed for the deltaJ=0 offdiag quadrupole tensorelements for the first nucleus that are available for tunneling treament
+      
+      include 'iam.fi'
+      real*8  Gx,Gy,Gz,Fxy,Fxz,Fyz,Chixy,Chiyz,Chixz
+      real*8  al(DIMPAR), au(DIMPAR)
+      real*8  h_2(2*DIMTOT,2*DIMTOT) 
+      real*8  check1
+      integer i, ik, j, f1, ib
+      integer off1,off2 ! where to put the matrix elements in the input matrix
+      real*8 fjn
+      real*8 e1          !this is used for the off-diag chi parameters neglecting off diags in J
+      real*8 dj,djj1,df, dff1
+      real*8 di, dii1,dg
+      
+      dj=dble(j)
+      djj1=dj*(dj+1.0)
+      e1=0.0
+      if ((ctlint(C_SPIN).ne.0).and.(j.gt.0).and.(f1.ge.0)) then
+        di=dble(ctlint(C_SPIN))/2.0d0
+        dii1=di*(di+1.0)
+        df=dble(f1)/2.0d0!using f1 here
+        dff1=df*(df+1.0)
+        dg=dff1-dii1-djj1
+        if (ctlint(C_SPIN).gt.1) then
+          e1= (0.75*dg*(dg+1.0)-dii1*djj1)
+     $         /(2.0*di*(2.0*di-1.0)*djj1*(2.0*dj-1.0)*(2.0*dj+3.0))
+        else
+          e1=0.0
+        end if
+      end if
+        
+C     The following implementation of Gx,y,z and Fxy, Fyz and Fxz, differes from that in SPFIT/SPCAT       
+C     While if all Fs and all Gs are fit on their own, the Data simulated using SPFIT/SPCAT is reproduced
+C     Mixing the Fs and Gs will lead to disagreement.       
+C     This is likely due to inconsistensies in phase convention in my implementation here.
+C     For now, I discourage mixing G and F parameters until this disagreement is fixed.
+C     
+C            --- Sven 25-07-2024
+      Gz    = 0.0
+      Gy    = 0.0
+      Gx    = 0.0
+      Fxy   = 0.0
+      Fxz   = 0.0
+      Fyz   = 0.0
+      Chixy = 0.0
+      Chixz = 0.0
+      Chiyz = 0.0
+      if (ib.le.2) then
+        Gz =al(P_GZ12)
+        Gy =al(P_GY12)
+        Gx =al(P_GX12)
+        Fxy=al(P_FXY1)
+        Fxz=al(P_FXZ1)
+        Fyz=al(P_FYZ1)
+        Chixy=al(P_WQXY1)*(-1.0) !Sign change to match relative signs in spfit output !these are offdiagonal nqcc matrix elements but used offdiagonal in v. Matrix elements offdiagonal in J neglected.
+        Chiyz=al(P_WQYZ1)*(-1.0) !
+        Chixz=al(P_WQXZ1)*(-1.0) !
+      else if (ib.le.4) then
+        Gz =al(P_GZ34)
+        Gy =al(P_GY34)
+        Gx =al(P_GX34)
+        Fxy=al(P_FXY3)  
+        Fxz=al(P_FXZ3)!
+        Fyz=al(P_FYZ3)!      
+        Chixy=al(P_WQXY3)*(-1.0)
+        Chiyz=al(P_WQYZ3)*(-1.0)
+        Chixz=al(P_WQXZ3)*(-1.0)
+      else if (ib.le.6) then
+        Gz =al(P_GZ56)
+        Gy =al(P_GY56)
+        Gx =al(P_GX56)
+        Fxy=al(P_FXY5)  
+        Fxz=al(P_FXZ5)!
+        Fyz=al(P_FYZ5)!      
+        Chixy=al(P_WQXY5)*(-1.0)
+        Chiyz=al(P_WQYZ5)*(-1.0)
+        Chixz=al(P_WQXZ5)*(-1.0)
+      end if
+       
+C     ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
+      if (Gz .ne. 0.0) then
+        do ik=1, 2*j+1
+          h_2(off1+ik,off2+ik)=Gz*1.0*(ik-1-j)! on complex off diag Gordy_Cook eq 7.135 p290 
+        end do !  
+      end if 
+      if (Gy .ne. 0.0) then
+        do ik=1, 2*j
+            h_2(off1+ik,off2+ik+1)=h_2(off1+ik,off2+ik+1)+0.5*Gy
+     $               *sqrt(1.0*(j-(ik-1-j))*(j+(ik-1-j)+1)) ! on complex off diag
+            h_2(off1+ik+1,off2+ik)=h_2(off1+ik+1,off2+ik)+0.5*Gy
+     $               *-1.0*sqrt(1.0*(j-(ik-1-j))*(j+(ik-1-j)+1)) ! on complex off diag
+        end do
+      end if 
+      if (Gx .ne. 0.0) then
+        do ik=2, 2*j+1
+            h_2(off2+ik,off1+ik-1)=h_2(off2+ik,off1+ik-1)+0.5*Gx
+     $               *sqrt(1.0*(j+(ik-1-j))*(j-(ik-1-j)+1)) ! on real off diag
+             h_2(off2+ik-1,off1+ik)=h_2(off2+ik-1,off1+ik)+0.5*Gx
+     $               *sqrt(1.0*(j+(ik-1-j))*(j-(ik-1-j)+1)) ! on real off diag
+        end do 
+      end if
+      
+      !FXY is imaginary!Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
+      if ((Fxy .ne. 0.0).or.(Chixy .ne. 0.0)) then !and based on doi.org/10.1063/1.1677430
+        do ik=1, 2*j-1
+          if(j.eq.1)then
+            fjn=(0.5*j*(j+1))**2
+          else
+            fjn=0.25*(j*(j+1)-(ik-j)*((ik-j)+1))
+     $         *(j*(j+1)-(ik-j)*((ik-j)-1))
+          end if 
+            h_2(off1+ik,off2+ik+2)=h_2(off1+ik,off2+ik+2) 
+     $       +sqrt(fjn)*(Fxy-2*Chixy*e1)
+            h_2(off1+ik+2,off2+ik)=h_2(off1+ik+2,off2+ik)
+     $        -1.0*sqrt(fjn)*(Fxy-2*Chixy*e1)
+        end do
+      end if        
+      
+      ! FYZ is put on the imaginary
+      if ((Fyz .ne. 0.0).or.(Chiyz .ne. 0.0)) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
+        do ik=1, 2*j
+            h_2(off1+ik,off2+ik+1)=
+     $ h_2(off1+ik,off2+ik+1)+0.5*(2*(ik-1-j)+1)
+     $ *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*(Fyz-2.0*Chiyz*e1)
+            h_2(off1+ik+1,off2+ik)=
+     $ h_2(off1+ik+1,off2+ik)-0.5*(2*(ik-1-j)+1)
+     $ *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*(Fyz-2.0*Chiyz*e1)
+        end do
+      end if        
+      !FXZ is put on the real
+      if ((Fxz .ne. 0.0).or.(Chixz .ne. 0.0)) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
+        do ik=1, 2*j
+           h_2(off2+ik+1,off1+ik)=h_2(off2+ik+1,off1+ik)+(0.5* 
+     $        (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
+     $         *(Fxz-2.0*Chixz*e1)
+            h_2(off2+ik,off1+ik+1)=h_2(off2+ik,off1+ik+1)+(0.5*
+     $         (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
+     $         *(Fxz-2.0*Chixz*e1)
+        end do
+      end if        
+      
+             
+       
+
+      return 
+      end
