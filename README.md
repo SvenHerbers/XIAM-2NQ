@@ -268,6 +268,11 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 | `chixy12,chixy34,chixy56,chiyz12,chiyz34,chiyz56,chixz12,chixz34,chixz56` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
+  13-June-2026 - recompilation of v0.44 <br>
+  - The previously uploaded executable did not correspond to the provided `iam.fi` file. It was instead compiled for the treatment of excited torsional states in dimethyloxirane (see the [example directory](https://github.com/SvenHerbers/XIAM-2NQ_Examples/tree/main/23Dimethyloxirane) ).
+  - The executable has been recompiled and reuploaded so that it matches the supplied `iam.fi`.
+  - Executables compiled with `DIMVV` not equal to 1, including the previously uploaded compilation of v0.44, may give incorrect intensity predictions or no intensity output when quadrupole coupling is present.
+
   XIAM-2NQ v0.44 - 19-April-2026 <br>
   This release introduces a necessary bug fix for the migration from `ifort` to `ifx`, along with general code cleanup and performance improvements.
   - General code cleanup (e.g., removal of the obsolete subroutine `hcaldev_old`)
