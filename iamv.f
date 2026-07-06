@@ -24,13 +24,13 @@ C     fistat > 0  Eigenvalues for differential quotient
       real*8  h_2(DIMQ*DIMTOT,DIMQ*DIMTOT) 
       real*8  h_2NQ1(DIMQ*DIMTOT,DIMQ*DIMTOT)
       integer h_2_sizes(DIMQ2) 
-      real*8  h_3(DIMQ2*DIMQ*DIMTOT,DIMQ2*DIMQ*DIMTOT) !h2024
-      real*8  h_3NQ2(DIMQ2*DIMQ*DIMTOT,DIMQ2*DIMQ*DIMTOT) !For elements off-diagonal in F1 for HQ2
-      real*8  evh_3(DIMQ2*DIMQ*DIMTOT)
-      real*8  zr_3(DIMTOT*DIMQ*DIMQ2,DIMTOT*DIMQ*DIMQ2)
-      real*8  zi_3(DIMTOT*DIMQ*DIMQ2,DIMTOT*DIMQ*DIMQ2)
-      real*8  e_3(DIMQ2*DIMQ*DIMTOT),e2_3(DIMQ2*DIMQ*DIMTOT)
-      real*8  tau_3(2,DIMQ2*DIMQ*DIMTOT)   
+      real*8  h_3(DIMUNI,DIMUNI) !h2024
+      real*8  h_3NQ2(DIMUNI,DIMUNI) !For elements off-diagonal in F1 for HQ2
+      real*8  evh_3(DIMUNI)
+      real*8  zr_3(DIMUNI,DIMUNI)
+      real*8  zi_3(DIMUNI,DIMUNI)
+      real*8  e_3(DIMUNI),e2_3(DIMUNI)
+      real*8  tau_3(2,DIMUNI)   
       real*8  signs(DIMTOT)
       real*8  vector(DIMTOT)
       integer qcase2
@@ -44,7 +44,7 @@ C     fistat > 0  Eigenvalues for differential quotient
       real*8  palc(DIMFIT,-1:DIMPLC) ! not used, but maybe later
       real*8  normis(DIMQ+DIMQ2)
       real*8  normis2(DIMQ2)
-      real*8  normisF1(DIMTOT*DIMQ2*DIMQ,DIMQ2)     ! F1 quantum number assignment is not as easy as I thought. 
+      real*8  normisF1(DIMUNI,DIMQ2)     ! F1 quantum number assignment is not as easy as I thought. 
       real*8  nF1s(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMQ2)         ! same as normisF1 but after F1 block assignment.
       integer wF1s(DIMQ2)         ! I need to save the vector normisF1 as well as wF1s to write them to file for improved intensity prediciton.
               
@@ -53,17 +53,17 @@ C     fistat > 0  Eigenvalues for differential quotient
       real*8  collectnorms((DIMQ+DIMQ2)*(2*DIMJ+1),DIMQ2) ! A
       real*8  newnorms((DIMQ+DIMQ2)*(2*DIMJ+1))           ! B
       real*8  NormF1(DIMQ2)
-      integer qcasesF1(DIMTOT*DIMQ2*DIMQ)
+      integer qcasesF1(DIMUNI)
       real*8  normisEO(0:1)                                !Even or odd
       real*8  normisPM(0:1)                                !PM for wang assignment
-      integer EOofI(DIMQ2*DIMQ*DIMTOT)                            ! separation by odd and even K quantum numbers.
-      integer PMofI(DIMQ2*DIMQ*DIMTOT)                            ! separation by wangs gamma + or -
+      integer EOofI(DIMUNI)                            ! separation by odd and even K quantum numbers.
+      integer PMofI(DIMUNI)                            ! separation by wangs gamma + or -
       integer indicesJ(DIMQ+DIMQ2,(DIMQ+DIMQ2)*(2*DIMJ+1))
       integer indicesJPPM(DIMQ+DIMQ2,0:1,0:1,(DIMQ+DIMQ2)*(DIMJ+1))
       integer indis((DIMQ+DIMQ2)*(2*DIMJ+1))
       integer hitsj(DIMQ+DIMQ2)
       integer hitsJPPM(DIMQ+DIMQ2,0:1,0:1)
-      integer qcasesJ(DIMTOT*DIMQ2*DIMQ)
+      integer qcasesJ(DIMUNI)
       integer pali(DIMFIT, 0:DIMPLC,2)       ! not used but maybe later.
       integer qmv(DIMV),ifittot(DIMPAR,DIMVB),dfit(DIMFIT)
       integer qmvs(DIMQ2,DIMQ,DIMV)
@@ -135,7 +135,14 @@ C      character*6 fnpost
         stop                                                         !An extra condition checking for DIMJ.
        end if                                                        !An extra condition checking for DIMJ.
       end if                                                         !An extra condition checking for DIMJ.
-      
+      if ((DIMUNI).le.((2*jselect+1)*
+     $       (ctlint(C_SPIN2)+1)*(ctlint(C_SPIN)+1))) then                  !An extra condition checking for DIMUNI
+       if (ctlint(C_SPIN2).gt.0) then                                 
+       write(0,*) "DIMUNI too small. Increase its value in"
+     $ "iam.fi before compilation."      
+        stop                                                         
+       end if                                                        
+      end if                                                         
       
 C      h_2=0.0
       hs=0.0! (:ctlint(C_SPIN),:(ctlint(C_SPIN)+ctlint(C_SPIN2)),:,:) dimension restriction didnt cause speedup in intialization.
@@ -216,8 +223,8 @@ C
       initdim = ((2*maxJ+1)               ! close to max dimension, but a bit overestimating
      $          * (ctlint(C_SPIN2) + 1)   ! init speed could still be improved tayloring this closer
      $          * (ctlint(C_SPIN) + 1))    ! to the actual matrix size
-      if (initdim .ge. DIMQ2*DIMQ*DIMTOT) then
-         initdim = DIMQ2*DIMQ*DIMTOT
+      if (initdim .ge. DIMUNI) then
+         initdim = DIMUNI
       end if
       h_3NQ2(1:initdim,1:initdim) = 0.0
       h_3(1:initdim,1:initdim) = 0.0
@@ -292,8 +299,8 @@ C     Updating size
       size(s_h)=occupied+size(s_h)
       
 C     Adding second nucleus to hamiltonian
-      D2=DIMQ2*DIMQ*DIMTOT 
-C      D2=size(S_H) ! replacing D2 with size(S_H) leads to quite some speed up but will cause stack overflow for iodotoluene for some reason?
+      D2=DIMUNI!DIMQ2*DIMQ*DIMTOT 
+C      D2=size(S_H) ! 
       h_3(1:size(S_H),1:size(S_H)) = 
      $   h_3(1:size(S_H),1:size(S_H)) 
      $ + h_3NQ2(1:size(S_H),1:size(S_H)) ! Adding NQ2 matrix to total matrix.
@@ -2810,7 +2817,7 @@ C      This subroutine builds the matrix elements for the second nucleus, offdia
 C      n=0 means that the elements diagonal in f1 are added.
        implicit none
        include 'iam.fi'
-       real*8 h_3(DIMQ2*DIMQ*DIMTOT,DIMQ2*DIMQ*DIMTOT)
+       real*8 h_3(DIMUNI,DIMUNI)
        real*8  atot(DIMPAR,DIMVB)
        integer h_sizesr(DIMQ)
        integer sizeprer

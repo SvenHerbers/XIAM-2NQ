@@ -160,11 +160,27 @@ C      ctlint(C_DW34SH)=0 ! Herbers2026
       ctlint(C_PRI)=myor(ctlint(C_PRI),apri)
       ctlint(C_XPR)=myor(ctlint(C_XPR),xpri)
       ctlint(C_NZYK)=max(ctlint(C_NZYK),ctlint(C_NCYCL))
+      write(*,'(3X,A8,1X,I5,$)') "DIMJ    ",DIMJ     !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMTOP  ",DIMTOP   !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMSIG  ",DIMSIG   !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMM    ",DIMM     !Herbers2026
+      write(*,*)                                    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMVV   ",DIMVV    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMV    ",DIMV     !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMVB   ",DIMVB    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMQ    ",DIMQ     !Herbers2026
+      write(*,*)                                    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMQ2   ",DIMQ2    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMDW   ",DIMDW    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMUNI  ",DIMUNI   !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMLIN  ",DIMLIN   !Herbers2026
+      write(*,*)                                    !Herbers2026
       do i=1, DIMCINT
         if (mod(i,4).eq.1) write(*,*)
         if (ctlstr(i)(1:1).ne.'_')
      $       write(*,'(3X,A,3X,I5,$)') ctlstr(i),ctlint(i)
       end do
+      write(*,*)
 C      write(*,*)
       j=0
       do i= DIMCINT+1, DIMCINT+DIMCPAR

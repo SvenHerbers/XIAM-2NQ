@@ -6,8 +6,6 @@ C
 C     Phase Convention: <JK|Px|JK+1>=0.5*dsqrt(J*(J+1)-K*(K+1)) 
 C  
       implicit none
-   
-      
       
       include 'iam.fi'
 
@@ -71,8 +69,8 @@ C     real*8  ab(DIMPAR)
 C      write(*,'(A,$)') ' Calculation date and time: '
       call mydate()
       write(*,*)
-      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.44 -' 
-     $                  ,'By Sven Herbers 19-April-2026' 
+      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.46 -' 
+     $                  ,'By Sven Herbers 05-July-2026' !Last change from 044 to 045 only added Dimension printing
       write(*,*) 'sven_herbers@web.de'
       write(*,*) 'Cite: J. Chem. Phys., 2025, '
      $         ,'162, 234304, DOI: 10.1063/5.0267651 ' 

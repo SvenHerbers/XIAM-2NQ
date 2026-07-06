@@ -46,6 +46,12 @@ C Number that defines the matrix size of the exact quadrupole treatment
 C Number that defines the matrix size of the double well treatment
       integer DIMDW
         parameter(DIMDW=2)  
+c   maximum Dimension of hamiltonian matrix including quadrupole coupling. 
+c   Can be set to (2*DIMJ+1) * (DIMQ) * (DIMQ2) to cover the largest possible matrix, 
+c   however, for speedup it makes sense to reduce this to some multiple of (2*DIMJ+1).
+      integer DIMUNI !Herbers2026
+        parameter (DIMUNI=4*(2*DIMJ+1) ) 
+
 C -------------------------------------------------------------------
 C  please change the following parameters only if you really know what you 
 C  are doing !
@@ -1016,7 +1022,7 @@ C        parameter (C_DW34SH=31)
         parameter (C_DWSOFF=28)!DWSoff 0 means: pair S1 with S1, S2 with S2 etc.  1 means: pair S1 with S2, S3 with S4 etc.
         parameter (C_DWVOFF=29)!DWVoff is required if the Bs are associated to different Vs 
         parameter (C_PASSGN=30)!Any but 0 means:Supress error asgn printing
-        parameter (C_LAST  =31) 
+        parameter (C_LAST  =30) 
       integer C_ROFIT, C_EPS, C_DEFER, C_WEIGF, C_CNVG
       integer C_LMBDA, C_FRQLO,C_FRQUP,C_INTLM, C_TEMP
         parameter (C_ROFIT=C_LAST+1, C_EPS  =C_LAST+2)
