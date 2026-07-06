@@ -268,6 +268,12 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 | `chixy12,chixy34,chixy56,chiyz12,chiyz34,chiyz56,chixz12,chixz34,chixz56` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
+
+  XIAM-2NQ v0.46 - 05/06-July-2026 <br>
+  - Fixed a bug that caused an unnecessary `NULL` and `0` to be printed at the end of the control parameter summary. This was resolved by setting `parameter (C_LAST = 30)` in `iam.fi`.
+  - Added the compile-time dimension `DIMUNI` to `iam.fi`, which defines the maximum matrix size allocated for quadrupole (`NQ`) treatments. Previously, this limit was hard-coded as `DIMQ*DIMQ2*DIMTOT`.
+  - Added a printout of all compile-time dimensions to the output files, making it easier to verify whether a particular compiled XIAM executable is suitable for a given problem.
+
   13-June-2026 - recompilation of v0.44 <br>
   - The previously uploaded executable did not correspond to the provided `iam.fi` file. It was instead compiled for the treatment of excited torsional states in dimethyloxirane (see the [example directory](https://github.com/SvenHerbers/XIAM-2NQ_Examples/tree/main/23Dimethyloxirane) ).
   - The executable has been recompiled and reuploaded so that it matches the supplied `iam.fi`.
