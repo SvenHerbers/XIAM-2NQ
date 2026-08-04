@@ -16,27 +16,21 @@ C     fistat > 0  Eigenvalues for differential quotient
       integer sizef1,sizepre
       integer sj,ej,cm,cmb
       integer cm2
-      real*8  p0,p1,p2
-
       integer minJ,maxJ
       integer occupied
-      integer indi
       integer n
-      
-
-
       real*8  hs(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMTOT)
       real*8  evhs(DIMQ2,DIMQ+DIMQ2,DIMTOT)                    
       real*8  h_2(DIMQ*DIMTOT,DIMQ*DIMTOT) 
       real*8  h_2NQ1(DIMQ*DIMTOT,DIMQ*DIMTOT)
       integer h_2_sizes(DIMQ2) 
-      real*8  h_3(DIMQ2*DIMQ*DIMTOT,DIMQ2*DIMQ*DIMTOT) !h2024
-      real*8  h_3NQ2(DIMQ2*DIMQ*DIMTOT,DIMQ2*DIMQ*DIMTOT) !For elements off-diagonal in F1 for HQ2
-      real*8  evh_3(DIMQ2*DIMQ*DIMTOT)
-      real*8  zr_3(DIMTOT*DIMQ*DIMQ2,DIMTOT*DIMQ*DIMQ2)
-      real*8  zi_3(DIMTOT*DIMQ*DIMQ2,DIMTOT*DIMQ*DIMQ2)
-      real*8  e_3(DIMQ2*DIMQ*DIMTOT),e2_3(DIMQ2*DIMQ*DIMTOT)
-      real*8  tau_3(2,DIMQ2*DIMQ*DIMTOT)   
+      real*8  h_3(DIMUNI,DIMUNI) !h2024
+      real*8  h_3NQ2(DIMUNI,DIMUNI) !For elements off-diagonal in F1 for HQ2
+      real*8  evh_3(DIMUNI)
+      real*8  zr_3(DIMUNI,DIMUNI)
+      real*8  zi_3(DIMUNI,DIMUNI)
+      real*8  e_3(DIMUNI),e2_3(DIMUNI)
+      real*8  tau_3(2,DIMUNI)   
       real*8  signs(DIMTOT)
       real*8  vector(DIMTOT)
       integer qcase2
@@ -50,7 +44,7 @@ C     fistat > 0  Eigenvalues for differential quotient
       real*8  palc(DIMFIT,-1:DIMPLC) ! not used, but maybe later
       real*8  normis(DIMQ+DIMQ2)
       real*8  normis2(DIMQ2)
-      real*8  normisF1(DIMTOT*DIMQ2*DIMQ,DIMQ2)     ! F1 quantum number assignment is not as easy as I thought. 
+      real*8  normisF1(DIMUNI,DIMQ2)     ! F1 quantum number assignment is not as easy as I thought. 
       real*8  nF1s(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMQ2)         ! same as normisF1 but after F1 block assignment.
       integer wF1s(DIMQ2)         ! I need to save the vector normisF1 as well as wF1s to write them to file for improved intensity prediciton.
               
@@ -59,43 +53,41 @@ C     fistat > 0  Eigenvalues for differential quotient
       real*8  collectnorms((DIMQ+DIMQ2)*(2*DIMJ+1),DIMQ2) ! A
       real*8  newnorms((DIMQ+DIMQ2)*(2*DIMJ+1))           ! B
       real*8  NormF1(DIMQ2)
-      integer qcasesF1(DIMTOT*DIMQ2*DIMQ)
+      integer qcasesF1(DIMUNI)
       real*8  normisEO(0:1)                                !Even or odd
       real*8  normisPM(0:1)                                !PM for wang assignment
-      integer EOofI(DIMQ2*DIMQ*DIMTOT)                            ! separation by odd and even K quantum numbers.
-      integer PMofI(DIMQ2*DIMQ*DIMTOT)                            ! separation by wangs gamma + or -
+      integer EOofI(DIMUNI)                            ! separation by odd and even K quantum numbers.
+      integer PMofI(DIMUNI)                            ! separation by wangs gamma + or -
       integer indicesJ(DIMQ+DIMQ2,(DIMQ+DIMQ2)*(2*DIMJ+1))
       integer indicesJPPM(DIMQ+DIMQ2,0:1,0:1,(DIMQ+DIMQ2)*(DIMJ+1))
       integer indis((DIMQ+DIMQ2)*(2*DIMJ+1))
-      integer KofI(DIMQ2*DIMQ*DIMTOT)
       integer hitsj(DIMQ+DIMQ2)
       integer hitsJPPM(DIMQ+DIMQ2,0:1,0:1)
-      integer qcasesJ(DIMTOT*DIMQ2*DIMQ)
+      integer qcasesJ(DIMUNI)
       integer pali(DIMFIT, 0:DIMPLC,2)       ! not used but maybe later.
       integer qmv(DIMV),ifittot(DIMPAR,DIMVB),dfit(DIMFIT)
       integer qmvs(DIMQ2,DIMQ,DIMV)
 C     quantum numbers
-      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP), qmk(DIMTOT,DIMQLP)
       integer qmks(DIMQ2,DIMQ,DIMTOT,DIMQLP)
       integer qvks(DIMQ2,DIMQ,DIMTOT,Q_K:Q_V+DIMTOP) 
       integer qvs(DIMQ2,DIMQ,DIMTOT)
-      integer qv(DIMTOT)
       integer qcase
 C     work
       real*8  zrs(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMTOT)
       real*8  zis(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMTOT)
-      real*8  dedp(DIMPAR) ! not used but maybe later
+C      real*8  dedp(DIMPAR) ! not used but maybe later
       integer check2
       integer results
       integer results2
-      integer ie,i,iv,itop,ivr,ivc,it1,it2
+      integer ie,i,itop,ivr,ivc,it1,it2
       integer eused(DIMTOT), ierr
       integer ruse(DIMVV,DIMVV,DIMTOP)
       integer mycounters(DIMQ2,DIMQ+DIMQ2)
       integer hitsJP((DIMQ+DIMQ2),0:1)                         ! remove if not needed.
       integer indicesJP(DIMQ+DIMQ2,0:1,(DIMQ+DIMQ2)*(DIMJ+1)) ! remove if not needed.
+      integer initdim
       character*4 fnpre
-      character*6 fnpost
+C      character*6 fnpost
       logical masave
       logical complex
       integer myand
@@ -143,10 +135,17 @@ C     work
         stop                                                         !An extra condition checking for DIMJ.
        end if                                                        !An extra condition checking for DIMJ.
       end if                                                         !An extra condition checking for DIMJ.
+      if ((DIMUNI).le.((2*jselect+1)*
+     $       (ctlint(C_SPIN2)+1)*(ctlint(C_SPIN)+1))) then                  !An extra condition checking for DIMUNI
+       if (ctlint(C_SPIN2).gt.0) then                                 
+       write(0,*) "DIMUNI too small. Increase its value in",         !Add ',' otherwise gfortran gives compilation error.
+     $ "iam.fi before compilation."      
+        stop                                                         
+       end if                                                        
+      end if                                                         
       
-      
-      h_2=0.0
-      hs=0.0
+C      h_2=0.0
+      hs=0.0! (:ctlint(C_SPIN),:(ctlint(C_SPIN)+ctlint(C_SPIN2)),:,:) dimension restriction didnt cause speedup in intialization.
       evhs=0.0
       normis=0.0
       mycounters=1
@@ -177,7 +176,7 @@ C     work
       end if
        maxJ=(endf1+ctlint(C_SPIN))/2 ! these will be needed to get the vector components right later.
       
-      D2=DIMQ2*DIMQ*DIMTOT
+
       !!! for non existing J/F states with J>jselect no matrix has to be built up
       if (ctlint(C_EVAL).gt.3)   masave=.true.
 
@@ -218,13 +217,22 @@ C------Construction of Htot Starts
       noJsinF1s=0
       nJPPMinF1=0
       h_2_sizes=0
-      h_3NQ2=0.0
-      h_3 =0.0
-
+C      h_3NQ2=0.0
+C      h_3 =0.0  
+C      
+      initdim = ((2*maxJ+1)               ! close to max dimension, but a bit overestimating
+     $          * (ctlint(C_SPIN2) + 1)   ! init speed could still be improved tayloring this closer
+     $          * (ctlint(C_SPIN) + 1))    ! to the actual matrix size
+      if (initdim .ge. DIMUNI) then
+         initdim = DIMUNI
+      end if
+      h_3NQ2(1:initdim,1:initdim) = 0.0
+      h_3(1:initdim,1:initdim) = 0.0
+      
       do f1=startf1,endf1,2 ! uses a step size of 2
        
        cm=(f1-startf1)/2!count matrices
-       h_2=0.0
+C       h_2=0.0 ! is reinitilaized in nqvmat_ir anyway
        wF1s(cm+1)=f1 ! need to save the f1 to written vectors and matrices together with F1 contributions for later evaluation in intensity predictions
        sj=(2*jselect-(f1-ctlint(C_SPIN)))/2!startj offset
        ej=((f1+ctlint(C_SPIN))-2*jselect)/2!endj offset
@@ -291,8 +299,11 @@ C     Updating size
       size(s_h)=occupied+size(s_h)
       
 C     Adding second nucleus to hamiltonian
-      
-      h_3 = h_3 + h_3NQ2 ! Adding NQ2 matrix to total matrix.
+      D2=DIMUNI!DIMQ2*DIMQ*DIMTOT 
+C      D2=size(S_H) ! 
+      h_3(1:size(S_H),1:size(S_H)) = 
+     $   h_3(1:size(S_H),1:size(S_H)) 
+     $ + h_3NQ2(1:size(S_H),1:size(S_H)) ! Adding NQ2 matrix to total matrix.
 
 C       The diagonalization can not handle zero rows + columns, so the following offset was added.
       do i=1,size(S_H)                     !
@@ -305,20 +316,20 @@ C------Construction of Htot finished
 C------Construction of Htot finished   
      
       
-      
-       e_3=0.0
-       e2_3=0.0
-       evh_3=0.0
-       tau_3=0.0
-       zr_3=0.0
+
+C       e_3(1:D2)=0.0      ! These are outputs of htrid3, intialization should be not required.
+C       e2_3(1:D2)=0.0     ! These are outputs of htrid3, intialization should be not required.
+C       evh_3(1:D2)=0.0    ! These are outputs of htrid3, intialization should be not required.
+C       tau_3=0.0          ! These are outputs of htrid3, intialization should be not required.
+       zr_3(1:D2,1:D2)=0.0
       do i=1, D2 !initialize zr_2 for diagonalization routine
        zr_3(i,i)=1.0
       end do
-      
-      call htrid3 (D2,size(s_h),h_3(:D2,:D2),evh_3(:D2),e_3(:D2), ! requires zr to be a unit matrix as input.
+
+      call htrid3 (D2,size(S_H),h_3(:D2,:D2),evh_3(:D2),e_3(:D2), ! requires zr to be a unit matrix as input.
      $  e2_3(:D2),tau_3(:,:D2))
       ierr=0.0
-      call tql2 (D2,size(s_h),evh_3(:D2),e_3(:D2),zr_3(:D2,:D2),ierr)
+      call tql2 (D2,size(S_H),evh_3(:D2),e_3(:D2),zr_3(:D2,:D2),ierr)
 
       if (ierr.ne.0) then
           write (*,'(a,i5)') 'Error in tql2 ',ierr
@@ -341,11 +352,11 @@ C------Diagnoalization finished
 C------Diagnoalization finished
 C------Diagnoalization finished
 
-        cm2=0                                    !!!!!!!!!!!!!!CONTIUNUE here
+        cm2=0                                     
         hitsj=0
         hitsJPPM=0
         hitsJP=0
-        do i = 1, size(S_H)   ! here goes one size... ! I have to write this on paper first.
+        do i = 1, size(S_H)   ! here goes one size... 
           normis=0   !normis for j identification.
           normis2=0  ! normis2 for f1 identification
           normisEO=0.0
@@ -441,7 +452,7 @@ C             write(0,*) h_3(sizepre+check2+1+j-3:sizepre+check2+1+j+3,i)
          else
          if ((normisPM(0)*normisPM(1)).lt.0) then !wangs gamma separation, see also Gordy equation 7.22
 
-          if (abs(normisPM(1)).gt.0.1) then ! for all but K=0 the normisPM(0) and (1) should be abput 0.5 in their absolutes., for K=0 normisPM(1) must be very close to zero.
+          if (abs(normisPM(1)).gt.0.1) then ! for all but K=0 the normisPM(0) and (1) should be about 0.5 in their absolutes., for K=0 normisPM(1) must be very close to zero.
            PMofI(i)=1
           else
            PMofI(i)=0
@@ -452,7 +463,7 @@ C             write(0,*) h_3(sizepre+check2+1+j-3:sizepre+check2+1+j+3,i)
          end if
          
 C         if (gam.eq.1) then
-C         write(0,*) normisPM(0), normisPM(1) ! somehow in case of mikes molecule these can add up to more than 0.5
+C         write(0,*) normisPM(0), normisPM(1) ! 
 C         end if
 C         if (abs(normisPM(1)).ge.0.9) then
 C          qcase=maxloc(normis,1)-1+minJ
@@ -613,93 +624,6 @@ C        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! END IF CASES
 
 
 
-
-C        do j=minJ,maxJ       ! for each J block
-C          cm=j-minJ
-C          NormF1=0.0
-C          collectnorms=0.0
-C          do i=1, hitsj(cm+1)!for each line in the block
-C           
-C           NormF1=normisF1(indicesJ(cm+1,i),:) !read the F1 vector sums saved to normisF1
-C           collectnorms(i,:)=NormF1            !X
-C           indi=maxloc(NormF1,1)               !Find which F1 block has the biggest sum, this is the F1 quantum number that will be assigned.
-C          end do
-C          do f1=startf1,endf1,2                 ! for all F1 quantum numbers
-C            cm2=(f1-startf1)/2
-C            newnorms=collectnorms(:,cm2+1)              !load vector contributions to F1
-C            call argsort(newnorms,
-C     $         indis,2*(DIMJ+DIMQ+DIMQ2)+1,hitsj(cm+1)) ! sort
-C            do n=1,noJsinF1s(cm+1,cm2+1)
-C               qcasesF1(indicesJ(cm+1,indis(n)))=cm2+1
-C               collectnorms(indis(n),:)=0! this line is already assigned, and is removed from subsequent assignment processes.
-C            end do            
-C            
-C          end do
-C         end do   
-
-
-         
-
-
-
-
-
-
-
-
-
-
-C               Three level cyclic permutations do not seem to have an effect so I removed them for now.
-C        do i=1,size(S_H) ! Testing once 3 level cyclic permutations. 
-C          j=0
-C          do while (j.lt.size(S_H))
-C           j=j+1
-C           k=0
-C           do while (k.lt.size(S_H))
-C           k=k+1
-C           if ((j.ne.i).and.(k.ne.i).and.(k.ne.j)) then
-C            if ((qcasesJ(i).eq.qcasesJ(j))
-C     $               .and.(qcasesJ(j).eq.qcasesJ(k))) then
-C            if ((EOofI(i).eq.EOofI(j)).and.(EOofI(j).eq.EOofI(k))) then
-C            if (.true.) then! (PMofI(i).eq.PMofI(j)) then
-C             p0=normisF1(i,qcasesF1(i))+normisF1(j,qcasesF1(j))
-C     $              +normisF1(k,qcasesF1(k))
-C             p1=normisF1(i,qcasesF1(k))+normisF1(j,qcasesF1(i))
-C     $              +normisF1(k,qcasesF1(j))
-C             p2=normisF1(i,qcasesF1(j))+normisF1(j,qcasesF1(k))
-C     $              +normisF1(k,qcasesF1(i))
-C             if ((p0.ge.p1).and.(p0.ge.p2)) then
-C             !Do nothing               ijk
-C             else
-C              if (p1.ge.p2) then
-C               Temp=qcasesF1(i)        !i to temp
-C               qcasesF1(i)=qcasesF1(k) !k to i
-C               qcasesF1(k)=Temp        !Temp(i) to k(i)
-C               Temp=qcasesF1(j)        !j to temp
-C               qcasesF1(j)=qcasesF1(k) !k(i) to j
-C               qcasesF1(k)=Temp        !Temp(j) to k
-C                                       ! cyclic permutation complete. kij
-C              else
-C               Temp=qcasesF1(i)        !i to temp
-C               qcasesF1(i)=qcasesF1(j) !j to i
-C               qcasesF1(j)=Temp        !Temp(i) to j(i)
-C               Temp=qcasesF1(k)        !k to temp
-C               qcasesF1(k)=qcasesF1(j) !j(i) to k
-C               qcasesF1(j)=Temp        !Temp(i) to j
-C                                       ! cyclic permutation complete. jki !by running the double loop also ikj and jik should be covered. as well as ijk
-C              end if
-C             j=0 !resets the loop if a swap was made to check again.
-C             k=0
-C             end if
-C            end if
-C            end if
-C            end if
-C           end if
-C           end do !k
-C          end do !j
-C        end do !i
-            
-
         do i = 1, size(S_H)   ! 
          qcase2=qcasesF1(i) !'loading' qcase for F1 from new assignment process
          qcase=qcasesJ(i) !'loading' qcase for J, still assuming that J remains a nearly good quantum number.
@@ -753,9 +677,11 @@ C        end do !i
      $           ,signs(results:results2)) !now the signs were restored following the signs of the largest contributing f1 !normalization should not be required since all components are used.
          mycounters(qcase2,qcase)=mycounters(qcase2,qcase)+1   !counter start at 1
          end do   !end for column i of h_3   
-
+         
+      if ((ctlint(C_INTS).gt.0).and.(fistat.eq.0)) then
       zis=0.0
       zrs=hs   
+      end if
       
       do f1= startf1, endf1,2 
       cm2=(f1-startf1)/2
@@ -772,26 +698,9 @@ C        end do !i
       cm=j-minJ
       cmb=j-(jselect-sj)
       
-
-      
-      
-      
-      
-      
-      
       size(S_H)= 2*(j)+1  ! added because it is used in wvrec,
       size(S_K)= 2*(j)+1 ! saved S_K added because S_K will be used in other routines
       
-      
-C      if ((j.eq.1).and.(f1.eq.3)) then
-C      if (gam.eq.1) then
-C      open(57,file='F3J1_newmat',status='unknown')
-C      do i=1,size(s_h)
-C        write(57,*) zrs(cm2+1,cm+1,i,:size(s_h))
-C        end do
-C      close(57)
-C      end if
-C      end if
       
       
       call assgn(j,gam,f,ib,f1,hs(cm2+1,cm+1,:,:),evhs(cm2+1,cm+1,:)
@@ -940,6 +849,7 @@ C     initialize the quantum no.s qvk
 
       if (masave) then
         do itop=1,ctlint(C_NTOP)
+          if (gamma(gam,itop).eq.99) goto 90 ! Exception for sigma = 99 entry
           write(fnpost,'(I1,I1,A,I1,I1)')
      $         itop,gam,'.j',int(j/10),mod(j,10)
           open(55,file=fnpre//'t'//fnpost,status='unknown')
@@ -955,8 +865,10 @@ C     initialize the quantum no.s qvk
             end do
           end do
           close(55)
+ 90       continue 
         end do
         do itop=1,ctlint(C_NTOP)
+          if (gamma(gam,itop).eq.99) goto 91 ! Exception for sigma = 99 entry
           write(fnpost,'(I1,I1,A,I1,I1)')
      $         itop,gam,'.j',int(j/10),mod(j,10)
           open(56,file=fnpre//'p'//fnpost,status='unknown')
@@ -978,6 +890,7 @@ C     initialize the quantum no.s qvk
             end do
           end do
           close(56)
+ 91       continue 
         end do
         
         do it1=1,ctlint(C_NTOP)
@@ -989,6 +902,7 @@ C     initialize the quantum no.s qvk
             do ic=1, size(S_H)
               tt=1.0d0
               do it2=1,ctlint(C_NTOP)
+                if (gamma(gam,itop).eq.99) goto 92 ! Exception for sigma = 99 entry
                 tt=tt*tori(qvk(ir,Q_K),    qvk(ic,Q_K),
      $                   qvk(ir,Q_V+it2),qvk(ic,Q_V+it2),
      $                   gamma(gam,it2),it2)
@@ -996,6 +910,7 @@ C     initialize the quantum no.s qvk
               write(55,'(D22.14,$)')
      $             rotm(qvk(ikr,Q_K),qvk(ikc,Q_K),1,it1)
      $             *tt
+ 92          continue
             end do
             write(55,*)
           end do
@@ -1019,7 +934,7 @@ c      write(*,*) 'bld2vjk',mclock()-t1
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
       end if
 C      t1=mclock()
-      call addrig_old(j,gam,f1
+      call addrig(j,gam,f1
      $     ,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori,complex)
         
 c      write(*,*) 'addrig',mclock()-t1
@@ -1149,7 +1064,7 @@ C      if (usert.eq.0) then
               e(ie)=zr(ie,id)
               e2(ie)=zi(ie,id)
             end do
-            call hcaldev_old(e,e2,j,gam,f1,ib,ifit,npar
+            call hcaldev(e,e2,j,gam,f1,ib,ifit,npar
      $           ,qvk,ruse,a,dedp,evalv,ovv,rotm,tori)
             call devsave(j,gam,f1,ib,qmk(id,Q_T)
      $           ,ifit,dfit,dedp,palc,pali)
@@ -1180,26 +1095,35 @@ C     fistat > 0  Eigenvalues for differential quotient
 
       implicit none
       include 'iam.fi'
-      integer j, gam, f, ib, npar, fistat, is, f1
+      integer j, gam,gam1,gam2, f, ib, npar, fistat, is, f1
       real*8  h(DIMTOT,DIMTOT),evh(DIMTOT)
       real*8  hs(2,DIMTOT,DIMTOT),evhs(2,DIMTOT)
-      real*8  h1out(DIMTOT,DIMTOT),evh1out(DIMTOT)! outputs will be written to these
-      real*8  h2out(DIMTOT,DIMTOT),evh2out(DIMTOT)! For each of the two couble states.
       real*8  h_2(2*DIMTOT,2*DIMTOT), evh_2(2*DIMTOT)
-      real*8  hresort(2*DIMTOT,2*DIMTOT) !Turns out the diagonalization likely works only if I blocksort first.
-      real*8  evhresort(2*DIMTOT)
       integer sorti(2*DIMTOT)
       integer counti,countis
       real*8  evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  evalvu(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  evalvl(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
       real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  ovvu(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
+      real*8  ovvl(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
       real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
+      real*8  rotmu(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
+      real*8  rotml(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
       real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
+      real*8  rottu(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
+      real*8  rottl(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
       real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
+     $     -DIMSIG:DIMSIG,DIMTOP)
+      real*8  toriu(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
+     $     -DIMSIG:DIMSIG,DIMTOP)
+      real*8  toril(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
      $     -DIMSIG:DIMSIG,DIMTOP)
       real*8  atot(DIMPAR,DIMVB)
       real*8  al(DIMPAR), au(DIMPAR)
       real*8  palc(DIMFIT,-1:DIMPLC)
       real*8  normi1, normi2 !renormalization in spearted hamiltonian matrices
+      real*8  beta_tot
       integer pali(DIMFIT, 0:DIMPLC,2)
       integer qmv(DIMV),ifittot(DIMPAR,DIMVB),dfit(DIMFIT)
       integer qmvs(2,DIMV)
@@ -1209,6 +1133,8 @@ C     quantum numbers
       integer qvks(2,DIMTOT,Q_K:Q_V+DIMTOP) 
       integer qv(DIMTOT)
       integer qvs(2,DIMTOT)
+      integer oldju, oldjl
+      integer off1,off2 
 C     work
       real*8  e(DIMTOT),e2(DIMTOT),tau(2,DIMTOT)
       real*8  e_2(2*DIMTOT),e2_2(2*DIMTOT),tau_2(2,2*DIMTOT)
@@ -1216,8 +1142,8 @@ C     work
       real*8  zr_2(DIMTOT*2,DIMTOT*2),zi_2(DIMTOT*2,DIMTOT*2)
       real*8  zrs(2,DIMTOT,DIMTOT),zis(2,DIMTOT,DIMTOT)
       real*8  dedp(DIMPAR)
-      real*8  Gx,Gy,Gz,Fxy,Fxz,Fyz
-      real*8  check1,check2
+      real*8  Gx,Gy,Gz,Fxy,Fxz,Fyz,Chixy,Chiyz,Chixz
+      real*8  check1,check2               
       real*8  fjn
       integer id,ie,i,iv,ik,itop,ivr,ivc,ir,ic,it1,it2,ikr,ikc
       integer ibl, ibu, ibselect
@@ -1225,6 +1151,8 @@ C     work
       integer ruse(DIMVV,DIMVV,DIMTOP)
       integer counter1
       integer counter2
+      integer mini,maxi
+      real*8 dj,djj1,e1,djjc,di,dii1,df,dff1,dg
       character*30 fmtstr
       character*30 fmtstr2
       character*4 fnpre
@@ -1240,50 +1168,140 @@ C     work
       masave=.false.
       h=0.0
       h_2=0.0
-	  h1out=0.0
-	  h2out=0.0
-      hresort=0.0
-      evhresort=0.0
       sorti=0
       counti= 0
       countis=0
-	  evh1out=0.0
-	  evh2out=0.0
-	  counter1=0
-	  counter2=0
+      counter1=0
+      counter2=0
+      
+      gam2=gam
+      gam1=gam
+C      if (ctlint(C_DWVOFF).eq.1) then !initialization not needed.
+C        evalvu=evalv
+C        ovvu=ovv
+C        rotmu=rotm
+C        rottu=rott
+C        toriu=tori
+C        evalvl=evalv
+C        ovvl=ovv
+C        rotml=rotm
+C        rottl=rott
+C        toril=tori
+C      end if 
+      
+
+      dj=dble(j)
+      djj1=dj*(dj+1.0)
+      e1=0.0
+C     djjc is used for spin rotation coupling to prevent a division by zero
+C     for J=0
+      djjc=1.0
+      if ((ctlint(C_SPIN).ne.0).and.(j.gt.0).and.(f1.ge.0)) then
+        di=dble(ctlint(C_SPIN))/2.0d0
+        dii1=di*(di+1.0)
+        df=dble(f1)/2.0d0!using f1 here
+        dff1=df*(df+1.0)
+        djjc=djj1
+        dg=dff1-dii1-djj1
+        if (ctlint(C_SPIN).gt.1) then
+          e1= (0.75*dg*(dg+1.0)-dii1*djj1)
+     $         /(2.0*di*(2.0*di-1.0)*djj1*(2.0*dj-1.0)*(2.0*dj+3.0))
+        else
+          e1=0.0
+        end if
+      end if
+      
       if (ib.le.2) then
         ibl=1
         ibu=2
-        if (ib.eq.1) then
+        if (ib.eq.1) then !ib1 is ib low shall be afilliated with Slow
           ibselect=1
+          call dw_idgam(gam,gam1,gam2,ibselect)!,1,0)
         else
           ibselect=2
+          call dw_idgam(gam,gam1,gam2,ibselect)!,1,0)
         end if
-      else
+      else if (ib.le.4) then
         ibl=3
         ibu=4  
         if (ib.eq.3) then
          ibselect=1
+         call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
         else
-         ibselect=2
+          ibselect=2
+          call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
+        endif
+       else 
+        ibl=5
+        ibu=6  
+        if (ib.eq.5) then
+         ibselect=1
+         call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
+        else
+          ibselect=2
+          call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
         endif
       end if     
       al=atot(:,ibl)
       au=atot(:,ibu)  
+C      write(*,*) gam,gam1, gam2
 
       if (ctlint(C_EVAL).gt.3)   masave=.true.
 
-      if ((myand(ctlint(C_PRI),AP_ST).ne.0).and.(xde.ge.1))
-     $     write(*,'(A,5I3)')
-     $     'starting with J,S,B,F Fit_stat=',J,gam,ibl,f,fistat
       fnpre='xiam'
-      if (gam.eq.0) ctlint(C_NTOP)=0
-      complex=.false.
-      do i=1,ctlint(C_NTOP)
-        if (al(PI_GAMA+(i-1)*DIMPIR+DIMPRR).ne.0.0) complex=.true.
-      end do
+      if (gam1.eq.0) ctlint(C_NTOP)=0
+      complex=.true. ! this marks the hamiltonian as containing complex matrix elements in several subroutines. Not sure if putting it false for certain parametersets really speeds things up, I will keep it as true for now
+
       usert = 1
-      if ((al(P_QYZ).ne.0.0).or.(al(P_QXY).ne.0.0)) complex=.true.
+C     Copied introt part from iam.f Herbers2026
+C     Recalculation of internal rotation part in case the Bs are affiliated with different Vs
+C     This is repeated for the upper ibu state further down the code.
+C     DWVoff must be set to 1 for the recalculation to be carried out.
+      if (ctlint(C_DWVOFF).eq.1) then
+        size(S_VV)=1
+        do iv=1, DIMVV
+          if (qvv(iv,1,ibl).eq.-1) goto 11
+          size(S_VV)=iv
+        end do
+ 11     continue
+        do itop=1, ctlint(C_NTOP)
+          mini=99
+          maxi=-1
+          do iv=1, size(S_VV)
+            if (qvv(iv,itop,ibl).lt.mini) mini=qvv(iv,itop,ibl) 
+            if (qvv(iv,itop,ibl).gt.maxi) maxi=qvv(iv,itop,ibl) 
+          end do
+          size(S_V+itop)=maxi-mini+1
+          size(S_MINV+itop)=mini
+          if (size(S_V+itop).lt.0) stop 'error in up reint calvjk_d'
+        end do
+       
+            call adjusta(atot(1,ibl),npar,ctlint(C_ADJF))
+C      calc the |m> and |K> part in the rho-system
+           call calmk(ibl,h,evalvl,ovvl,rotml,rottl,toril
+     $          ,atot(1,ibl),qmv,ifittot(1,ibl),npar,fistat,0)
+           h=0.0
+C      set up the rotation matrix  !Herbers2026
+        do itop=1,ctlint(C_NTOP)
+         beta_tot=atot(P1_BETA+DIMPIR*(itop-1),ibl)
+     $      +dble((j*(j+1))**1)*atot(P1_BETJ1+DIMPIR*(itop-1),ibl)
+     $      +dble((j*(j+1))**2)*atot(P1_BETJ2+DIMPIR*(itop-1),ibl)
+     $      +dble((j*(j+1))**3)*atot(P1_BETJ3+DIMPIR*(itop-1),ibl)
+     $      +dble((j*(j+1))**4)*atot(P1_BETJ4+DIMPIR*(itop-1),ibl)
+         oldjl=0
+           call rotate(rotml(-DIMJ,-DIMJ,1,itop)
+     $          ,beta_tot,j,oldjl)
+        end do
+      end if
+C     
+C     End of Recalculation of internal rotation part DWVoff=1 case
+C     
+      
+      do ivr=1, size(S_H) 
+        do ivc=1, size(S_H)
+          h(ivr,ivc)=0.0
+        end do
+      end do
 
       size(S_K)=2*j+1
 C     initialize the quantum no.s qvk
@@ -1299,11 +1317,6 @@ C     initialize the quantum no.s qvk
         end do
       end do
       size(S_H)=i
-      do ivr=1, size(S_H)
-        do ivc=1, size(S_H)
-          h(ivr,ivc)=0.0
-        end do
-      end do
 
       do itop=1, ctlint(C_NTOP)
         do ivr=1, size(S_VV)
@@ -1327,93 +1340,14 @@ C     initialize the quantum no.s qvk
         end do
       end do
 
-      if ((myand(ctlint(C_PRI),AP_ST).ne.0).and.(xde.ge.1)) then
-        write(fmtstr,'(A,I1,A,I2,A)') '(',ctlint(C_NTOP),'I2,A,'
-     $       ,size(S_VV),'I3)'
-        write(*,*) fmtstr
-        do itop=1, ctlint(C_NTOP)
-          write(*,'(A,I3)') ' ruse array for top', itop 
-          do ivr=1, size(S_VV)
-            write(*,fmtstr)(qvv(ivr,it2,ibl),it2=1,ctlint(C_NTOP))
-     $           ,' | ',(ruse(ivr,ivc,itop),ivc=1, size(S_VV))
-          end do
-        end do
-      end if 
-
-      if (masave) then
-        do itop=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         itop,gam,'.j',int(j/10),mod(j,10)
-          open(55,file=fnpre//'t'//fnpost,status='unknown')
-          write(55,*) size(S_V+itop)*size(S_K),0,0
-          do ivr=1, size(S_V+itop)
-            do ikr=1, size(S_K)
-              write(55,*)
-     $             ((rotm(qvk(ikr,Q_K),qvk(ikc,Q_K),1,itop)
-     $             *tori(qvk(ikr,Q_K),qvk(ikc,Q_K),ivr,ivc
-     $             ,gamma(gam,itop),itop)
-     $             ,ikc=1,size(S_K))
-     $             ,ivc=1, size(S_V+itop))
-            end do
-          end do
-          close(55)
-        end do
-        do itop=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         itop,gam,'.j',int(j/10),mod(j,10)
-          open(56,file=fnpre//'p'//fnpost,status='unknown')
-          write(56,*) size(S_V+itop)*size(S_K),0,0
-          do ivr=1, size(S_V+itop)
-            do ikr=1, size(S_K)
-              do ivc=1, size(S_V+itop)
-                do ikc=1, size(S_K)
-                  if (qvk(ikr,Q_K).eq.qvk(ikc,Q_K)) then
-                    write(56,'(D22.14,$)')
-     $                   ovv(ivr,ivc,PM_PI,gamma(gam,itop)
-     $                   ,qvk(ikr,Q_K),itop)
-                  else
-                    write(56,'(D22.14,$)') 0.0
-                  end if
-                end do
-              end do
-              write(56,*)
-            end do
-          end do
-          close(56)
-        end do
-        
-        do it1=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         it1,gam,'.j',int(j/10),mod(j,10)
-          open(55,file=fnpre//'r'//fnpost,status='unknown')
-          write(55,*) size(S_H),0,0
-          do ir=1, size(S_H)
-            do ic=1, size(S_H)
-              tt=1.0d0
-              do it2=1,ctlint(C_NTOP)
-                tt=tt*tori(qvk(ir,Q_K),    qvk(ic,Q_K),
-     $                   qvk(ir,Q_V+it2),qvk(ic,Q_V+it2),
-     $                   gamma(gam,it2),it2)
-              end do
-              write(55,'(D22.14,$)')
-     $             rotm(qvk(ikr,Q_K),qvk(ikc,Q_K),1,it1)
-     $             *tt
-            end do
-            write(55,*)
-          end do
-          close(55)
-        end do
-      end if
-
-      if (gam.ne.0) then 
-C      t1=mclock()
-C     build the rotated D^{T} E_{K v \sigma} D
-C        if (usert.eq.0) then
-C          call bld1vjk(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori)
-C        else
-        call bld2vjk(j,gam,f
+      if (gam1.ne.0) then 
+      if (ctlint(C_DWVOFF).eq.1) then
+        call bld2vjk(j,gam1,f1
+     $         ,qvk,ruse,h,al,evalvl,ovvl,rotml,rottl,toril,complex)
+      else 
+        call bld2vjk(j,gam1,f1
      $         ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
-
+      end if 
 C        end if
 
 c      write(*,*) 'bld2vjk',mclock()-t1
@@ -1422,14 +1356,17 @@ c      write(*,*) 'bld2vjk',mclock()-t1
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
       end if
 C      t1=mclock()
-      call addrig_old(j,gam,f
+      if (ctlint(C_DWVOFF).eq.1) then
+      call addrig(j,gam1,f1
+     $     ,qvk,ruse,h,al,evalvl,ovvl,rotml,rottl,toril,complex)
+      else
+      call addrig(j,gam1,f1
      $     ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
-     
-
+      end if
 C---
 C      t1=mclock()
-       do i=1, DIMTOT
-         do ie=1, DIMTOT
+       do i=1, size(S_H)
+         do ie=1, size(S_H)
            h_2(i,ie)=h(i,ie) !copying h to h2
          end do
        end do 
@@ -1445,6 +1382,51 @@ C     Starting a copy with ibu
 C     Starting a copy with ibu
 C     Starting a copy with ibu
 C     Starting a copy with ibu
+
+
+C     Recalculation of internal rotation part in case the Bs are affiliated with different Vs
+C     This is repeated for the lower ibl state further up the code.
+C     DWVoff must be set to 1 for the recalculation to be carried out.
+      if (ctlint(C_DWVOFF).eq.1) then
+        size(S_VV)=1
+        do iv=1, DIMVV
+          if (qvv(iv,1,ibu).eq.-1) goto 12
+          size(S_VV)=iv
+        end do
+ 12     continue
+        do itop=1, ctlint(C_NTOP)
+          mini=99
+          maxi=-1
+          do iv=1, size(S_VV)
+            if (qvv(iv,itop,ibu).lt.mini) mini=qvv(iv,itop,ibu) 
+            if (qvv(iv,itop,ibu).gt.maxi) maxi=qvv(iv,itop,ibu) 
+          end do
+          size(S_V+itop)=maxi-mini+1
+          size(S_MINV+itop)=mini
+          if (size(S_V+itop).lt.0) stop 'error in up reint calvjk_d'
+        end do
+
+          call adjusta(atot(1,ibu),npar,ctlint(C_ADJF))
+C     calc the |m> and |K> part in the rho-system
+          call calmk(ibu,h,evalvu,ovvu,rotmu,rottu,toriu
+     $         ,atot(1,ibu),qmv,ifittot(1,ibu),npar,fistat,0)
+C     set up the rotation matrix  !Herbers2026
+        do itop=1,ctlint(C_NTOP)
+        beta_tot=atot(P1_BETA+DIMPIR*(itop-1),ibu)
+     $     +dble((j*(j+1))**1)*atot(P1_BETJ1+DIMPIR*(itop-1),ibu)
+     $     +dble((j*(j+1))**2)*atot(P1_BETJ2+DIMPIR*(itop-1),ibu)
+     $     +dble((j*(j+1))**3)*atot(P1_BETJ3+DIMPIR*(itop-1),ibu)
+     $     +dble((j*(j+1))**4)*atot(P1_BETJ4+DIMPIR*(itop-1),ibu)
+        oldju=0
+          call rotate(rotmu(-DIMJ,-DIMJ,1,itop)
+     $         ,beta_tot,j,oldju)
+        end do
+      end if 
+C     
+C     End of Recalculation of internal rotation part DWVoff=1 case
+C     
+      
+      
       i=0
       do iv=1, size(S_VV)
         do ik=1, size(S_K)
@@ -1485,110 +1467,32 @@ C     Starting a copy with ibu
         end do
       end do
 
-      if ((myand(ctlint(C_PRI),AP_ST).ne.0).and.(xde.ge.1)) then
-        write(fmtstr,'(A,I1,A,I2,A)') '(',ctlint(C_NTOP),'I2,A,'
-     $       ,size(S_VV),'I3)'
-        write(*,*) fmtstr
-        do itop=1, ctlint(C_NTOP)
-          write(*,'(A,I3)') ' ruse array for top', itop 
-          do ivr=1, size(S_VV)
-            write(*,fmtstr)(qvv(ivr,it2,ibu),it2=1,ctlint(C_NTOP))
-     $           ,' | ',(ruse(ivr,ivc,itop),ivc=1, size(S_VV))
-          end do
-        end do
-      end if 
-
-      if (masave) then
-        do itop=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         itop,gam,'.j',int(j/10),mod(j,10)
-          open(55,file=fnpre//'t'//fnpost,status='unknown')
-          write(55,*) size(S_V+itop)*size(S_K),0,0
-          do ivr=1, size(S_V+itop)
-            do ikr=1, size(S_K)
-              write(55,*)
-     $             ((rotm(qvk(ikr,Q_K),qvk(ikc,Q_K),1,itop)
-     $             *tori(qvk(ikr,Q_K),qvk(ikc,Q_K),ivr,ivc
-     $             ,gamma(gam,itop),itop)
-     $             ,ikc=1,size(S_K))
-     $             ,ivc=1, size(S_V+itop))
-            end do
-          end do
-          close(55)
-        end do
-        do itop=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         itop,gam,'.j',int(j/10),mod(j,10)
-          open(56,file=fnpre//'p'//fnpost,status='unknown')
-          write(56,*) size(S_V+itop)*size(S_K),0,0
-          do ivr=1, size(S_V+itop)
-            do ikr=1, size(S_K)
-              do ivc=1, size(S_V+itop)
-                do ikc=1, size(S_K)
-                  if (qvk(ikr,Q_K).eq.qvk(ikc,Q_K)) then
-                    write(56,'(D22.14,$)')
-     $                   ovv(ivr,ivc,PM_PI,gamma(gam,itop)
-     $                   ,qvk(ikr,Q_K),itop)
-                  else
-                    write(56,'(D22.14,$)') 0.0
-                  end if
-                end do
-              end do
-              write(56,*)
-            end do
-          end do
-          close(56)
-        end do
-        
-        do it1=1,ctlint(C_NTOP)
-          write(fnpost,'(I1,I1,A,I1,I1)')
-     $         it1,gam,'.j',int(j/10),mod(j,10)
-          open(55,file=fnpre//'r'//fnpost,status='unknown')
-          write(55,*) size(S_H),0,0
-          do ir=1, size(S_H)
-            do ic=1, size(S_H)
-              tt=1.0d0
-              do it2=1,ctlint(C_NTOP)
-                tt=tt*tori(qvk(ir,Q_K),    qvk(ic,Q_K),
-     $                   qvk(ir,Q_V+it2),qvk(ic,Q_V+it2),
-     $                   gamma(gam,it2),it2)
-              end do
-              write(55,'(D22.14,$)')
-     $             rotm(qvk(ikr,Q_K),qvk(ikc,Q_K),1,it1)
-     $             *tt
-            end do
-            write(55,*)
-          end do
-          close(55)
-        end do
-      end if
-
-      if (gam.ne.0) then 
-C      t1=mclock()
-C     build the rotated D^{T} E_{K v \sigma} D
-C        if (usert.eq.0) then
-C          call bld1vjk(j,gam,f,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori)
-C        else
-
-        call bld2vjk(j,gam,f
+      if (gam2.ne.0) then 
+      if (ctlint(C_DWVOFF).eq.1) then
+        call bld2vjk(j,gam2,f1
+     $         ,qvk,ruse,h,au,evalvu,ovvu,rotmu,rottu,toriu,complex)
+      else
+        call bld2vjk(j,gam2,f1
      $         ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
-C        end if
-
-c      write(*,*) 'bld2vjk',mclock()-t1
-
+      end if
       else
         if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
       end if
 C      t1=mclock()
-      call addrig(j,gam,f
+      if (ctlint(C_DWVOFF).eq.1) then
+      call addrig(j,gam2,f1
+     $     ,qvk,ruse,h,au,evalvu,ovvu,rotmu,rottu,toriu,complex)
+      else
+      call addrig(j,gam2,f1
      $     ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
+      end if
         
 
 C---
 C      t1=mclock()
-        do i=1, DIMTOT
-          do ie=1, DIMTOT
-            h_2(i+DIMTOT,ie+DIMTOT)=h(i,ie) !copying 2nd h to h2
+        do i=1, size(S_H)
+          do ie=1, size(S_H)
+            h_2(i+size(S_H),ie+size(S_H))=h(i,ie) !copying 2nd h to h2
           end do
         end do
         
@@ -1600,97 +1504,23 @@ C      t1=mclock()
 C      End of copy
 C      End of copy        
 
+        off1=0
+        off2=size(S_H)
+        call addoffdiags_dw(off1,off2,ib,j,f1,al,au,h_2) !
         
-C      The following implementation of Gx,y,z and Fxy, Fyz and Fxz, differes from that in SPFIT/SPCAT       
-C      While if all Fs and all Gs are fit on their own, the Data simulated using SPFIT/SPCAT is reproduced
-C      Mixing the Fs and Gs will lead to disagreement.       
-C      This is likely due to inconsistensies in phase convention in my implementation here.
-C      For now, I discourage mixing G and F parameters until this disagreement is fixed.
-C      
-C             --- Sven 25-07-2024
-       Gz  = 0.0
-       Gy  = 0.0
-       Gx  = 0.0
-       Fxy = 0.0
-       Fxz = 0.0
-       Fyz = 0.0
-       if (ib.le.2) then
-         Gz =al(P_GZ12)
-         Gy =al(P_GY12)
-         Gx =al(P_GX12)
-         Fxy=al(P_FXY1)
-         Fxz=al(P_FXZ1)
-         Fyz=al(P_FYZ1)
-       else
-         Gz =al(P_GZ34)
-         Gy =al(P_GY34)
-         Gx =al(P_GX34)
-         Fxy=al(P_FXY3)
-         Fxz=al(P_FXZ3)
-         Fyz=al(P_FYZ3)      
-       end if
         
-C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
-       if (Gz .ne. 0.0) then
-         do ik=1, 2*j+1
-           h_2(ik,DIMTOT+ik)=Gz*1.0*(ik-1-j)! on complex off diag Gordy_Cook eq 7.135 p290 
-         end do !  
-       end if 
-       if (Gy .ne. 0.0) then
-         do ik=1, 2*j
-             h_2(ik,DIMTOT+ik+1)=h_2(ik,DIMTOT+ik+1)+0.5*Gy
-     $                *sqrt(1.0*(j-(ik-1-j))*(j+(ik-1-j)+1)) ! on complex off diag
-             h_2(ik+1,DIMTOT+ik)=h_2(ik+1,DIMTOT+ik)+0.5*Gy
-     $                *-1.0*sqrt(1.0*(j-(ik-1-j))*(j+(ik-1-j)+1)) ! on complex off diag
-         end do
-       end if 
-       if (Gx .ne. 0.0) then
-         do ik=2, 2*j+1
-             h_2(DIMTOT+ik,ik-1)=h_2(DIMTOT+ik,ik-1)+0.5*Gx
-     $                *sqrt(1.0*(j+(ik-1-j))*(j-(ik-1-j)+1)) ! on real off diag
-              h_2(DIMTOT+ik-1,ik)=h_2(DIMTOT+ik-1,ik)+0.5*Gx
-     $                *sqrt(1.0*(j+(ik-1-j))*(j-(ik-1-j)+1)) ! on real off diag
-         end do 
-       end if
+C       The problem is that there can be 0 energy levels e.g. J=0. 
+C       however the diagonalization routine does not accept zero entries. 
+C       This means I have to check, if for both rotational states the entries are zero.
+C       If this is not the case, I will add a small offset to the one that is non zero
+        do i = 1, 2*size(S_H) !
+        check1=abs(h_2(i,i))    
+        if (check1.le.1.0e-14) then
+            h_2(i,i)=5.0e-14 
+        end if
+       end do     
        
-       !FXY is imaginary!Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
-       if (Fxy .ne. 0.0) then !and based on doi.org/10.1063/1.1677430
-         do ik=1, 2*j-1
-           if(j.eq.1)then
-             fjn=(0.5*j*(j+1))**2
-           else
-             fjn=0.25*(j*(j+1)-(ik-j)*((ik-j)+1))
-     $          *(j*(j+1)-(ik-j)*((ik-j)-1))
-
-           end if 
-             h_2(ik,DIMTOT+ik+2)=h_2(ik,DIMTOT+ik+2) 
-     $        +sqrt(fjn)*Fxy
-             h_2(ik+2,DIMTOT+ik)=h_2(ik+2,DIMTOT+ik)
-     $         -1.0*sqrt(fjn)*Fxy
-         end do
-       end if        
-       
-       ! FYZ is put on the imaginary
-       if (Fyz .ne. 0.0) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
-         do ik=1, 2*j
-             h_2(ik,DIMTOT+ik+1)=h_2(ik,DIMTOT+ik+1)+0.5*(2*(ik-1-j)+1)
-     $  *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*Fyz
-             h_2(ik+1,DIMTOT+ik)=h_2(ik+1,DIMTOT+ik)-0.5*(2*(ik-1-j)+1)
-     $  *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*Fyz 
-         end do
-       end if        
-       !FXZ is put on the real
-       if (Fxz .ne. 0.0) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
-         do ik=1, 2*j
-            h_2(DIMTOT+ik+1,ik)=h_2(DIMTOT+ik+1,ik)+(0.5* 
-     $         (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
-     $          *Fxz
-             h_2(DIMTOT+ik,ik+1)=h_2(DIMTOT+ik,ik+1)+(0.5*
-     $          (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
-     $          *Fxz
-         end do
-       end if        
-       
+        
         do ir=1, 2*size(S_H)
           do ic=1, 2*size(S_H)
             zr_2(ir,ic)=0.0
@@ -1698,34 +1528,6 @@ C      ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
           zr_2(ir,ir)=1.0
         end do
         ierr=0
-              
-        
-C        The problem is that there can be 0 energy levels e.g. J=0. 
-C        however the diagonalization routine does not accept zero entries. 
-C        This means I have to check, if for both rotational states the entries are zero.
-C        If this is not the case, I will add a small offset to the one that is non zero
-        do i = 1, size(S_H) ! it is probably better to fix this using size(S_H)... but for now.
-         check1=abs(h_2(i,i))    
-         if (check1.le.1.0e-14) then
-             h_2(i,i)=5.0e-14 
-         end if
-         check2=abs(h_2(DIMTOT+i,DIMTOT+i))    
-         if (check2.le.1.0e-14) then
-          h_2(DIMTOT+i,DIMTOT+i)=5.0e-14 
-         end if
-        end do     
-             
-         
-      hresort(1:size(S_H),1:size(S_H))=
-     $ h_2(1:size(S_H),1:size(S_H))  ! Diagonal Block lower state
-      hresort(size(S_H)+1:2*size(S_H),size(S_H)+1:2*size(S_H))=
-     $ h_2(DIMTOT+1:DIMTOT+size(S_H),DIMTOT+1:DIMTOT+size(S_H))  ! Diagonal Block upper state
-      hresort(1:size(S_H),size(S_H)+1:2*size(S_H))=
-     $ h_2(1:size(S_H),DIMTOT+1:DIMTOT+size(S_H))     ! Offdiagonal 1
-      hresort(size(S_H)+1:2*size(S_H),1:size(S_H))=  
-     $ h_2(DIMTOT+1:DIMTOT+size(S_H),1:size(S_H))     ! Offdiagonal 2
-
-        h_2=hresort
         
         call htrid3 (2*DIMTOT,2*size(s_h),h_2,evh_2,e_2,e2_2,tau_2)
         call tql2 (2*DIMTOT,2*size(s_h),evh_2,e_2,zr_2,ierr)
@@ -1825,6 +1627,7 @@ C      h=hs(ibselect,:,:)
        end 
 
 C----------------------------------------------------------------------
+C----------------------------------------------------------------------
       subroutine addrig(j,gam,f,qvk,ruse
      $     ,h,a,evalv,ovv,rotm,rott,tori,complex)
       implicit none
@@ -1847,9 +1650,7 @@ C     work
       do i =1, size(S_H)
         do iv=1, size(S_H)
           vr(iv)=0.0
-          vor(iv)=0.0
           vi(iv)=0.0
-          voi(iv)=0.0
         end do
         vr(i )=1.0d0
         call hmulthrr(j,gam,f
@@ -1864,46 +1665,6 @@ C     work
       return
       end
 C----------------------------------------------------------------------
-      subroutine addrig_old(j,gam,f,qvk,ruse
-     $     ,h,a,evalv,ovv,rotm,rott,tori,complex)
-      implicit none
-      include 'iam.fi'
-      integer j,gam,f
-      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      real*8  h(DIMTOT,DIMTOT),a(DIMPAR)
-      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-      logical complex
-C     work
-      real*8 vr(DIMTOT), vi(DIMTOT), vor(DIMTOT), voi(DIMTOT)
-      integer i,iv
-
-      do i =1, size(S_H)
-        do iv=1, size(S_H)
-          vr(iv)=0.0
-          vor(iv)=0.0
-          vi(iv)=0.0
-          voi(iv)=0.0
-        end do
-        vr(i )=1.0d0
-        call hmulthrr_old(j,gam,f
-     $       ,qvk,ruse,a,vr,vi,vor,voi,evalv,ovv,rotm,tori,0,0)
-        do iv=1, i
-          h(i,iv)=h(i,iv)+vor(iv)
-        end do
-        do iv=i+1, size(S_H)
-          h(i,iv)=h(i,iv)+voi(iv)
-        end do
-      end do
-      return
-      end
-
-C----------------------------------------------------------------------
       subroutine hcaldev(vr,vi,j,gam,f,ib,ifit,npar
      $     ,qvk,ruse,a,dedp,evalv,ovv,rotm,tori)
 C     (hermitian) calculation of the < J tau | Op | J tau' >  
@@ -1912,7 +1673,7 @@ C     Hellmann-Feynman-Theorem?
       include 'iam.fi'
       real*8  vi(DIMTOT),vr(DIMTOT)
       integer j,gam,f,npar,ib
-      integer qvk(DIMTOT,Q_K:Q_V1+DIMTOP-1), ifit(DIMPAR)
+      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP), ifit(DIMPAR)
       integer ruse(DIMVV,DIMVV,DIMTOP)
       real*8  a(DIMPAR),dedp(DIMPAR)
       real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
@@ -1934,10 +1695,6 @@ C     work
             da(i)=0.0
           end do
           da(ifs)=1.0
-          do i=1, size(S_H)
-            vor(i)=0.0
-            voi(i)=0.0
-          end do
           call hmulthrr(j,gam,f
      $         ,qvk,ruse,da,vr,vi,vor,voi,evalv,ovv,rotm,tori,ifs,0)
           do i=1, size(S_H)
@@ -1948,59 +1705,14 @@ C     work
       return
       end
 C----------------------------------------------------------------------
-      subroutine hcaldev_old(vr,vi,j,gam,f,ib,ifit,npar
-     $     ,qvk,ruse,a,dedp,evalv,ovv,rotm,tori)
-C     (hermitian) calculation of the < J tau | Op | J tau' >  
-C     Hellmann-Feynman-Theorem? 
-      implicit none
-      include 'iam.fi'
-      real*8  vi(DIMTOT),vr(DIMTOT)
-      integer j,gam,f,npar,ib
-      integer qvk(DIMTOT,Q_K:Q_V1+DIMTOP-1), ifit(DIMPAR)
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      real*8  a(DIMPAR),dedp(DIMPAR)
-      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-C     work
-      real*8  da(DIMPAR)
-      real*8  vor(DIMTOT),voi(DIMTOT)
-      integer i,ifs
-
-      do ifs=1, DIMPRR
-        dedp(ifs)=0.0
-      end do
-      do ifs=1, DIMPRR
-        if (ifit(ifs).ne.0) then
-          do i=1,DIMPRR
-            da(i)=0.0
-          end do
-          da(ifs)=1.0
-          do i=1, size(S_H)
-            vor(i)=0.0
-            voi(i)=0.0
-          end do
-          call hmulthrr_old(j,gam,f
-     $         ,qvk,ruse,da,vr,vi,vor,voi,evalv,ovv,rotm,tori,ifs,0)
-          do i=1, size(S_H)
-            dedp(ifs)=dedp(ifs)+vor(i)*vr(i)+voi(i)*vi(i)
-          end do
-        end if
-      end do
-      return
-      end
-      
-C----------------------------------------------------------------------
       subroutine hmulthrr(j,gam,f
      $     ,qvk,ruse,a,vr,vi,vor,voi,evalv,ovv,rotm,tori,ifs,it)
 C     multiply the complex vector vr,vi by the rigid part of the
 C     Hamilton matrix, yielding vor,voi
       implicit none
       include 'iam.fi'
-      integer j,gam,f,ifs,it
-      integer qvk(DIMTOT,Q_K:Q_V1+DIMTOP-1)
+      integer j,gam,f,ifs,it,ii
+      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
       integer ruse(DIMVV,DIMVV,DIMTOP)
       real*8  a(DIMPAR)
       real*8  vr(DIMTOT),vor(DIMTOT),vi(DIMTOT),voi(DIMTOT)
@@ -2009,18 +1721,24 @@ C     Hamilton matrix, yielding vor,voi
       real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
       real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
      $     -DIMSIG:DIMSIG,DIMTOP)
-
 C     work
       real*8  dk,dj,djj1,dff,t,t1,t2,djjc
       real*8  e1,df,dff1,di,dii1,dg
       real*8  adelk,adelj,ah2,ah3,ahk,ar6,ahjk,ahj
-      real*8  DXTERM, DYTERM, DZTERM
+      real*8  alj,aljk,alkj,alk !Herbers2026
+      real*8  al2,al3,al4 !Herbers2026
+      real*8  DXT, DYT, DZT !Herbers2024
+      real*8  DBJ, DBK, DBD !Herbers2026
       integer ik,ir,ic,ivr,ivc,itop
       integer off,voff
       integer myand
       external myand
       if (size(S_H).gt.DIMTOT) stop 'Dimension Error in HMULTHRR'
 
+      do ii=1, size(S_H) !Herbers2026: moved vo initialization from before hmulthrr calls into hmulthrr
+          vor(ii)=0.0
+          voi(ii)=0.0
+      end do
       dj=dble(j)
       djj1=dj*(dj+1.0)
       e1=0.0
@@ -2043,6 +1761,23 @@ C     for J=0
       end if
 
 C     the centrifugal distortion parameters
+C     Initialization
+        adelj= 0.0
+        adelk= 0.0
+        ar6  = 0.0
+        ahj  = 0.0
+        ahjk = 0.0
+        ah2  = 0.0
+        ahk  = 0.0
+        ah3  = 0.0
+        alj =  0.0
+        aljk = 0.0
+        alkj = 0.0
+        alk  = 0.0
+        alj =  0.0
+        al2 =  0.0
+        al3 =  0.0
+        al4 =  0.0
 C     Watson A 
       if (ctlint(C_RED).eq.0) then
         adelj=a(P_DJD)
@@ -2053,6 +1788,10 @@ C     Watson A
         ah2  =0.0d0
         ahk  =a(P_HKD)
         ah3  =0.0d0
+        alj = a(P_LJD)
+        aljk = a(P_LJKD)
+        alkj = a(P_LKJD)
+        alk  = a(P_LKD)
       end if
 C     Watson S
       if (ctlint(C_RED).eq.1) then
@@ -2064,6 +1803,10 @@ C     Watson S
         ah2  =a(P_HJKD)
         ahk  =0.0d0
         ah3  =a(P_HKD)
+        alj = a(P_LJD)
+        al2 = a(P_LJKD)
+        al3 = a(P_LKJD)
+        al4 = a(P_LKD)
       end if
 C     van Eijck / Typke
       if (ctlint(C_RED).eq.2) then
@@ -2075,6 +1818,7 @@ C     van Eijck / Typke
         ah2  =0.25d0*a(P_HJKD)
         ahk  =0.0d0
         ah3  =0.125d0*a(P_HKD)
+        alj  =0.5*a(P_LJD) ! no further implementation for octic.
       end if
 
       if ( (a(P_BJ) .ne.0.0).or.(a(P_BK) .ne.0.0).or.
@@ -2082,7 +1826,9 @@ C     van Eijck / Typke
      $     (a(P_DK) .ne.0.0).or.(a(P_HJ ).ne.0.0).or.
      $     (a(P_HJK).ne.0.0).or.(a(P_HKJ).ne.0.0).or.
      $     (a(P_HK) .ne.0.0).or.(a(P_QZ) .ne.0.0).or.
-     $     (a(P_CP) .ne.0.0).or.(a(P_CZ) .ne.0.0).or.
+     $     (a(P_LJ) .ne.0.0).or.(a(P_LK) .ne.0.0).or.
+     $     (a(P_LJJK) .ne.0.0).or.(a(P_LJK) .ne.0.0).or.
+     $     (a(P_LKKJ) .ne.0.0).or.
      $     (a(P_E)  .ne.0.0)) then !Herbers2023
         do ik=1, size(S_K)
           dk=dble(qvk(ik,Q_K))
@@ -2094,10 +1840,15 @@ C     van Eijck / Typke
      $         + a(P_HJ) *djj1**3
      $         + a(P_HJK)*(djj1**2)*(dk**2)
      $         + a(P_HKJ)*djj1*(dk**4)
-     $         + a(P_HK) *dk**6                      !     $         + a(P_QZ) * e1 * (3.0*(dk**2)-djj1) remvoed
+     $         + a(P_HK) *dk**6                      !     $         + a(P_QZ) * e1 * (3.0*(dk**2)-djj1) remvoed - now shows up in ctrl 0 section
      $         + a(P_CP) * 0.5*dg*(1.0-dk*dk/djjc)
      $         + a(P_CZ) * 0.5*dg*dk*dk/djjc
      $         + a(P_E)  !Herbers2023
+     $         + a(P_LJ) *djj1**4                 !Herbers2026
+     $         + a(P_LK) *dk**8                   !Herbers2026
+     $         + a(P_LJK)*(djj1**2)*(dk**4)       !Herbers2026
+     $         + a(P_LJJK)*(djj1**3)*(dk**2)      !Herbers2026
+     $         + a(P_LKKJ)*(djj1**1)*(dk**6)      !Herbers2026
           do ivc=1, size(S_VV)
             ic=ik+size(S_K)*(ivc-1)
             vor(ic)=vor(ic)+vr(ic)*t
@@ -2105,7 +1856,7 @@ C     van Eijck / Typke
           end do
         end do
       end if
-      
+
       if (a(P_PZ) .ne.0.0) then
         do ik=1, size(S_K)
           dk=dble(qvk(ik,Q_K))
@@ -2117,32 +1868,6 @@ C     van Eijck / Typke
           end do
         end do
       end if
-      
-      DZTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)   DZTERM=a(P_DZ1)  !herbers2024
-      if (gam.eq.2)   DZTERM=a(P_DZ2)  !herbers2024
-      if (gam.eq.3)   DZTERM=a(P_DZ3)  !herbers2024
-      if (gam.eq.4)   DZTERM=a(P_DZ4)  !herbers2024
-      if (gam.eq.5)   DZTERM=a(P_DZ5)  !herbers2024
-      if (gam.eq.6)   DZTERM=a(P_DZ6)  !herbers2024
-      if (gam.eq.7)   DZTERM=a(P_DZ7)  !herbers2024
-      if (gam.eq.8)   DZTERM=a(P_DZ8)  !herbers2024
-      if (gam.eq.9)   DZTERM=a(P_DZ9)  !herbers2024
-      if (gam.eq.10)  DZTERM=a(P_DZ10) !herbers2024
-      if (gam.eq.11)  DZTERM=a(P_DZ11) !herbers2024
-      if (DZTERM.ne.0.0) then          !herbers2024
-        do ik=1, size(S_K)             !herbers2024
-          dk=dble(qvk(ik,Q_K))         !herbers2024
-          t=     DZTERM *dk            !herbers2024
-          do ivc=1, size(S_VV)         !herbers2024
-            ic=ik+size(S_K)*(ivc-1)    !herbers2024
-            vor(ic)=vor(ic)+vr(ic)*t   !herbers2024
-            voi(ic)=voi(ic)+vi(ic)*t   !herbers2024
-          end do                       !herbers2024
-        end do                         !herbers2024
-      end if                           !herbers2024
-      
-      
       
       if ((ctlint(C_RED).eq.2).and. 
      $     ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0))) then
@@ -2160,61 +1885,20 @@ C     van Eijck / Typke
         end do
       end if
         
-CC     real off diagonal k/k+1   ! removed 
-C      if ((a(P_QXZ).ne.0.0)) then
-C        off=1
-C        do ik=1, size(S_K)-off
-C          dk=dble(qvk(ik,Q_K))
-C          dff=(1.0+2.0*dk)*dsqrt(djj1-dk*(dk+1.0))
-C          t=    e1* a(P_QXZ) *dff  
-C          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-C        end do
-C      end if
-
-C     real off diagonal k/k+1 
-      if ((a(P_PX).ne.0.0)) then
+C     real off diagonal k/k+1 ! in XIAM P_PX is real and P_PY gives imaginary, this is flipped convention from Gordy 2.63
+      if ((a(P_PX).ne.0.0).or.(a(P_DZX).ne.0.0).or.
+     $     (a(P_DZXJ).ne.0.0).or.(a(P_DZXK).ne.0.0)) then!Adding Dab, DabJ, DabK here
         off=1
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
           dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=  a(P_PX) *dff
+          t=  a(P_PX)*dff
+     $       +a(P_DZX)*(dk+(dk+1.0))*dff
+     $       +a(P_DZXJ)*(dk+(dk+1.0))*djj1*dff
+     $       +a(P_DZXK)*(dk**3+(dk+1.0)**3)*dff     
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
-      
-      DXTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)  DXTERM=a(P_DX1)   !herbers2024
-      if (gam.eq.2)  DXTERM=a(P_DX2)   !herbers2024
-      if (gam.eq.3)  DXTERM=a(P_DX3)   !herbers2024
-      if (gam.eq.4)  DXTERM=a(P_DX4)   !herbers2024
-      if (gam.eq.5)  DXTERM=a(P_DX5)   !herbers2024
-      if (gam.eq.6)  DXTERM=a(P_DX6)   !herbers2024
-      if (gam.eq.7)  DXTERM=a(P_DX7)   !herbers2024
-      if (gam.eq.8)  DXTERM=a(P_DX8)   !herbers2024
-      if (gam.eq.9)  DXTERM=a(P_DX9)   !herbers2024
-      if (gam.eq.10) DXTERM=a(P_DX10)   !herbers2024
-      if (gam.eq.11) DXTERM=a(P_DX11)   !herbers2024
-      if (DXTERM.ne.0.0) then          !herbers2024
-C       real off diagonal k/k+1 
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=  DXTERM *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if      
-
-CC     imaginaer off diagonal k/k+1  ! removed
-C      if ((a(P_QYZ).ne.0.0)) then
-C        off=1
-C        do ik=1, size(S_K)-off
-C          dk=dble(qvk(ik,Q_K))
-C          dff=(1.0+2.0*dk)*dsqrt(djj1-dk*(dk+1.0))
-C          t=    e1* a(P_QYZ) *dff *(-1) ! Sign change added by Sven 2024
-C          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
-C        end do
-C      end if
 
 C     imaginaer off diagonal k/k+1 
       if ((a(P_PY).ne.0.0)) then
@@ -2227,34 +1911,13 @@ C     imaginaer off diagonal k/k+1
         end do
       end if
       
-      DYTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)  DYTERM=a(P_DY1)   !herbers2024
-      if (gam.eq.2)  DYTERM=a(P_DY2)   !herbers2024
-      if (gam.eq.3)  DYTERM=a(P_DY3)   !herbers2024
-      if (gam.eq.4)  DYTERM=a(P_DY4)   !herbers2024
-      if (gam.eq.5)  DYTERM=a(P_DY5)   !herbers2024
-      if (gam.eq.6)  DYTERM=a(P_DY6)   !herbers2024
-      if (gam.eq.7)  DYTERM=a(P_DY7)   !herbers2024
-      if (gam.eq.8)  DYTERM=a(P_DY8)   !herbers2024
-      if (gam.eq.9)  DYTERM=a(P_DY9)   !herbers2024
-      if (gam.eq.10) DYTERM=a(P_DY10)   !herbers2024
-      if (gam.eq.11) DYTERM=a(P_DY11)   !herbers2024
-      if (DYTERM.ne.0.0) then          !herbers2024
-C       imaginaer off diagonal k/k+1 
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=   DYTERM *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
-        end do
-      end if
-      
 C     real off diagonal k/k+2 
       if ((a(P_BD).ne.0.0).or.(adelj.ne.0.0).or.
      $    (adelk.ne.0.0).or.(a(P_QD).ne.0.0).or.
      $    (ahj.ne.0.0).or.(a(P_CD).ne.0.0).or.
-     $    (ahjk.ne.0.0).or.(ahk.ne.0.0)) then
+     $    (ahjk.ne.0.0).or.(ahk.ne.0.0).or.(alj.ne.0.0).or.
+     $    (aljk.ne.0.0).or.(alkj.ne.0.0).or.(alk.ne.0.0)
+     $     ) then
         off=2
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
@@ -2264,8 +1927,12 @@ C     real off diagonal k/k+2
      $         - adelk   *dff*((dk+2.0d0)**2+dk**2)
      $         + ahj*2.0d0*dff*djj1**2
      $         + ahjk*dff*((dk+2.0d0)**2+dk**2)*djj1
-     $         + ahk*dff*((dk+2.0d0)**4+dk**4)   !     $         + a(P_QD) *dff*e1 removed
+     $         + ahk*dff*((dk+2.0d0)**4+dk**4)   !     $         + a(P_QD) *dff*e1 removed - now shows up in ctrl 0 section
      $         + a(P_CD) *0.5*dg*dff/djjc
+     $         + alj*2.0d0*dff*djj1**3                        !Herbers2026
+     $         + aljk*dff*((dk+2.0d0)**2+dk**2)*djj1**2       !Herbers2026
+     $         + alkj*dff*((dk+2.0d0)**4+dk**4)*djj1          !Herbers2026
+     $         + alk*dff*((dk+2.0d0)**6+dk**6)                !Herbers2026
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
@@ -2296,20 +1963,20 @@ C        end do
 C      end if
  
 C     Watson S off diagonal k/k+4 (evtl. change dff)
-      if ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0)) then
+      if ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0).or.(al2.ne.0.0d0)) then
         off=4
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
           dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
      $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))) 
           t=   
-     $          ar6*dff + ah2*djj1*dff
+     $          ar6*dff + ah2*djj1*dff + al2*djj1**2*dff
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
 
 C     Watson S off diagonal k/k+6 
-      if (ah3.ne.0.0d0) then
+      if ((ah3.ne.0.0d0).or.(al3.ne.0.0)) then
         off=6
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
@@ -2317,121 +1984,35 @@ C     Watson S off diagonal k/k+6
      $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))
      $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))) 
           t=   
-     $          ah3*dff
+     $          ah3*dff+al3*djj1*dff
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
       
-      return
-      end
-
-C----------------------------------------------------------------------
-      subroutine hmulthrr_old(j,gam,f
-     $     ,qvk,ruse,a,vr,vi,vor,voi,evalv,ovv,rotm,tori,ifs,it)
-C     multiply the complex vector vr,vi by the rigid part of the
-C     Hamilton matrix, yielding vor,voi
-      implicit none
-      include 'iam.fi'
-      integer j,gam,f,ifs,it
-      integer qvk(DIMTOT,Q_K:Q_V1+DIMTOP-1)
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      real*8  a(DIMPAR)
-      real*8  vr(DIMTOT),vor(DIMTOT),vi(DIMTOT),voi(DIMTOT)
-      real*8            evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-
-C     work
-      real*8  dk,dj,djj1,dff,t,t1,t2,djjc
-      real*8  e1,df,dff1,di,dii1,dg
-      real*8  adelk,adelj,ah2,ah3,ahk,ar6,ahjk,ahj
-      real*8  DXTERM, DYTERM, DZTERM
-      integer ik,ir,ic,ivr,ivc,itop
-      integer off,voff
-      integer myand
-      external myand
-      if (size(S_H).gt.DIMTOT) stop 'Dimension Error in HMULTHRR'
-
-      dj=dble(j)
-      djj1=dj*(dj+1.0)
-      e1=0.0
-C     djjc is used for spin rotation coupling to prevent a division by zero
-C     for J=0
-      djjc=1.0
-      if ((ctlint(C_SPIN).ne.0).and.(j.gt.0).and.(f.ge.0)) then
-        di=dble(ctlint(C_SPIN))/2.0d0
-        dii1=di*(di+1.0)
-        df=dble(f)/2.0d0
-        dff1=df*(df+1.0)
-        djjc=djj1
-        dg=dff1-dii1-djj1
-        if (ctlint(C_SPIN).gt.1) then
-          e1= (0.75*dg*(dg+1.0)-dii1*djj1)
-     $         /(2.0*di*(2.0*di-1.0)*djj1*(2.0*dj-1.0)*(2.0*dj+3.0))
-        else
-          e1=0.0
-        end if
+C     Watson S off diagonal k/k+8                                     !Herbers2026
+      if (al4.ne.0.0) then                                            ! 
+        off=8                                                         ! 
+        do ik=1, size(S_K)-off                                        ! 
+          dk=dble(qvk(ik,Q_K))                                        ! 
+          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))       ! 
+     $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))     ! 
+     $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))     ! 
+     $         *(djj1-(dk+6.0)*(dk+7.0))*(djj1-(dk+7.0)*(dk+8.0)))    ! 
+          t=                                                          ! 
+     $          al4*dff                                               ! 
+          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)            ! 
+        end do
       end if
-
-C     the centrifugal distortion parameters
-C     Watson A 
-      if (ctlint(C_RED).eq.0) then
-        adelj=a(P_DJD)
-        adelk=a(P_DKD)
-        ar6  =0.0d0
-        ahj  =a(P_HJD)
-        ahjk =a(P_HJKD)
-        ah2  =0.0d0
-        ahk  =a(P_HKD)
-        ah3  =0.0d0
-      end if
-C     Watson S
-      if (ctlint(C_RED).eq.1) then
-        adelj=-a(P_DJD)
-        adelk=0.0d0
-        ar6  =a(P_DKD)
-        ahj  =a(P_HJD)
-        ahjk =0.0d0
-        ah2  =a(P_HJKD)
-        ahk  =0.0d0
-        ah3  =a(P_HKD)
-      end if
-C     van Eijck / Typke
-      if (ctlint(C_RED).eq.2) then
-        adelj=a(P_DJD)
-        adelk=0.0d0
-        ar6  =a(P_DKD)
-        ahj  =0.5d0*a(P_HJD)
-        ahjk =0.0d0
-        ah2  =0.25d0*a(P_HJKD)
-        ahk  =0.0d0
-        ah3  =0.125d0*a(P_HKD)
-      end if
-
-      if ( (a(P_BJ) .ne.0.0).or.(a(P_BK) .ne.0.0).or.
-     $     (a(P_DJ) .ne.0.0).or.(a(P_DJK).ne.0.0).or.
-     $     (a(P_DK) .ne.0.0).or.(a(P_HJ ).ne.0.0).or.
-     $     (a(P_HJK).ne.0.0).or.(a(P_HKJ).ne.0.0).or.
-     $     (a(P_HK) .ne.0.0).or.(a(P_QZ) .ne.0.0).or.
-     $     (a(P_CP) .ne.0.0).or.(a(P_CZ) .ne.0.0).or.
-     $     (a(P_E)  .ne.0.0)) then !Herbers2023
+      
+C------------------------
+C------------------------ Quadrupole ctrl case not 3 (original XIAM or DW)
+C------------------------
+      if (ctlint(C_DW).ne.3) then
+      
+      if ((a(P_QZ) .ne.0.0)) then !Herbers2023
         do ik=1, size(S_K)
           dk=dble(qvk(ik,Q_K))
-          t=     a(P_BJ) *djj1
-     $         + a(P_BK) *dk*dk
-     $         - a(P_DJ) *djj1**2
-     $         - a(P_DJK)*djj1*dk**2
-     $         - a(P_DK) *dk**4
-     $         + a(P_HJ) *djj1**3
-     $         + a(P_HJK)*(djj1**2)*(dk**2)
-     $         + a(P_HKJ)*djj1*(dk**4)
-     $         + a(P_HK) *dk**6
-     $         + a(P_QZ) * e1 * (3.0*(dk**2)-djj1)
-     $         + a(P_CP) * 0.5*dg*(1.0-dk*dk/djjc)
-     $         + a(P_CZ) * 0.5*dg*dk*dk/djjc
-     $         + a(P_E)  !Herbers2023
+          t=     a(P_QZ) * e1 * (3.0*(dk**2)-djj1)
           do ivc=1, size(S_VV)
             ic=ik+size(S_K)*(ivc-1)
             vor(ic)=vor(ic)+vr(ic)*t
@@ -2440,60 +2021,6 @@ C     van Eijck / Typke
         end do
       end if
       
-      if (a(P_PZ) .ne.0.0) then
-        do ik=1, size(S_K)
-          dk=dble(qvk(ik,Q_K))
-          t=     a(P_PZ) *dk
-          do ivc=1, size(S_VV)
-            ic=ik+size(S_K)*(ivc-1)
-            vor(ic)=vor(ic)+vr(ic)*t
-            voi(ic)=voi(ic)+vi(ic)*t
-          end do
-        end do
-      end if
-      
-      DZTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)   DZTERM=a(P_DZ1)  !herbers2024
-      if (gam.eq.2)   DZTERM=a(P_DZ2)  !herbers2024
-      if (gam.eq.3)   DZTERM=a(P_DZ3)  !herbers2024
-      if (gam.eq.4)   DZTERM=a(P_DZ4)  !herbers2024
-      if (gam.eq.5)   DZTERM=a(P_DZ5)  !herbers2024
-      if (gam.eq.6)   DZTERM=a(P_DZ6)  !herbers2024
-      if (gam.eq.7)   DZTERM=a(P_DZ7)  !herbers2024
-      if (gam.eq.8)   DZTERM=a(P_DZ8)  !herbers2024
-      if (gam.eq.9)   DZTERM=a(P_DZ9)  !herbers2024
-      if (gam.eq.10)  DZTERM=a(P_DZ10) !herbers2024
-      if (gam.eq.11)  DZTERM=a(P_DZ11) !herbers2024
-      if (DZTERM.ne.0.0) then          !herbers2024
-        do ik=1, size(S_K)             !herbers2024
-          dk=dble(qvk(ik,Q_K))         !herbers2024
-          t=     DZTERM *dk            !herbers2024
-          do ivc=1, size(S_VV)         !herbers2024
-            ic=ik+size(S_K)*(ivc-1)    !herbers2024
-            vor(ic)=vor(ic)+vr(ic)*t   !herbers2024
-            voi(ic)=voi(ic)+vi(ic)*t   !herbers2024
-          end do                       !herbers2024
-        end do                         !herbers2024
-      end if                           !herbers2024
-      
-      
-      
-      if ((ctlint(C_RED).eq.2).and. 
-     $     ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0))) then
-        do ik=1, size(S_K)
-          dk=dble(qvk(ik,Q_K))
-          dff=  (djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
-     $         +(djj1-dk*(dk-1.0))*(djj1-(dk-1.0)*(dk-2.0))
-     $         -2.0d0*(djj1-dk**2)**2
-          t=  (ar6 + ah2*djj1)*dff
-          do ivc=1, size(S_VV)
-            ic=ik+size(S_K)*(ivc-1)
-            vor(ic)=vor(ic)+vr(ic)*t
-            voi(ic)=voi(ic)+vi(ic)*t
-          end do
-        end do
-      end if
-        
 C     real off diagonal k/k+1 
       if ((a(P_QXZ).ne.0.0)) then
         off=1
@@ -2504,41 +2031,7 @@ C     real off diagonal k/k+1
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
-
-C     real off diagonal k/k+1 
-      if ((a(P_PX).ne.0.0)) then
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=  a(P_PX) *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if
       
-      DXTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)  DXTERM=a(P_DX1)   !herbers2024
-      if (gam.eq.2)  DXTERM=a(P_DX2)   !herbers2024
-      if (gam.eq.3)  DXTERM=a(P_DX3)   !herbers2024
-      if (gam.eq.4)  DXTERM=a(P_DX4)   !herbers2024
-      if (gam.eq.5)  DXTERM=a(P_DX5)   !herbers2024
-      if (gam.eq.6)  DXTERM=a(P_DX6)   !herbers2024
-      if (gam.eq.7)  DXTERM=a(P_DX7)   !herbers2024
-      if (gam.eq.8)  DXTERM=a(P_DX8)   !herbers2024
-      if (gam.eq.9)  DXTERM=a(P_DX9)   !herbers2024
-      if (gam.eq.10) DXTERM=a(P_DX10)   !herbers2024
-      if (gam.eq.11) DXTERM=a(P_DX11)   !herbers2024
-      if (DXTERM.ne.0.0) then          !herbers2024
-C       real off diagonal k/k+1 
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=  DXTERM *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if      
-
 C     imaginaer off diagonal k/k+1 
       if ((a(P_QYZ).ne.0.0)) then
         off=1
@@ -2549,75 +2042,7 @@ C     imaginaer off diagonal k/k+1
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
         end do
       end if
-
-C     imaginaer off diagonal k/k+1 
-      if ((a(P_PY).ne.0.0)) then
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=   a(P_PY) *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
-        end do
-      end if
       
-      DYTERM=0.0                       !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
-      if (gam.eq.1)  DYTERM=a(P_DY1)   !herbers2024
-      if (gam.eq.2)  DYTERM=a(P_DY2)   !herbers2024
-      if (gam.eq.3)  DYTERM=a(P_DY3)   !herbers2024
-      if (gam.eq.4)  DYTERM=a(P_DY4)   !herbers2024
-      if (gam.eq.5)  DYTERM=a(P_DY5)   !herbers2024
-      if (gam.eq.6)  DYTERM=a(P_DY6)   !herbers2024
-      if (gam.eq.7)  DYTERM=a(P_DY7)   !herbers2024
-      if (gam.eq.8)  DYTERM=a(P_DY8)   !herbers2024
-      if (gam.eq.9)  DYTERM=a(P_DY9)   !herbers2024
-      if (gam.eq.10) DYTERM=a(P_DY10)   !herbers2024
-      if (gam.eq.11) DYTERM=a(P_DY11)   !herbers2024
-      if (DYTERM.ne.0.0) then          !herbers2024
-C       imaginaer off diagonal k/k+1 
-        off=1
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
-          t=   DYTERM *dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
-        end do
-      end if
-      
-C     real off diagonal k/k+2 
-      if ((a(P_BD).ne.0.0).or.(adelj.ne.0.0).or.
-     $    (adelk.ne.0.0).or.(a(P_QD).ne.0.0).or.
-     $    (ahj.ne.0.0).or.(a(P_CD).ne.0.0).or.
-     $    (ahjk.ne.0.0).or.(ahk.ne.0.0)) then
-        off=2
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=0.5d0*dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0)))
-          t=     a(P_BD) *dff
-     $         - adelj   *2.0d0*dff*djj1
-     $         - adelk   *dff*((dk+2.0d0)**2+dk**2)
-     $         + ahj*2.0d0*dff*djj1**2
-     $         + ahjk*dff*((dk+2.0d0)**2+dk**2)*djj1
-     $         + ahk*dff*((dk+2.0d0)**4+dk**4)
-     $         + a(P_QD) *dff*e1
-     $         + a(P_CD) *0.5*dg*dff/djjc
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if
-
-      if ((ctlint(C_RED).eq.2).and.(ah3.ne.0.0d0)) then
-        off=2
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0)))
-     $         *((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
-     $         +(djj1-dk*(dk-1.0))*(djj1-(dk-1.0)*(dk-2.0))
-     $         +(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0)))
-          t=  ah3*dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if
-
 C     imaginaer off diagonal k/k+2 
       if ((a(P_QXY).ne.0.0)) then
         off=2
@@ -2629,47 +2054,116 @@ C     imaginaer off diagonal k/k+2
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
         end do
       end if
- 
-C     Watson S off diagonal k/k+4 (evtl. change dff)
-      if ((ar6.ne.0.0d0).or.(ah2.ne.0.0d0)) then
-        off=4
+      
+C     real off diagonal k/k+2 
+      if ((a(P_QD).ne.0.0)) then
+        off=2
         do ik=1, size(S_K)-off
           dk=dble(qvk(ik,Q_K))
-          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
-     $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))) 
-          t=   
-     $          ar6*dff + ah2*djj1*dff
-          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
-        end do
-      end if
-
-C     Watson S off diagonal k/k+6 
-      if (ah3.ne.0.0d0) then
-        off=6
-        do ik=1, size(S_K)-off
-          dk=dble(qvk(ik,Q_K))
-          dff=dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0))
-     $         *(djj1-(dk+2.0)*(dk+3.0))*(djj1-(dk+3.0)*(dk+4.0))
-     $         *(djj1-(dk+4.0)*(dk+5.0))*(djj1-(dk+5.0)*(dk+6.0))) 
-          t=   
-     $          ah3*dff
+          dff=0.5d0*dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0)))
+          t=     a(P_QD) *dff*e1
           call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
         end do
       end if
       
+      end if
+C------------------------
+C------------------------ End of qudrupole ctrol case ne 3
+C------------------------
+      
+C------------------------
+C------------------------ Species Semi-Local Treatment
+C------------------------
+
+C------------------------ 2nd order
+      DBJ=0.0;DBK=0.0;DBD=0.0!herbers2026 : I added these to allow for Delta BJ , Delta BK, Delta B- for the different Species without introducing new sets of constants
+      if ((gam.le.11).and.(gam.ge.1)) then    !Exclude S0, Implementation only up to 11
+      DBJ=a(P_DBJ1+gam-1) ;DBK=a(P_DBK1+gam-1) ;DBD=a(P_DBD1+gam-1)  ! assumes sequential defintion of the P_DBJ1, P_DBJ2... which is the case, I promise!
+      end if 
+      
+      if (DBJ.ne.0.0) then          !
+        do ik=1, size(S_K)
+          dk=dble(qvk(ik,Q_K))
+          t=     DBJ *djj1
+          do ivc=1, size(S_VV)
+            ic=ik+size(S_K)*(ivc-1)
+            vor(ic)=vor(ic)+vr(ic)*t
+            voi(ic)=voi(ic)+vi(ic)*t
+          end do
+        end do
+      end if
+      if (DBK.ne.0.0) then          !
+        do ik=1, size(S_K)
+          dk=dble(qvk(ik,Q_K))
+          t=     DBK *dk*dk
+          do ivc=1, size(S_VV)
+            ic=ik+size(S_K)*(ivc-1)
+            vor(ic)=vor(ic)+vr(ic)*t
+            voi(ic)=voi(ic)+vi(ic)*t
+          end do
+        end do
+      end if
+      if (DBD.ne.0.0) then          !
+        off=2
+        do ik=1, size(S_K)-off
+          dk=dble(qvk(ik,Q_K))
+          dff=0.5d0*dsqrt((djj1-dk*(dk+1.0))*(djj1-(dk+1.0)*(dk+2.0)))
+          t=     DBD*dff
+          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
+        end do
+      end if
+      
+C------------------------ 1st order
+      DZT=0.0;DXT=0.0;DYT=0.0 !herbers2024 I added these to use PxPyPz sperate for the various S1,S2,S3,S4,S5 without the need of defining a new set of constants.
+      if ((gam.le.11).and.(gam.ge.1)) then      !Implementation only up to 11
+      DZT=a(P_DZ1+gam-1) ;DXT=a(P_DX1+gam-1) ;DYT=a(P_DY1+gam-1)  ! assumes sequential defintion of the P_DBJ1, P_DBJ2...
+      end if 
+      
+      if (DZT.ne.0.0) then           
+        do ik=1, size(S_K)              
+          dk=dble(qvk(ik,Q_K))          
+          t=     DZT *dk             
+          do ivc=1, size(S_VV)          
+            ic=ik+size(S_K)*(ivc-1)     
+            vor(ic)=vor(ic)+vr(ic)*t    
+            voi(ic)=voi(ic)+vi(ic)*t    
+          end do                        
+        end do                          
+      end if                            
+      if (DXT.ne.0.0) then          !herbers2024
+C       real off diagonal k/k+1 
+        off=1
+        do ik=1, size(S_K)-off
+          dk=dble(qvk(ik,Q_K))
+          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
+          t=  DXT *dff
+          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,0)
+        end do
+      end if      
+      if (DYT.ne.0.0) then          !herbers2024
+C       imaginaer off diagonal k/k+1 
+        off=1
+        do ik=1, size(S_K)-off
+          dk=dble(qvk(ik,Q_K))
+          dff=0.5d0*dsqrt(djj1-dk*(dk+1.0))
+          t=   DYT *dff
+          call vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,1)
+        end do
+      end if
+C------------------------
+C------------------------ End of Species Semi-Local Treatment
+C------------------------
       return
       end
 
 C----------------------------------------------------------------------
-
-
 
       subroutine vadd(ik,off,gam,t,tori,qvk,vr,vi,vor,voi,ri)
       implicit none
       include 'iam.fi'
       integer ik,off,gam,ri
       real*8  t
-      integer qvk(DIMTOT,Q_K:Q_V1+DIMTOP-1)
+      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP)
       real*8  vr(DIMTOT),vor(DIMTOT),vi(DIMTOT),voi(DIMTOT)
       real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
      $     -DIMSIG:DIMSIG,DIMTOP)
@@ -2686,6 +2180,7 @@ C----------------------------------------------------------------------
             t1=1.0d0
             t2=1.0d0
             do itop=1, ctlint(C_NTOP)
+              if (gamma(gam,itop).eq.99) goto 92 ! Exception for sigma = 99 entry
               voff=size(S_MINV+itop)-1
               t1=t1*tori
      $             (qvk(ir,Q_K),qvk(ic+off,Q_K)
@@ -2697,6 +2192,7 @@ C----------------------------------------------------------------------
      $             ,qvk(ir+off,Q_V+itop)-voff
      $             ,qvk(ic,Q_V+itop)-voff
      $             ,gamma(gam,itop),itop)
+ 92         continue 
             end do  
             if (ri.eq.0) then
               vor(ir)    =vor(ir    )+vr(ic+off)*t*t2
@@ -2812,7 +2308,7 @@ C----------------------------------------------------------------------
           do il=1, ctlint(C_NDATA) 
             do iq=1,2
               if (      (j  .eq.qlin(il,Q_J,iq))
-     $             .and.(f  .eq.qlin(il,Q_F,iq))
+     $             .and.(f  .eq.qlin(il,Q_F1,iq))!Herbers2026 f=f1 is the new condition after implementation of a second nucleus...
      $             .and.(gam.eq.qlin(il,Q_S,iq))
      $             .and.(t  .eq.qlin(il,Q_T,iq))
      $             .and.(ib .eq.qlin(il,Q_B,iq))) then
@@ -3059,8 +2555,10 @@ c        end do
           kdegen=.true.
           call maxof(h,DIMTOT,DIMTOT,size(S_H),icc,1,bestvk,scndvk,
      $         besth1,scndh1)
+          if (ctlint(C_PASSGN).eq.0) then !herbers2026, added option to supress error assgn print
           if (abs(qvk(bestvk(1),Q_K)).ne.abs(qvk(bestk(icc),Q_K)))
      $         write(*,*) 'ERROR in assgn: K trouble',j,gam,icc 
+          end if 
           qmk(icc,Q_K)=sign(qvk(bestvk(1),Q_K),
      $         int(besth1(1)*scndh1(1)*10000.0))
           qmk(icc,Q_K2)=qmk(icc,Q_K)
@@ -3169,6 +2667,7 @@ C----------------------------------------------------------------------
       real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
      $     -DIMSIG:DIMSIG,DIMTOP) 
       real*8  a(DIMPAR)
+      real*8  beta_tot
       integer qmv(DIMV)
       integer qmvs(DIMQ,DIMV)
 C     quantum numbers
@@ -3212,11 +2711,18 @@ C     work
 
       do j=jselect-sj,jselect+ej
       cm=j-(jselect-sj)!count matrices
-      h=0.0
+      
       if (j.ge.0) then   !START IF HERE 
       do itop=1,ctlint(C_NTOP)
-        call rotate(rotm(-DIMJ,-DIMJ,1,itop)
-     $         ,a(P1_BETA+DIMPIR*(itop-1)),j,oldj(itop))
+        beta_tot=a(P1_BETA+DIMPIR*(itop-1))
+C     $     +log(1.+j*(j+1))*a(P1_BLOGJ+DIMPIR*(itop-1))
+     $     +dble((j*(j+1))**1)*a(P1_BETJ1+DIMPIR*(itop-1))
+     $     +dble((j*(j+1))**2)*a(P1_BETJ2+DIMPIR*(itop-1))
+     $     +dble((j*(j+1))**3)*a(P1_BETJ3+DIMPIR*(itop-1))
+     $     +dble((j*(j+1))**4)*a(P1_BETJ4+DIMPIR*(itop-1))
+        
+          call rotate(rotm(-DIMJ,-DIMJ,1,itop)
+     $         ,beta_tot,j,oldj(itop))
       end do
 
 C       if ((abs((j)-df).le.abs(di)).or.(df.eq.-0.5)) then ! For some reason this exception leads to malfunction.
@@ -3233,6 +2739,9 @@ C       if ((abs((j)-df).le.abs(di)).or.(df.eq.-0.5)) then ! For some reason thi
         end do
       end do
       size(S_H)=i
+      
+      h(:size(S_H),:size(S_H))=0.0
+      
       if (gam.ne.0) then 
         call bld2vjk(j,gam,f
      $         ,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori,complex)
@@ -3245,8 +2754,8 @@ C       if ((abs((j)-df).le.abs(di)).or.(df.eq.-0.5)) then ! For some reason thi
       call addrig(j,gam,f
      $     ,qvk,ruse,h,a,evalv,ovv,rotm,rott,tori,complex)
       if ((abs(2*j-f).le.abs(ctlint(C_SPIN))).or.(f.eq.-1)) then ! J-F > I  
-       h_2(1+DIMTOT*cm:1+DIMTOT*(cm+1),       ! same as double do loop above but more compact.
-     $    1+DIMTOT*cm:1+DIMTOT*(cm+1))=h(:,:) ! same as double do loop above but more compact.
+       h_2(1+DIMTOT*cm:1+DIMTOT*cm+size(S_H),       ! same as double do loop above but more compact.
+     $    1+DIMTOT*cm:1+DIMTOT*cm+size(S_H))=h(:size(S_H),:size(S_H)) ! same as double do loop above but more compact.
       end if ! J-F > I            
 
 
@@ -3308,7 +2817,7 @@ C      This subroutine builds the matrix elements for the second nucleus, offdia
 C      n=0 means that the elements diagonal in f1 are added.
        implicit none
        include 'iam.fi'
-       real*8 h_3(DIMQ2*DIMQ*DIMTOT,DIMQ2*DIMQ*DIMTOT)
+       real*8 h_3(DIMUNI,DIMUNI)
        real*8  atot(DIMPAR,DIMVB)
        integer h_sizesr(DIMQ)
        integer sizeprer
@@ -3920,4 +3429,230 @@ C      Simple routine that takes array, sorts it Array And Indicies, order of Ar
 C
        return
        end
+C---------------------
+       subroutine dw_idgam(gam,gam1,gam2,ibselect)!,case12,case34) !herbers2026 - For cross species tunneling matrix elemets.
+       implicit none
+       include 'iam.fi'
+       integer gam, gam1, gam2,ibselect
+C       logical case12, case34
        
+       if (ctlint(C_DWSOFF).eq.1) then 
+        if (MODULO(gam,2).eq.1) then
+         if (ibselect.eq.1) then
+          gam1=gam
+          gam2=gam+1
+         end if
+         if (ibselect.eq.2) then
+          gam1=gam+1
+          gam2=gam
+         end if
+        else !if modulu=0, even gams
+         if (ibselect.eq.1) then
+          gam1=gam
+          gam2=gam-1
+         end if
+         if (ibselect.eq.2) then
+          gam1=gam-1
+          gam2=gam
+         end if
+        end if
+       end if
+       
+C       if (case12) then
+C        if (ibselect.eq.1) then
+C            if (ctlint(C_DW12SL).ne.0) then 
+C                if      (gam.eq.ctlint(C_DW12SL)) then
+C                gam2=ctlint(C_DW12SH)           
+C                end if
+C                if      (gam.eq.ctlint(C_DW12SH)) then
+C                gam2=ctlint(C_DW12SL)
+C                end if
+C            endif
+C        end if
+C        if (ibselect.eq.2) then
+C            if (ctlint(C_DW12SL).ne.0) then 
+C                if      (gam.eq.ctlint(C_DW12SL)) then
+C                gam1=ctlint(C_DW12SH)           
+C                end if
+C                if      (gam.eq.ctlint(C_DW12SH)) then
+C                gam1=ctlint(C_DW12SL)
+C                end if
+C            endif
+C        end if
+C       end if
+C
+C       if (case34) then
+C        if (ibselect.eq.1) then
+C            if (ctlint(C_DW34SL).ne.0) then 
+C                if      (gam.eq.ctlint(C_DW34SL)) then
+C                gam2=ctlint(C_DW34SH)           
+C                end if
+C                if      (gam.eq.ctlint(C_DW34SH)) then
+C                gam2=ctlint(C_DW34SL)
+C                end if
+C            endif
+C        end if
+C        if (ibselect.eq.2) then
+C            if (ctlint(C_DW34SL).ne.0) then 
+C                if      (gam.eq.ctlint(C_DW34SL)) then
+C                gam1=ctlint(C_DW34SH)           
+C                end if
+C                if      (gam.eq.ctlint(C_DW34SH)) then
+C                gam1=ctlint(C_DW34SL)
+C                end if
+C            endif
+C        end if
+C       end if
+       
+       if (gam1.gt.size(S_G)) gam1=gam ! Error correction 
+       if (gam2.gt.size(S_G)) gam2=gam
+       return 
+       end
+C---------------------
+      subroutine addoffdiags_dw(off1,off2,ib,j,f1,al,au,h_2)!Subroutine to add vib-vib corilois coupling. Inputquanta:ib,j,f1, input al,au,h_2 -> output: h_2
+      implicit none                               !f1 is only needed for the deltaJ=0 offdiag quadrupole tensorelements for the first nucleus that are available for tunneling treament
+      
+      include 'iam.fi'
+      real*8  Gx,Gy,Gz,Fxy,Fxz,Fyz,Chixy,Chiyz,Chixz
+      real*8  al(DIMPAR), au(DIMPAR)
+      real*8  h_2(2*DIMTOT,2*DIMTOT) 
+      real*8  check1
+      integer i, ik, j, f1, ib
+      integer off1,off2 ! where to put the matrix elements in the input matrix
+      real*8 fjn
+      real*8 e1          !this is used for the off-diag chi parameters neglecting off diags in J
+      real*8 dj,djj1,df, dff1
+      real*8 di, dii1,dg
+      
+      dj=dble(j)
+      djj1=dj*(dj+1.0)
+      e1=0.0
+      if ((ctlint(C_SPIN).ne.0).and.(j.gt.0).and.(f1.ge.0)) then
+        di=dble(ctlint(C_SPIN))/2.0d0
+        dii1=di*(di+1.0)
+        df=dble(f1)/2.0d0!using f1 here
+        dff1=df*(df+1.0)
+        dg=dff1-dii1-djj1
+        if (ctlint(C_SPIN).gt.1) then
+          e1= (0.75*dg*(dg+1.0)-dii1*djj1)
+     $         /(2.0*di*(2.0*di-1.0)*djj1*(2.0*dj-1.0)*(2.0*dj+3.0))
+        else
+          e1=0.0
+        end if
+      end if
+        
+C     The following implementation of Gx,y,z and Fxy, Fyz and Fxz, differes from that in SPFIT/SPCAT       
+C     While if all Fs and all Gs are fit on their own, the Data simulated using SPFIT/SPCAT is reproduced
+C     Mixing the Fs and Gs will lead to disagreement.       
+C     This is likely due to inconsistensies in phase convention in my implementation here.
+C     For now, I discourage mixing G and F parameters until this disagreement is fixed.
+C     
+C            --- Sven 25-07-2024
+      Gz    = 0.0
+      Gy    = 0.0
+      Gx    = 0.0
+      Fxy   = 0.0
+      Fxz   = 0.0
+      Fyz   = 0.0
+      Chixy = 0.0
+      Chixz = 0.0
+      Chiyz = 0.0
+      if (ib.le.2) then
+        Gz =al(P_GZ12)
+        Gy =al(P_GY12)
+        Gx =al(P_GX12)
+        Fxy=al(P_FXY1)
+        Fxz=al(P_FXZ1)
+        Fyz=al(P_FYZ1)
+        Chixy=al(P_WQXY1)*(-1.0) !Sign change to match relative signs in spfit output !these are offdiagonal nqcc matrix elements but used offdiagonal in v. Matrix elements offdiagonal in J neglected.
+        Chiyz=al(P_WQYZ1)*(-1.0) !
+        Chixz=al(P_WQXZ1)*(-1.0) !
+      else if (ib.le.4) then
+        Gz =al(P_GZ34)
+        Gy =al(P_GY34)
+        Gx =al(P_GX34)
+        Fxy=al(P_FXY3)  
+        Fxz=al(P_FXZ3)!
+        Fyz=al(P_FYZ3)!      
+        Chixy=al(P_WQXY3)*(-1.0)
+        Chiyz=al(P_WQYZ3)*(-1.0)
+        Chixz=al(P_WQXZ3)*(-1.0)
+      else if (ib.le.6) then
+        Gz =al(P_GZ56)
+        Gy =al(P_GY56)
+        Gx =al(P_GX56)
+        Fxy=al(P_FXY5)  
+        Fxz=al(P_FXZ5)!
+        Fyz=al(P_FYZ5)!      
+        Chixy=al(P_WQXY5)*(-1.0)
+        Chiyz=al(P_WQYZ5)*(-1.0)
+        Chixz=al(P_WQXZ5)*(-1.0)
+      end if
+       
+C     ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
+      if (Gz .ne. 0.0) then
+        do ik=1, 2*j+1
+          h_2(off1+ik,off2+ik)=Gz*1.0*(ik-1-j)! on complex off diag Gordy_Cook eq 7.135 p290 
+        end do !  
+      end if 
+      if (Gy .ne. 0.0) then
+        do ik=1, 2*j
+            h_2(off1+ik,off2+ik+1)=h_2(off1+ik,off2+ik+1)+0.5*Gy
+     $               *sqrt(1.0*(j-(ik-1-j))*(j+(ik-1-j)+1)) ! on complex off diag
+            h_2(off1+ik+1,off2+ik)=h_2(off1+ik+1,off2+ik)+0.5*Gy
+     $               *-1.0*sqrt(1.0*(j-(ik-1-j))*(j+(ik-1-j)+1)) ! on complex off diag
+        end do
+      end if 
+      if (Gx .ne. 0.0) then
+        do ik=2, 2*j+1
+            h_2(off2+ik,off1+ik-1)=h_2(off2+ik,off1+ik-1)+0.5*Gx
+     $               *sqrt(1.0*(j+(ik-1-j))*(j-(ik-1-j)+1)) ! on real off diag
+             h_2(off2+ik-1,off1+ik)=h_2(off2+ik-1,off1+ik)+0.5*Gx
+     $               *sqrt(1.0*(j+(ik-1-j))*(j-(ik-1-j)+1)) ! on real off diag
+        end do 
+      end if
+      
+      !FXY is imaginary!Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
+      if ((Fxy .ne. 0.0).or.(Chixy .ne. 0.0)) then !and based on doi.org/10.1063/1.1677430
+        do ik=1, 2*j-1
+          if(j.eq.1)then
+            fjn=(0.5*j*(j+1))**2
+          else
+            fjn=0.25*(j*(j+1)-(ik-j)*((ik-j)+1))
+     $         *(j*(j+1)-(ik-j)*((ik-j)-1))
+          end if 
+            h_2(off1+ik,off2+ik+2)=h_2(off1+ik,off2+ik+2) 
+     $       +sqrt(fjn)*(Fxy-2*Chixy*e1)
+            h_2(off1+ik+2,off2+ik)=h_2(off1+ik+2,off2+ik)
+     $        -1.0*sqrt(fjn)*(Fxy-2*Chixy*e1)
+        end do
+      end if        
+      
+      ! FYZ is put on the imaginary
+      if ((Fyz .ne. 0.0).or.(Chiyz .ne. 0.0)) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
+        do ik=1, 2*j
+            h_2(off1+ik,off2+ik+1)=
+     $ h_2(off1+ik,off2+ik+1)+0.5*(2*(ik-1-j)+1)
+     $ *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*(Fyz-2.0*Chiyz*e1)
+            h_2(off1+ik+1,off2+ik)=
+     $ h_2(off1+ik+1,off2+ik)-0.5*(2*(ik-1-j)+1)
+     $ *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*(Fyz-2.0*Chiyz*e1)
+        end do
+      end if        
+      !FXZ is put on the real
+      if ((Fxz .ne. 0.0).or.(Chixz .ne. 0.0)) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
+        do ik=1, 2*j
+           h_2(off2+ik+1,off1+ik)=h_2(off2+ik+1,off1+ik)+(0.5* 
+     $        (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
+     $         *(Fxz-2.0*Chixz*e1)
+            h_2(off2+ik,off1+ik+1)=h_2(off2+ik,off1+ik+1)+(0.5*
+     $         (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
+     $         *(Fxz-2.0*Chixz*e1)
+        end do
+      end if        
+      
+             
+       
+
+      return 
+      end

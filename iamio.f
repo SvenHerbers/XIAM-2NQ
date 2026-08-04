@@ -111,12 +111,22 @@ C     Header of Input File
       ctlint(C_XPR)=0
       ctlint(C_PRINT)=3
       ctlint(C_NFOLD)=3 
+      ctlint(C_NFOLD1)=0 ! Herbers2026
+      ctlint(C_NFOLD2)=0 ! Herbers2026
+      ctlint(C_NFOLD3)=0 ! Herbers2026
+      ctlint(C_NFOLD4)=0 ! Herbers2026
+C      ctlint(C_DW12SL)=0 ! Herbers2026
+C      ctlint(C_DW12SH)=0 ! Herbers2026
+C      ctlint(C_DW34SL)=0 ! Herbers2026
+C      ctlint(C_DW34SH)=0 ! Herbers2026
+      ctlint(C_DWSOFF)=0 ! Herbers2026 !0 means: pair S1 with S1, S2 with S2 etc.  1 means: pair S1 with S2, S3 with S4 etc.
+      ctlint(C_DWVOFF)=0 ! Herbers 2026
+      ctlint(C_PASSGN)=0
       ctlint(C_FITSC)=0
       ctlint(C_WOODS)=33
       ctlint(C_ADJF)=0
       ctlpar(C_EPS)=1.0d-12
       ctlint(C_DW)=3 !Herbers2024 default use exact NQC in fitting
-C     ctlint(C_NQI)=0 !Herbers2024 default, printing of approximate hyperfine intensities is off.
       ctlint(C_SORT)=3
       ctlpar(C_DEFER)=1.0d-5
       ctlpar(C_CNVG)=0.999d0
@@ -150,11 +160,27 @@ C     ctlint(C_NQI)=0 !Herbers2024 default, printing of approximate hyperfine in
       ctlint(C_PRI)=myor(ctlint(C_PRI),apri)
       ctlint(C_XPR)=myor(ctlint(C_XPR),xpri)
       ctlint(C_NZYK)=max(ctlint(C_NZYK),ctlint(C_NCYCL))
+      write(*,'(3X,A8,1X,I5,$)') "DIMJ    ",DIMJ     !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMTOP  ",DIMTOP   !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMSIG  ",DIMSIG   !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMM    ",DIMM     !Herbers2026
+      write(*,*)                                    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMVV   ",DIMVV    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMV    ",DIMV     !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMVB   ",DIMVB    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMQ    ",DIMQ     !Herbers2026
+      write(*,*)                                    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMQ2   ",DIMQ2    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMDW   ",DIMDW    !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMUNI  ",DIMUNI   !Herbers2026
+      write(*,'(3X,A8,1X,I5,$)') "DIMLIN  ",DIMLIN   !Herbers2026
+      write(*,*)                                    !Herbers2026
       do i=1, DIMCINT
         if (mod(i,4).eq.1) write(*,*)
         if (ctlstr(i)(1:1).ne.'_')
      $       write(*,'(3X,A,3X,I5,$)') ctlstr(i),ctlint(i)
       end do
+      write(*,*)
 C      write(*,*)
       j=0
       do i= DIMCINT+1, DIMCINT+DIMCPAR
@@ -489,7 +515,8 @@ C     symmetry-species-name beginning with '/'
      $         write(*,'(3X,A,$)') qnostr(MAXQC+is) 
           write(*,'(2X,A,4I4)') 'S  ',(gamma(is,it),it=1,ctlint(C_NTOP))
           do it=1,ctlint(C_NTOP)
-            if (gamma(is,it).gt.DIMSIG) stop 'ERROR: sigma > DIMSIG'
+            if ((gamma(is,it).gt.DIMSIG).and.(gamma(is,it).ne.99))
+     $                               stop 'ERROR: sigma > DIMSIG'
           end do
         end do
       else
@@ -861,13 +888,13 @@ C Q_T numbering of eigenvalues of the whole matrix (with several V''s)
         end if
       end do
  10   continue
-        if (ctlint(C_DW).eq.1) then ! Sven 2024, for DW treatment.
-         if (MODULO(size(S_NB),2).eq.1) then
-            size(S_NB)=size(S_NB)+1
-            write(0,*) 'For DW treatment, the maximum B quanum number', 
-     $          ' is considered to be ', size(S_NB)
-         end if
-        end if
+C        if (ctlint(C_DW).eq.1) then ! Sven 2024, for DW treatment.
+C         if (MODULO(size(S_NB),2).eq.1) then
+C            size(S_NB)=size(S_NB)+1
+C            write(0,*) 'For DW treatment, the maximum B quanum number', 
+C     $          ' is considered to be ', size(S_NB)
+C         end if
+C        end if
       if (stpflg) then
         write(*,*) 'INPUT ERROR(S)' 
         write(0,*) 'INPUT ERROR(S)'
@@ -1057,8 +1084,8 @@ C     print potential paramaters
         write(*,'((A,F12.6,A,F8.4,A),A,F11.6)')
      $       '        '
      $       ,a(P1_VN1+ift)*incm,' cm +/- ',da(P1_VN1+ift)*incm
-     $       ,' cm ','   s='
-     $       ,4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F))
+     $       ,' cm ','   s = 4V1n/9F = ' !Herbers2026 - added definition of F
+     $       ,4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F+ift))!Herbers2026 - added +ift for correct print of reduced barrier
       end do
       if (a(P1_VN2+ift).ne.0.0d0) then
       do itop=1, ctlint(C_NTOP)
@@ -1222,6 +1249,7 @@ C     print transition list
       integer fp4x
       real*8  reffreq,refcalc,fcalc,ffreq,maxd,dmaxd
       integer maxi,gam
+      integer stopbstr !herbers2026
       logical lfit
       character*1  errstr
       character*10 fp1astr
@@ -1369,13 +1397,22 @@ c     else
         end if
 
         fp1len=19
+        stopbstr=4
         if (size(S_NB).gt.1) then
+         if (qlin(i,Q_B,Q_LO).eq.qlin(i,Q_B,Q_UP)) then
           write(fp1estr,'(A,I2)') 
      $          ' B',qlin(i,Q_B,Q_UP)
           fp1len=fp1len+4
+          stopbstr=4
+         else
+          write(fp1estr,'(A,2I2)') 
+     $             ' B',qlin(i,Q_B,Q_UP),qlin(i,Q_B,Q_LO) !Herbers2026, added case to also print Bup Blo
+          fp1len=fp1len+6
+          stopbstr=6
+         end if
         end if
         fp1str=':'//fp1astr(1:3)//fp1bstr(1:6)//fp1cstr(1:3)
-     $       //fp1dstr(1:6)//fp1estr(1:4)
+     $       //fp1dstr(1:6)//fp1estr(1:stopbstr)
 
         fp2blen=1
         if (ctlint(C_SPIN2).ne.0) then
@@ -2006,9 +2043,24 @@ C ---------------------------------------------------------------------
         else if ((aexp.lt.-6).and.(aexp.ge.-9)) then 
           write(astr,'(F12.6,A)') a*1.d9,'E-9'
           write(dstr,'(F9.6,A)') d*1.d9,'E-9'
-        else 
+        else if ((aexp.lt.-9).and.(aexp.ge.-12)) then 
           write(astr,'(F11.5,A)') a*1.d12,'E-12'
           write(dstr,'(F8.5,A)') d*1.d12,'E-12'
+        else if ((aexp.lt.-12).and.(aexp.ge.-15)) then 
+          write(astr,'(F11.5,A)') a*1.d15,'E-15'
+          write(dstr,'(F8.5,A)') d*1.d15,'E-15'
+        else if ((aexp.lt.-15).and.(aexp.ge.-18)) then 
+          write(astr,'(F11.5,A)') a*1.d18,'E-18'
+          write(dstr,'(F8.5,A)') d*1.d18,'E-18'
+        else if ((aexp.lt.-18).and.(aexp.ge.-21)) then 
+          write(astr,'(F11.5,A)') a*1.d21,'E-21'
+          write(dstr,'(F8.5,A)') d*1.d21,'E-21'
+        else if ((aexp.lt.-21).and.(aexp.ge.-24)) then 
+          write(astr,'(F11.5,A)') a*1.d24,'E-24'
+          write(dstr,'(F8.5,A)') d*1.d24,'E-24'
+        else
+          write(astr,'(F15.9)') a
+          write(dstr,'(F12.9)') d
         end if 
       else
         write(astr,'(F15.9)') 0.0d0

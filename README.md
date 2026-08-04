@@ -1,42 +1,379 @@
 # XIAM-2NQ
-XIAM-2NQ is a spectral fitting code that handles up to two quadrupolar nuclei and 4 internal rotors. It is an extension of the original XIAM code by Hartwig, available at the PROSPE (http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.
-The repository contains all source files which can be compiled using the make file to create a linux applications. Alternatively, the files can be compiled in steps using the ifortran compiler by intel.
-XIAMi2NQ.exe is a compiled executable using the Intel(R) Fortran Intel(R) 64 Compiler Classic for applications running on IA-32 (Version 2021.13.1).
-Compilation was carried out using the following command line entries: <br/> 
-ifort -c iamint.f <br/> 
-ifort -c iamio.f <br/> 
-ifort -c mgetx.f <br/> 
-ifort -c iamv.f <br/> 
-ifort -c iamlib.f <br/> 
-ifort -c iamfit.f <br/> 
-ifort -c iamv2.f <br/> 
-ifort -c iamadj.f <br/> 
-ifort -c iamm.f <br/> 
-ifort -c iamsys.f <br/> 
-ifort -c iam.f <br/> 
+XIAM-2NQ is a spectral fitting program for molecules containing up to two quadrupolar nuclei and four internal rotors. It extends the original XIAM code by Hartwig which is available at the [PROSPE](http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.  
+This repository provides the complete source code required to build the program. A makefile is included for straightforward compilation on Linux systems. Alternatively, the source files can be compiled step-by-step using the Intel ifortran compiler.
 
-ifort  -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f <br/> 
+XIAMi2NQ.exe was built with the Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2025.3.3.
+Compilation was carried out using the following command line entries:
+```
+ifx -c iamint.f
+ifx -c iamio.f
+ifx -c mgetx.f
+ifx -c iamv.f
+ifx -c iamlib.f
+ifx -c iamfit.f
+ifx -c iamv2.f
+ifx -c iamadj.f
+ifx -c iamm.f
+ifx -c iamsys.f
+ifx -c iam.f
+ifx -static -o XIAMi2NQ.exe iam.f iamsys.f iamm.f iamadj.f iamv2.f iamfit.f iamlib.f iamv.f mgetx.f iamio.f iamint.f
+```
+
+Citation: J. Chem. Phys. 162, 234304 (2025) [DOI: 10.1063/5.0267651](https://doi.org/10.1063/5.0267651)
+
+The executable provided in this repository was compiled with the following limits: **Jmax = 71, I1max = 5/2, I2max = 5/2,** and up to **two 3-fold tops**. All array dimensions are defined at compile time. These limits can be modified in `iam.fi`, after which the program must be recompiled. Be aware that memory allocation in XIAM-2NQ is static. Increasing these limits beyond a certain point may cause the Hamiltonian matrix to exceed available memory. If significantly larger Jmax values are required for molecules without quadrupole coupling and without a double-well potential, it is recommended to first set `DIMQ=1`, `DIMQ2=1`, and `DIMDW=1` in `iam.fi`.
+
+Example input and output files are provided in the example repository [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples).
 
 ----------------------------------------------------------------------------
-  XIAM-2NQ v0.24 - Sven Herbers, 31-Jan-2024  
+## Parameter Table
+In this table, `Π = (Pα - ρ Pz)` refers to the relative internal angular momentum in the ρ-Axis System (RAS).
+  
+### Semi-Rigid Rotor Parameters Hrr
+Here only A reduction (`reduc 0`) but S reduction (`reduc 1`) is also available.
+If the S reduction is chosen, the parameter names stay the same, but some change their meaning.
+The correspondence in S reduction is as follows: `dj,dk,h_j,hjk,h_k,l_j,ljk,lkj,l_k` mean d1,d2,h1,h2,h3,l1,l2,l3,l4
 
+Operators are formulated in the PAS
+
+| `Parameter` | `Operator` |
+|------------|------------|
+| `BJ` | `P**2` |
+| `BK` | `Pz**2` |
+| `B-` | `Px**2-Py**2` |
+| `DJ` | `-P**4` |
+| `DJK` | `-Pz**2P**2` |
+| `DK` | `-Pz**4` |
+| `dj` | `-2P**2 (Px**2-Py**2)` |
+| `dk` | `-[Pz**2(Px**2 - Py**2)+(Px**2 - Py**2)Pz**2]` |
+| `H_J` | `P**6` |
+| `HJK` | `P**4 Pz**2` |
+| `HKJ` | `P**2 Pz**4` |
+| `H_K` | `Pz**6` |
+| `h_j` | `2P**4 (Px**2 - Py**2)` |
+| `hjk` | `P**2 [Pz**2 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**2]` |
+| `h_k` | `[Pz**4 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**4]` |
+| `L_J` | `P**8` |
+| `LJK` | `P**4 Pz**4` |
+| `LJJK` | `P**6 Pz**2` |
+| `LKKJ` | `P**2 Pz**6` |
+| `L_K` | `Pz**8` |
+| `l_j`  | `2*P**6 (Px**2 - Py**2)` |
+| `ljk` | `P**4  [Pz**2 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**2]` |
+| `lkj` | `P**2  [Pz**4 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**4]` |
+| `l_k` | `[Pz**6 (Px**2 - Py**2) + (Px**2 - Py**2) Pz**6]` |
+|------------|------------|
+| `Dzx` | `(PzPx + PxPz)`|
+| `DzxJ` | `P**2 (PzPx + PxPz)`|
+| `DzxK` | `(Pz**3Px + PxPz**3)`|
+
+
+
+### Internal Rotor Parameters Hir
+Operators are formulated in the RAS
+
+| `Parameter` | `Operator` |
+|------------|------------|
+| `F` | `Π**2` |
+| `Dpi4`  | `Π**4` |
+| `Dpi6`  | `Π**6` |
+| `rho` | `(ρ Pz**2 - 2 Pα Pz)` |
+| `V1n` | `0.5(1-cos(nα))` |
+| `V2n` | `0.5(1-cos(2nα))` |
+|------------|------------|
+| `Fm2` | `Pα**2 Π**2` |
+| `Fk2` | `ρ**2 Pz**2 Π**2` |
+| `Fmk` | `Pα ρ Pz Π**2` |
+| `Fm2k2` | `Pα**2 ρ**2 Pz**2 Π**2` |
+| `Fmk3` | `Pα ρ**3 Pz**3 Π**2` |
+| `Fm3k` | `Pα**3 ρ Pz Π**2` |
+| `Fm3k3` | `Pα**3 ρ**3 Pz**3 Π**2` |
+|------------|------------|
+| `mk` | `Pα ρ Pz` |
+| `m2k2` | `Pα**2 ρ**2 Pz**2` |
+| `mk3` | `Pα ρ**3 Pz**3` |
+| `m3k` | `Pα**3 ρ Pz` |
+| `m3k3` | `Pα**3 ρ**3 Pz**3` |
+| `m2k4` | `Pα**2 ρ**4 Pz**4` |
+| `m4k2` | `Pα**4 ρ**2 Pz**2` |
+
+### Internal rotation - overall rotation distortion Hird
+ 
+For these mixed terms, operators defined in the rotor axis system (RAS) are first rotated into the principal axis system (PAS) and then combined with operators expressed directly in the PAS.
+The rotation is performed using Wigner small-d matrices in the form `dt(O)d`.
+
+The operator `Pz` is used with a dual meaning, referring either to the z-axis in the RAS or in the PAS. In expressions where both appear, the RAS `Pz` can be identified by its placement between two Wigner small-d matrices,`dt` and `d`, which indicate the rotation from the RAS to the PAS.
+The Wigner small-d matrix depends only on the angle `beta` and the rotational quantum number J. In cases where an additional rotation about the x-axis (`gamma`) is required, the corresponding phase factors are included in the code but omitted from the tables for clarity.
+
+| `Parameter` | `Operator` |
+|------------|------------|
+| `Dpi2J` | `2*dt(Π**2)d P**2` |
+| `Dpi2K` | `[dt(Π**2)d Pz**2+ Pz**2 dt(Π**2)d]` |
+| `Dpi2-` | `[dt(Π**2)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**2)d]` |
+| `Dp2JJ` | `2*dt(Π**2)d P**4` |
+| `Dp2JK` | `P**2[dt(Π**2)d Pz**2 + Pz**2 dt(Π**2)d]` |
+| `Dp2KK` | `[dt(Π**2)d Pz**4 + Pz**4 dt(Π**2)d]` |
+| `Dp2-j` | `-P**2[dt(Π**2)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Π**2)d]` |
+| `Dp2-k` | `-[dt(Π**2)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Π**2)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Π**2)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Π**2)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Π**2)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Π**2)d]` |
+| `Dp2zx` | `-[dt(Π**2)d Pz Px`<br>` + dt(Π**2)d Px Pz`<br>` + Pz dt(Π**2)d Px`<br>` + Px dt(Π**2)d Pz`<br>` + Pz Px dt(Π**2)d`<br>` + Px Pz dt(Π**2)d]` |
+|------------|------------|
+| `Dpi4J` | `2*dt(Π**4)d P**2` |
+| `Dpi4K` | `[dt(Π**4)d Pz**2+ Pz**2 dt(Π**4)d]` |
+| `Dpi4-` | `[dt(Π**4)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**4)d]` |
+| `Dp4JJ` | `2*dt(Π**4)d P**4` |
+| `Dp4JK` | `P**2[dt(Π**4)d Pz**2 + Pz**2 dt(Π**4)d]` |
+| `Dp4KK` | `[dt(Π**4)d Pz**4 + Pz**4 dt(Π**4)d]` |
+| `Dp4-j` | `-P**2[dt(Π**4)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Π**4)d]` |
+| `Dp4-k` | `-[dt(Π**4)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Π**4)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Π**4)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Π**4)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Π**4)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Π**4)d]` |
+| `Dp4zx` | `-[dt(Π**4)d Pz Px`<br>` + dt(Π**4)d Px Pz`<br>` + Pz dt(Π**4)d Px`<br>` + Px dt(Π**4)d Pz`<br>` + Pz Px dt(Π**4)d`<br>` + Px Pz dt(Π**4)d]` |
+|------------|------------|
+| `Dpi6J` | `2*dt(Π**6)d P**2` |
+| `Dpi6K` | `[dt(Π**6)d Pz**2+ Pz**2 dt(Π**6)d]` |
+| `Dpi6-` | `[dt(Π**6)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Π**6)d]` |
+|------------|------------|
+| `rhoJ`  | `2*dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d P**2` |
+| `rhoK` | `[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2+ Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
+| `rho-` | `[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
+| `rhoJJ`  | `2*dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d P**4` |
+| `rhoJK` | `P**2 [dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2+ Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
+| `rhoKK` | `[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**4+ Pz**4 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
+| `rho-j` | `-P**2[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2) + (Px**2 - Py**2) dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
+| `rho-k` | `-[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2(Px**2 -P_y**2)`<br>` + dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d`<br>` + (Px**2 - Py**2) Pz**2 dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
+| `rhozx` | `-[dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz Px`<br>` + dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Px Pz`<br>` + Pz dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Px`<br>` + Px dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d Pz`<br>` + Pz Px dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d`<br>` + Px Pz dt(F*(2.0 * ρ * Pz**2 - 2.0 * Pα * Pz))d]` |
+|------------|------------|
+| `Dc3J` | `2*dt(cos(nα))d P**2` |
+| `Dc3K` | `[dt(cos(nα))d Pz**2+ Pz**2 dt(cos(nα))d]` |
+| `Dc3-` | `[dt(cos(nα))d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(cos(nα))d]` |
+| `D3JJ` | `2*dt(cos(nα))d P**4` |
+| `D3JK` | `P**2[dt(cos(nα))d Pz**2 + Pz**2 dt(cos(nα))d]` |
+| `D3KK` | `[dt(cos(nα))d Pz**4 + Pz**4 dt(cos(nα))d]` |
+| `D3-j` | `-P**2[dt(cos(nα))d (Px**2 - Py**2) + (Px**2 - Py**2) dt(cos(nα))d]` |
+| `D3-k` | `-[dt(cos(nα))d Pz**2(Px**2 -P_y**2)`<br>` + dt(cos(nα))d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(cos(nα))d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(cos(nα))d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(cos(nα))d`<br>` + (Px**2 - Py**2) Pz**2 dt(cos(nα))d]` |
+| `D3zx` | `-[dt(cos(nα))d Pz Px`<br>` + dt(cos(nα))d Px Pz`<br>` + Pz dt(cos(nα))d Px`<br>` + Px dt(cos(nα))d Pz`<br>` + Pz Px dt(cos(nα))d`<br>` + Px Pz dt(cos(nα))d]` |
+|------------|------------|
+| `FmkJ` | `2*dt(Pα ρ Pz Π**2)d P**2` |
+| `FmkK` | `[dt(Pα ρ Pz Π**2)d Pz**2+ Pz**2 dt(Pα ρ Pz Π**2)d]` |
+| `Fmk-` | `[dt(Pα ρ Pz Π**2)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα ρ Pz Π**2)d]` |
+| `FmkJJ` | `2*dt(Pα ρ Pz Π**2)d P**4` |
+| `FmkJK` | `P**2[dt(Pα ρ Pz Π**2)d Pz**2 + Pz**2 dt(Pα ρ Pz Π**2)d]` |
+| `FmkKK` | `[dt(Pα ρ Pz Π**2)d Pz**4 + Pz**4 dt(Pα ρ Pz Π**2)d]` |
+| `Fmk-j` | `-P**2[dt(Pα ρ Pz Π**2)d (Px**2 - Py**2) + (Px**2 - Py**2) dt(Pα ρ Pz Π**2)d]` |
+| `Fmk-k` | `-[dt(Pα ρ Pz Π**2)d Pz**2(Px**2 -P_y**2)`<br>` + dt(Pα ρ Pz Π**2)d (Px**2 - Py**2) Pz**2`<br>` + Pz**2 dt(Pα ρ Pz Π**2)d (Px**2 - Py**2)`<br>` + (Px**2 - Py**2) dt(Pα ρ Pz Π**2)d Pz**2`<br>` + Pz**2 (Px**2 - Py**2)dt(Pα ρ Pz Π**2)d`<br>` + (Px**2 - Py**2) Pz**2 dt(Pα ρ Pz Π**2)d]` |
+| `Fmkzx` | `-[dt(Pα ρ Pz Π**2)d Pz Px`<br>` + dt(Pα ρ Pz Π**2)d Px Pz`<br>` + Pz dt(Pα ρ Pz Π**2)d Px`<br>` + Px dt(Pα ρ Pz Π**2)d Pz`<br>` + Pz Px dt(Pα ρ Pz Π**2)d`<br>` + Px Pz dt(Pα ρ Pz Π**2)d]` |
+|------------|------------|
+| `mkJ` | `2*dt(Pα ρ Pz)d P**2` |
+| `mkK` | `[dt(Pα ρ Pz)d Pz**2+ Pz**2 dt(Pα ρ Pz)d]` |
+| `mk-` | `[dt(Pα ρ Pz)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα ρ Pz)d]` |
+| `mk3J` | `2*dt(Pα ρ**3 Pz**3)d P**2` |
+| `mk3K` | `[dt(Pα ρ**3 Pz**3)d Pz**2+ Pz**2 dt(Pαρ**3Pz**3)d]` |
+| `mk3-` | `[dt(Pα ρ**3 Pz**3)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pαρ**3Pz**3)d]` |
+| `m3kJ` | `2*dt(Pα**3 ρ Pz)d P**2` |
+| `m3kK` | `[dt(Pα**3 ρ Pz)d Pz**2+ Pz**2 dt(Pα**3 ρ Pz)d]` |
+| `m3k-` | `[dt(Pα**3 ρ Pz)d (Px**2 - Py**2)+ (Px**2 - Py**2) dt(Pα**3 ρ Pz)d]` |
+|------------|------------|
+
+
+### Top-Top coupling term Hii
+
+The top–top coupling parameters are implemented by forming symmetrized pairwise products of the single-top operators. The operators, or how their matrix representations are put together, are shown for the 2 top case in the table below.
+
+| `Parameter` | `Operator` |
+|------------|------------|
+| `F12` | `dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1` |
+| `Vcc` | `0.5*[dt1 cos(nα1) d1 * dt2 cos(nα2) d2 `<br>`+  dt2 cos(nα2) d2 * dt1 cos(nα1) d1]` |
+| `Vss` | `0.5*[dt1 sin(nα1) d1 * dt2 sin(nα2) d2  `<br>`+ dt2 sin(nα2) d2 * dt1 sin(nα1) d1]  ` |<!-- I first thought there was a negative sign for Vss due to line 56 in iamv2.f showing multiplication with -0.5. However, the expected negative sign in iamm.f line line 178 is also missing. These two multiplications with -1.0 make the whole expression positive again. -->
+| `P12` | `dt1 Π1**2 d1 * dt2 Π2**2 d2 `<br>`+ dt2 Π2**2 d2 * dt1 Π1**2 d1` |
+
+For three tops, the operator associated with `F12` for example would be  
+`   dt1 Π1 d1 * dt2 Π2 d2 +  dt2 Π2 d2 * dt1 Π1 d1 `<br>`+ dt1 Π1 d1 * dt3 Π3 d3 +  dt3 Π3 d3 * dt1 Π1 d1 `<br>`+ dt2 Π2 d2 * dt3 Π3 d3 +  dt3 Π3 d3 * dt2 Π2 d2` 
+
+Additional higher-order top–top coupling terms for `F12`, `Vcc`, and `P12` are now available. These terms have not yet been thoroughly tested, as no suitable use case has been identified so far. Feel free to experiment with them, and please let me know if you find a situation where they are useful. 
+Parameters of type `-k` are not listed in the table. However, approximate implementations are available to the user using a nested anti-commutator of the form `{Pz**2,{Px**2 - Py**2,O}}`, where O denotes the operator associated with the respective parameters `F12`, `Vcc`, or `P12`. This differs from the `-k` implementation in `Hird`, where all operator permutations are taken into account. 
+| `Parameter` | `Operator` |
+|------------|------------|
+| `DF12J` | `P**2(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)` |
+| `DF12K` | `Pz**2(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)`<br>`+(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)Pz**2` |
+| `DF12-` | `(Px**2 - Py**2)(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)`<br>`+(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)(Px**2 - Py**2)` |
+| `DF12JJ` | `P**4(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)` |
+| `DF12JK` | `P**2(Pz**2(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)`<br>`+(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)Pz**2)` |
+| `DF12KK` | `Pz**4(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)`<br>`+(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)Pz**4` |
+| `DF12-j` | `P**2[(Px**2 - Py**2)(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)`<br>`+(dt1 Π1 d1 * dt2 Π2 d2 `<br>`+ dt2 Π2 d2 * dt1 Π1 d1)(Px**2 - Py**2)]` |
+| `DVccJ` | `P**2(0.5*[dt1 cos(nα1) d1 * dt2 cos(nα2) d2 `<br>`+  dt2 cos(nα2) d2 * dt1 cos(nα1) d1])`|
+| `...` | `...`|
+| `DP12J` | `P**2(dt1 Π1**2 d1 * dt2 Π2**2 d2 `<br>`+ dt2 Π2**2 d2 * dt1 Π1**2 d1)`|
+| `...` | `...`|
+
+### Other parameters
+
+| `Parameter` | `Description` |
+|------------|---------------|
+| `F0` | `Structural constant to internal rotation. Can be used as input to derive ρ,β,γ`<br>`F = ℏ**2/(2rIα)= F0/r `<br>`With`<br>`r=1-Σg λg**2 Iα/Ig`<br>`and with λ being the direction cosines, and g=a,b,c in the PAS`|
+| `delta` | `The angle between the internal rotation axis and the principal axis z` |
+| `epsil` | `The angle between the principal axis x and the projection of the internal rotation axis onto xy-plane` |
+| `beta` | `rotation about y axis` |
+| `gamma` | `rotation about x axis` |
+| `betJ1` `betJ2` `betJ3` `betJ4` | `Parameters to add P**2 dependence to beta.`<br/>`beta_total = beta + betJ1*(J(J+1))+ betJ2*(J(J+1))**2+ betJ3*(J(J+1))**3+ betJ4*(J(J+1))**4` |
+
+### Local parameters
+Mixing in local parameters to arrive at semi-local fits is particularly useful in systems with two low-barrier, coupled internal rotors, where the standard coupling parameters available in XIAM (F12, Vcc, Vss) are no longer sufficient to capture the observed interactions. The local parameters can be defined independently for each species (up to 11 species supported).
+
+#### First order local parameters
+These parameters multiply the operators `Px`, `Py`, and `Pz` in the principal axis system (PAS). 
+
+| `Parameter` |
+|-------------|
+| `S1_Dx, S2_Dx,.. S11_Dx` |
+| `S1_Dy, S2_Dy,.. S11_Dy` |
+| `S1_Dz, S2_Dz,.. S11_Dz` |
+
+#### Second order local parameters
+These parameters multiply the operators `P**2`, `Pz**2` and `Px**2-Py**2` in the principal axis system (PAS). 
+When fit together with global `BJ`, `BK`, and `B-` these parameters represent the differences between global and effective species specific rotational constants. E.g. `BJ_S2,eff = BJ + S2_BJ`.
+Unlike their global equivalents, these local parameters are not used in the derivation of internal rotation parameters and in the calculation of `rho`.
+
+| `Parameter` |
+|-------------|
+| `S1_BJ, S2_BJ,.. S11_BJ` |
+| `S1_BK, S2_BK,.. S11_BK` |
+| `S1_B-, S2_B-,.. S11_B-` |
+
+
+### Nuclear quadrupole coupling parameters
+For first or second nucleus.  
+Matrix elements given in J. Chem. Phys. 162, 234304 (2025) DOI: [10.1063/5.0267651](https://doi.org/10.1063/5.0267651)
+
+| `Parameter` |
+|-------------|
+| `chi_z, chi2_z` |
+| `chi_-, chi2_-` |
+| `chi_xy, chi2_xy` |
+| `chi_xz, chi2_xz` |
+| `chi_yz, chi2_yz` |
+
+### Vibrational state interaction parameters
+Parameter E is always available. 
+For Wilson and Pickett Coriolis coupling parameters, vibrational coupling mode must be activated by setting control parameter ctrl to  `ctrl 1`.
+Can only be used with the “old” approximate nuclear quadrupole coupling (elements off diagonal in J neglected)  with a single quadrupolar nucleus.  
+
+Reference Wilson parameters: J. Chem. Phys. 4, 313–316 (1936) DOI: [10.1063/1.1749846](https://doi.org/10.1063/1.1749846)  
+Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.1063/1.1677430](https://doi.org/10.1063/1.1677430)
+
+
+
+| `Parameter` | `Description` |
+|------------|---------------|
+| `E` | `Energy-offset assignable to the various vibrational states` |
+| `Gx12,Gx34,Gx56,Gy12,Gy34,Gy56,Gz12,Gz34,Gz56` | `Wilson type Coriolis coupling parameters for coupling between states 1&2, 3&4, and 5&6. Should not be mixed with Pickett type at the moment, due to a likely phase inconsistency.` |
+| `Fxy12,Fxy34,Fxy56,Fyz12,Fyz34,Fyz56,Fxz12,Fxz34,Fxz56` | `Pickett type Coriolis coupling parameters for coupling between states 1&2, 3&4, and 5&6. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency` |
+| `chixy12,chixy34,chixy56,chiyz12,chiyz34,chiyz56,chixz12,chixz34,chixz56` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
+
+## Update Notes
+
+  XIAM-2NQ v0.46 - 05/06-July-2026 <br>
+  - Fixed a bug that caused an unnecessary `NULL` and `0` to be printed at the end of the control parameter summary. This was resolved by setting `parameter (C_LAST = 30)` in `iam.fi`.
+  - Added the compile-time dimension `DIMUNI` to `iam.fi`, which defines the maximum matrix size allocated for quadrupole (`NQ`) treatments. Previously, this limit was hard-coded as `DIMQ*DIMQ2*DIMTOT`.
+  - Added a printout of all compile-time dimensions to the output files, making it easier to verify whether a particular compiled XIAM executable is suitable for a given problem.
+
+  13-June-2026 - recompilation of v0.44 <br>
+  - The previously uploaded executable did not correspond to the provided `iam.fi` file. It was instead compiled for the treatment of excited torsional states in dimethyloxirane (see the [example directory](https://github.com/SvenHerbers/XIAM-2NQ_Examples/tree/main/23Dimethyloxirane) ).
+  - The executable has been recompiled and reuploaded so that it matches the supplied `iam.fi`.
+  - Executables compiled with `DIMVV` not equal to 1, including the previously uploaded compilation of v0.44, may give incorrect intensity predictions or no intensity output when quadrupole coupling is present.
+
+  XIAM-2NQ v0.44 - 19-April-2026 <br>
+  This release introduces a necessary bug fix for the migration from `ifort` to `ifx`, along with general code cleanup and performance improvements.
+  - General code cleanup (e.g., removal of the obsolete subroutine `hcaldev_old`)
+  - Refactored construction of the tunneling off-diagonal matrix (including Pickett’s Fxy parameters and related terms) into a dedicated subroutine `addoffdiags_dw`
+  - Fixed a bug in `hmultrr` caused by missing initializations (e.g., `al2 = 0.0`); this issue was tolerated by `ifort` but exposed by `ifx`
+  - Improved initialization of `h_3` and `h_3NQ2` by aligning submatrix dimensions more closely with actual usage
+  - Minor performance improvement in `calvjk_d` by correcting the loop bound from `DIMTOT` to `size(S_H)` when writing `h` to `h_2` for the lower state.
+
+  XIAM-2NQ v0.43b - 12-April-2026
+  - Fixed a bug in `subroutine prpot` (`iamio.f`): the reduced barrier was incorrectly computed as `4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F))` which always used the F parameter of the first rotor.
+This has been corrected to `4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F+ift))` ensuring the rotor-dependent F is used properly.
+  - Improved output printing: the reduced barrier is now printed as `s = 4V1n/9F =` instead of the previous ambiguous `s =`
+  - Fixed an input read issue: `S1_BK` was previously expected incorrectly under the name `S1BK`; this has now been corrected.
+
+  XIAM-2NQ v0.43 - 06-April-2026
+  - Added coupling parameters for vibrational states 5 and 6 (e.g. `Fxz56`)
+  - Increased the dimensions in `iam.fi` to support up to six distinct sets of rotational constants within a single fit.
+  - Introduced the control parameter `DWVoff`. When using `ctrl 1` DWVoff ensures that the coupled states use their respective internal rotation parts correctly. It should always be turned on if the internal rotation part or the angles `beta` or `gamma` of the two states are not identical.
+    
+  XIAM-2NQ v0.40c - 16-March-2026
+  - Fixed an error in handling `S 0` (rigid-rigid) lines in `hmulthrr` which lead to wrong results wenn used together with offdiagonal `chiyz34` or `S11_` parameters.
+
+  XIAM-2NQ v0.40 - 14-March-2026
+  - Unified the subroutines `hmulthrr` and `hmulthrr_old`; `hmulthrr_old` has been removed.
+  - Updated the naming convention for first-order local types from `DxS2` to `S2_Dx`.
+  - Added second-order local parameters `S1_BJ`, `S2_BJ`, … `S1_BK`, `S2_BK`, … `S1_B-`, `S2_B-`.
+  - Added parameter `P12` to `Hii`.
+  - Added higher-order parameters to `Hii`. These parameters have not yet been thoroughly tested; see the parameter table for details.
+  - Added the control parameter `NoErr`. When set to `1`, this suppresses assignment warning messages, which can otherwise dominate the output file when using an excited torsional basis.
+
+  XIAM-2NQ v0.38b - 07-March-2026
+  - fixed a bug in `iamv.f` that prevented the use of analytic gradients when a single quadrupolar nucleus was present and `ctrl 0`.
+
+  XIAM-2NQ v0.38 - 14-February-2026
+  - `iamio.f` **update**: For cross-B (cross-vibrational-state) transitions, both `Bup` and `Blo` are now printed in the output.
+  -  **Rotor fold control**: Added control parameters `nfold1`, `nfold2`, `nfold3`, and `nfold4`. These override the global `nfold` value for specific rotors and define their individual fold numbers. This enables mixed fold numbers within one fit (e.g., `nfold1 3`, `nfold2 2` for CH3 and OH tunneling).
+  - **Species definition ignore flag**: Added ignore flag `99` in species definitions. Example: `S 0 1` refers to the first rotor in σ=0 and the second rotor in σ=1. `S 0 99` refers to the first rotor in σ=0 while the second rotor is ignored in the calculation.
+  - `DWSoff` **control parameter**. Added control parameter `DWSoff`. Default `DWSoff 0` couples between B1-B2 and B3-B4 within the same symmetry species (S1<->S1, S2<->S2, S3<->S3, S4<->S4...)  `DWSoff 1` enables cross-species coupling (S1<->S2, S2<->S1, S3<->S4, S4<->S3,...). This allows inclusion of Coriolis-type coupling parameters between species, relevant for OH tunneling when the OH group is treated as a twofold rotor.
+
+  XIAM-2NQ v0.35 - 06-February-2026
+  - Parameters of type `chixy12` to be used with Pickett type Coriolis coupling were added (see parameter table)
+  - Added updated near-experimental accuracy example fit (4.4 kHz rms) of Diethylamine to [example repository](https://github.com/SvenHerbers/XIAM-2NQ_Examples) based on dataset in J. Chem. Phys. 135, 024310 (2011) DOI: [10.1063/1.3607992](https://doi.org/10.1063/1.3607992). 
+
+  XIAM-2NQ v0.34d - 05-February-2026
+  - A bug was fixed that prevented the simplified single-nucleus quadrupolar coupling with no matrix elements offdiagonal in J to be used with coriolis coupling parameters.
+  - Minor code cleanup (removal of unused arrays).
+  - Reduction of matrix to `2*size(S_H)` instead of `2*DIMTOT` in construction for coupling between vibrational states when using coriolis coupling parameters and `ctrl 1` leading to some speed-up.
+  - An example repository [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples) was created
+  - Methylformate example was moved to dedicated example repository
+
+  XIAM-2NQ v0.34c - 01-February-2026
+  - Fixed an error in the implementation of `mk3`,`m3k`,`Dpi4`, and `Dpi6` in cases  where gamma≠0.
+  - `mk3`,`m3k`,`Dpi4`,`Dpi6` moved to Hir for consistency. This change also affects their definition and value in fitting procedures compared to earlier versions.
+
+  XIAM-2NQ v0.34b - 31-January-2026
+  - General code clean-up.
+  - Renamed parameters for consistency: `DFm2` to `Fm2`, `mkD` to `mk-`.
+  - Redefined `Fk2` to multiply with `ρ**2 Pz**2 Π**2` instead of `ρ Pz**2 Π**2` for consistency.
+  - Reorded print-out of parameters to group them together by J,K,-,JJ,JK,KK,-j,-k,zx.
+  - Streamlined matrix initialization and Hamiltonian construction in the exact quadrupole-coupling routines. For quadrupole-containing fits, this leads to noticeable performance improvements: from a few percent up to a factor of ~5, depending on `iam.fi` pre-compilation settings and the dataset.
+
+  28-January-2026
+  - Updated Example-Methylformate fit of the subset of v=0, Jmax=50, Kamax=20 lines. The unweighted rms of XIAM on this subset is 95 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
+  - Added a fit to Example-Methylformate treating the *complete* set (49 parameters, Jmax=62, Kamax=27, fmax= 668.1 GHz, fmin= 1.6 GHz, 6976 assignments) of v=0 lines from the v=0,1 dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009) DOI: [10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM fits on this subset is 145 kHz; RAM36 global fits on the complete set of lines yield 75 kHz rms within this subset. 
+
+  XIAM-2NQ v0.34 - 25-January-2026
+  - Many new parameters available in Hird and Hir, parameter table will be updated in the following days.
+
+  XIAM-2NQ v0.32 - 18-January-2026
+  - Implementation of octic centrifugal distortion coefficients for Watson A and Watson S reduction (reduc 0 or reduc 1)
+  - Many new parameters available in Hird and Hir
+
+  XIAM-2NQ v0.25 -> v0.29 - 05-January-2026
+  - Many new parameters available in Hird and Hir, parameter table added to readme.md.
+  - Minor code cleanup (removal/replacement of some functions)
+
+  XIAM-2NQ v0.24b - 17-June-2025 
+  - The XIAM-2NQ Publication is out! Updated go-to citation to J. Chem. Phys. 162, 234304 (2025) https://doi.org/10.1063/5.0267651
+  - Removed some unnecessary comments from iam.fi
+
+  XIAM-2NQ v0.24 - 31-Jan-2025 
   A small update to the iamint.f file:
   - An error was fixed that caused int 3 predictions to not work if no spin was present.
   - Modifications were made to allow for intensitiy predictions with J>100, if iam.fi 
     is modified accordingly and XIAM is recompiled. 
 
-  XIAM-2NQ v0.23 -  Sven Herbers, 6-Jan-2024 
-  
+  XIAM-2NQ v0.23 - 6-Jan-2025
   This is an updated version of XIAM-NQ with severale changes, the most important one
-being the implementation of exact quadrupole coupling for two nuclei. The changes come with 
-new control parameters. The go-to citations for this version are: <br/> 
-...to be published... <br/> 
-and <br/> 
-  S. Herbers, J. Mol. Spectrosc., 2024, 405, 111950, DOI: 10.1016/j.jms.2024.111950  <br/> 
-It follows a list of changes, the original documentation by Hartwig is printed below 
+being the implementation of exact quadrupole coupling for two nuclei. 
+
+
+----------------------------------------------------------------------------
+## Further documentation
+It follows a list of changes compared to original XIAM, the original documentation by Hartwig is printed below 
 for completeness.<br/> 
-
-
 New control parameters:  
 
      ctrl (default 3)    If spin is not 0 this switches exact quadrupole coupling on (3) or off (0) 
@@ -102,7 +439,7 @@ XIAM-2NQ uses 2I as input for control parameter 'spin', it also uses 2F as input
 
 
 XIAM_mod parameters: The additional empirical disortion parameters (Dc3K and Dc3-) available in 
-                     XIAM_mod are also available in XIAM-NQ.
+                     XIAM_mod are also available in XIAM-NQ. 
 Internal rotation overall - rotation distortion operator in XIAM_mod:
 <pre>
   Hird =  2 Dpi2J (p_alpha - rho P_r)**2 P**2
@@ -110,9 +447,9 @@ Internal rotation overall - rotation distortion operator in XIAM_mod:
                                   + P_z**2 (p_alpha - rho P_r)**2]
          + Dpi2- [(p_alpha - rho P_r)**2 (P_x**2 - P_y**2)
                                   + (P_x**2 - P_y**2) (p_alpha - rho P_r)**2]
-         + Dc3J  cos(3alpha) P**2
-         + Dc3K  cos(3alpha) P_z**2         
-         + Dc3-  cos(3alpha) (P_x**2 - P_y**2)
+         + 2 Dc3J  cos(3alpha) P**2
+         + Dc3K  [cos(3alpha) P_z**2 + P_z**2 cos(3alpha)]       
+         + Dc3-  [cos(3alpha) (P_x**2 - P_y**2) + (P_x**2 - P_y**2) cos(3alpha)]
 </pre> 
 
 -----------------------------------------------------------------------------
