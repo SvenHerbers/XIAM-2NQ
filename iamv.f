@@ -138,7 +138,7 @@ C      character*6 fnpost
       if ((DIMUNI).le.((2*jselect+1)*
      $       (ctlint(C_SPIN2)+1)*(ctlint(C_SPIN)+1))) then                  !An extra condition checking for DIMUNI
        if (ctlint(C_SPIN2).gt.0) then                                 
-       write(0,*) "DIMUNI too small. Increase its value in"
+       write(0,*) "DIMUNI too small. Increase its value in",         !Add ',' otherwise gfortran gives compilation error.
      $ "iam.fi before compilation."      
         stop                                                         
        end if                                                        

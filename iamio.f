@@ -2028,36 +2028,43 @@ C ---------------------------------------------------------------------
 
       if (dabs(a).gt.0.0d0) then
         aexp=int(log10(dabs(a)))
+        if (aexp.ge.3) then
+          write(astr,'(F15.6)') a
+          write(dstr,'(F12.6)') d
+        else if ((aexp.lt.3).and.(aexp.ge.0)) then
+          write(astr,'(F15.9)') a
+          write(dstr,'(F12.9)') d
+        else if ((aexp.lt.0).and.(aexp.ge.-3)) then
+          write(astr,'(F12.6,A)') a*1.d3,'E-3'
+          write(dstr,'(F9.6,A)') d*1.d3,'E-3'
+        else if ((aexp.lt.-3).and.(aexp.ge.-6)) then
+          write(astr,'(F12.6,A)') a*1.d6,'E-6'
+          write(dstr,'(F9.6,A)') d*1.d6,'E-6'
+        else if ((aexp.lt.-6).and.(aexp.ge.-9)) then 
+          write(astr,'(F12.6,A)') a*1.d9,'E-9'
+          write(dstr,'(F9.6,A)') d*1.d9,'E-9'
+        else if ((aexp.lt.-9).and.(aexp.ge.-12)) then 
+          write(astr,'(F11.5,A)') a*1.d12,'E-12'
+          write(dstr,'(F8.5,A)') d*1.d12,'E-12'
+        else if ((aexp.lt.-12).and.(aexp.ge.-15)) then 
+          write(astr,'(F11.5,A)') a*1.d15,'E-15'
+          write(dstr,'(F8.5,A)') d*1.d15,'E-15'
+        else if ((aexp.lt.-15).and.(aexp.ge.-18)) then 
+          write(astr,'(F11.5,A)') a*1.d18,'E-18'
+          write(dstr,'(F8.5,A)') d*1.d18,'E-18'
+        else if ((aexp.lt.-18).and.(aexp.ge.-21)) then 
+          write(astr,'(F11.5,A)') a*1.d21,'E-21'
+          write(dstr,'(F8.5,A)') d*1.d21,'E-21'
+        else if ((aexp.lt.-21).and.(aexp.ge.-24)) then 
+          write(astr,'(F11.5,A)') a*1.d24,'E-24'
+          write(dstr,'(F8.5,A)') d*1.d24,'E-24'
+        else
+          write(astr,'(F15.9)') a
+          write(dstr,'(F12.9)') d
+        end if 
       else
-        aexp=-9
-      end if
-      if (aexp.ge.3) then
-        write(astr,'(F15.6)') a
-        write(dstr,'(F12.6)') d
-      end if
-      if ((aexp.lt.3).and.(aexp.ge.-3)) then
-        write(astr,'(F15.9)') a
-        write(dstr,'(F12.9)') d
-      end if
-      if ((aexp.lt.-3).and.(aexp.ge.-6)) then !Sven2023
-        write(astr,'(F12.6,A)') a*1.d6,'E-6' !Sven2023
-        write(dstr,'(F9.6,A)')  d*1.d6,'E-6' !Sven2023
-      end if                                 !Sven2023
-      if ((aexp.lt.-6).and.(aexp.ge.-9)) then !Sven2023
-        write(astr,'(F12.6,A)') a*1.d9,'E-9' !Sven2023
-        write(dstr,'(F9.6,A)')  d*1.d9,'E-9' !Sven2023
-      end if                                   !Sven2023
-      if ((aexp.lt.-9).and.(aexp.ge.-12)) then !Sven2026
-        write(astr,'(F11.5,A)') a*1.d12,'E-12'  !Sven2026
-        write(dstr,'(F8.5,A)')  d*1.d12,'E-12'  !Sven2026
-      end if
-      if ((aexp.lt.-12).and.(aexp.ge.-15)) then !Sven2026
-        write(astr,'(F11.5,A)') a*1.d15,'E-15'  !Sven2026
-        write(dstr,'(F8.5,A)')  d*1.d15,'E-15'  !Sven2026
-      end if
-      if (aexp.lt.-15) then                    !Sven2026
-        write(astr,'(F11.5,A)') a*1.d15,'E-15'  !Sven2026
-        write(dstr,'(F8.5,A)')  d*1.d15,'E-15'  !Sven2026
+        write(astr,'(F15.9)') 0.0d0
+        write(dstr,'(F12.9)') 0.0d0
       end if
       return
       end
