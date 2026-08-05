@@ -269,10 +269,10 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 
 ## Update Notes
   XIAM-2NQ v0.46b - 05-August-2026 <br>
-Various output improvements from Luyao Zou's `pr/1` branch have been merged into the main branch:
-- Added printout of the lower-state energy in units of cm<sup>−1</sup> to intensity predictions.
-- Standardized parameter output formatting for values from E−3 down to E−24.
-- Fixed a compilation bug: the statement
+  Various output improvements from Luyao Zou's `pr/1` branch have been merged into the main branch:
+  - Added printout of the lower-state energy in units of cm<sup>−1</sup> to intensity predictions.
+  - Standardized parameter output formatting for values from E−3 down to E−24.
+  - Fixed a compilation bug: the statement
   ``write(0,*) "DIMUNI too small. Increase its value in", "iam.fi before compilation."``
   was missing a comma, causing compilation errors with `gfortran`.
   
