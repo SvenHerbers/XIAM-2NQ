@@ -1,6 +1,6 @@
 # XIAM-2NQ
 XIAM-2NQ is a spectral fitting program for molecules containing up to two quadrupolar nuclei and four internal rotors. It extends the original XIAM code by Hartwig which is available at the [PROSPE](http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.  
-This repository provides the complete source code required to build the program. A makefile is included for straightforward compilation on Linux systems. Alternatively, the source files can be compiled step-by-step using the Intel ifortran compiler.
+This repository provides the complete source code required to build the program. A makefile is included for straightforward compilation on Linux systems. Alternatively, the source files can be compiled step-by-step using the Intel ifx compiler.
 
 XIAMi2NQ.exe was built with the Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2025.3.3.
 Compilation was carried out using the following command line entries:
@@ -268,7 +268,14 @@ Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.106
 | `chixy12,chixy34,chixy56,chiyz12,chiyz34,chiyz56,chixz12,chixz34,chixz56` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
 
 ## Update Notes
-
+  XIAM-2NQ v0.46b - 05-August-2026 <br>
+Various output improvements from Luyao Zou's `pr/1` branch have been merged into the main branch:
+- Added printout of the lower-state energy in units of cm<sup>−1</sup> to intensity predictions.
+- Standardized parameter output formatting for values from E−3 down to E−24.
+- Fixed a compilation bug: the statement
+  ``write(0,*) "DIMUNI too small. Increase its value in", "iam.fi before compilation."``
+  was missing a comma, causing compilation errors with `gfortran`.
+  
   XIAM-2NQ v0.46 - 05/06-July-2026 <br>
   - Fixed a bug that caused an unnecessary `NULL` and `0` to be printed at the end of the control parameter summary. This was resolved by setting `parameter (C_LAST = 30)` in `iam.fi`.
   - Added the compile-time dimension `DIMUNI` to `iam.fi`, which defines the maximum matrix size allocated for quadrupole (`NQ`) treatments. Previously, this limit was hard-coded as `DIMQ*DIMQ2*DIMTOT`.
