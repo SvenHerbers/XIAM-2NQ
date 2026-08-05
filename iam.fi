@@ -4,8 +4,8 @@ C   Important array dimensions, to be set before compiling
 C
 C   maximal J quantum number
       integer DIMJ
-       parameter (DIMJ=99)  ! Let do more !
-C        parameter (DIMJ=41) ! 22,23 works 19,21 works not if you encounter segfault in the new quadrupole coupling version, try doubling this value.
+C       parameter (DIMJ=30) 
+        parameter (DIMJ=71)  
 
 C   maximal number of v-blocks in the last diagonalisation.
 C   the size of the matrix is (2*DIMJ+1)*DIMVV
@@ -23,8 +23,7 @@ C   maximal internal rotation symmetry number sigma for one top
 C   maximal number of basis funcions for the pure internal rotation 
 C   Hamiltonian 
       integer DIMM
-       parameter (DIMM=71)   !keep more DIMM (for higher K), 5% is not much
-C        parameter (DIMM=31) !reducing frmo 71 to 31 improves computation time by 5%
+        parameter (DIMM=31)  
 
 C   maximum number of v basis funktions for one top
       integer DIMV
@@ -32,8 +31,7 @@ C   maximum number of v basis funktions for one top
 
 C   maximum number of transitions 
       integer DIMLIN
-C       parameter (DIMLIN=500)
-        parameter (DIMLIN=99999)  ! more lines. mm-wave
+        parameter (DIMLIN=15000)
 
 C   maximum number of different sets of paramaters 
       integer DIMVB
