@@ -17,12 +17,12 @@ C                    ! strlg is the intensity given in cat
 C                    ! elow is energy of lower state
 C                    ! fac = (4.16231e-5) / qrot
 C                    ! frq = frequency
-C                    ! tmq = tmc / (Temperature * elow/cmc,spcat)
+C                    ! tmq = tmc / (Temperature * cmc)
 C                    ! tmql = tmq * 0.43429448
 C                    !
 C                    !Params defined above:
 C                    ! tmc = -1.43878
-C                    ! elow/cmc,spcat = 29979.2458
+C                    ! cmc = 29979.2458
 C                    !
 C                    ! intensities following picketts definition will be written as 
 C                    ! spcat (name in code "spcat"
