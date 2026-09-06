@@ -271,10 +271,30 @@ Pickett type Coriolis coupling parameters go well with vibrationally off-diagona
 | `Fxy12,Fxy34,Fxy56,Fyz12,Fyz34,Fyz56,Fxz12,Fxz34,Fxz56` | `Pickett type Coriolis coupling parameters for coupling between states 1&2, 3&4, and 5&6.` |
 | `FxyJ12,...` | `Pickett type Coriolis coupling parameters multiplied with 'P**2'` |
 | `FxyK12,...` | `Pickett type Coriolis coupling parameters multiplied with 'Pz**2'` |
-| `chixy12,chixy34,chixy56,chiyz12,chiyz34,chiyz56,chixz12,chixz34,chixz56` | `Quadrupole coupling terms for first nucleus, but used off-diagonal in vibration. These parameters go well with Pickett type Coriolis parameters.` |
+| `ch1xy12,ch1xy34,ch1xy56,ch1yz12,ch1yz34,ch1yz56,ch1xz12,ch1xz34,ch1xz56` | `Quadrupole coupling terms for first nucleus, but used off-diagonal in vibration. These parameters go well with Pickett type Coriolis parameters.` |
 | `ch2xy12,ch2xy34,ch2xy56,ch2yz12,ch2yz34,ch2yz56,ch2xz12,ch2xz34,ch2xz56` | `Quadrupole coupling terms for second nucleus, but used off-diagonal in vibration. These parameters go well with Pickett type Coriolis parameters.` |
 ## Update Notes
   XIAM-2NQ v1.00 - 06-September-2026 <br>
+    
+  This release represents a major extension and restructuring of XIAM-2NQ since v0.46b. The main focus has been the merging of tunneling and quadrupole subroutines into a single subroutine `calvjk_uni`, the extension of vibrationally off-diagonal quadrupole and Coriolis interactions, and improved handling of state mixing and matrix dimensions.
+  These changes expanded the capabilities of XIAM-2NQ to cases where exact quadrupole coupling and internal rotation treatments are required in the presence of a double well (see, for example, Diethylamine for a single weak NQC, DW tunneling and two internal rotors, or the Cl2H2C-Ne complex with two strong NQC, DW tunneling, but no internal rotors in [github.com/SvenHerbers/XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples).
+  
+  ___Major changes since v0.46b are
+  - Tunneling is now automatically recognized by the user's parameter choice. `ctrl` does not need to be set by the user anymore.
+  - Added examples of Phenylacetate and Dichloromethane-Ne to the [XIAM-2NQ_Examples](https://github.com/SvenHerbers/XIAM-2NQ_Examples) repository.
+  - The tunneling case was fully merged with the NQC case into a new `calvjk_uni` subroutine, and the separate DW and NQC subroutines were removed.
+  - Renamed vibrationally off-diagonal parameters `chixy12, ...` to `ch1xy12, ...` and reworked their implementation to include matrix elements off-diagonal in J.
+  - Added vibrationally off-diagonal parameters `ch2xy12, ...`
+  - Added parameters `chi_zJ`, `chi_zK`, `chi2_zJ`, and `chi2_zK`.
+  - Added parameters `FxyJ12,...`, `FxyK12,...` used in the example case of Phenylacetate.
+  - Previous versions of XIAM-2NQ assumed the vibrational quantum number in tunneling treatments `B` to be a good quantum number that could be identified by simply finding the maximum vector contributions. To increase the capability to handle nearly 50/50 mixed states, additional repair routines have been introduced that try to enforce unitarity and enforce the same number of eigenstates to be assigned to each `B` block. This was required for several mmw transitions in the example case of Phenylacetate.
+  - A calculation error of `S_MAXK` in cases of NQC in `iam.f` was corrected: a factor of `1/2` had previously been missing in the spin contribution, which also led to a wrong (too large) max J being printed in the output files.
+  
+  ___Output formatting changes
+  - Output files now contain a date and timestamp at the beginning of the header using the Fortran intrinsic `DATE_AND_TIME`.
+  - Removed the obsolete `mydate()` routine.
+  - Removed the previous signal-handling code, including `mysignal()`, `sig_func()`, and `iamwrap.c`.
+  - Added `print_tors_v0k0(a,itop,sizev)` to `iamio.f` to print the torsional energies of all symmetry species for `k=0` for each top. 
    
 
   XIAM-2NQ v0.46b - 05-August-2026 <br>
