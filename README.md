@@ -1,5 +1,5 @@
 # XIAM-2NQ
-XIAM-2NQ is a spectral fitting program for molecules containing up to two quadrupolar nuclei and four internal rotors. It extends the original XIAM code by Hartwig which is available at the [PROSPE](http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.  
+XIAM-2NQ is a spectral fitting program for molecules containing up to **two quadrupolar nuclei**, **four internal rotors**, and **up to one double-well** like tunneling motion. It extends the original XIAM code by Hartwig which is available at the [PROSPE](http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.  
 This repository provides the complete source code required to build the program. A makefile is included for straightforward compilation on Linux systems. Alternatively, the source files can be compiled step-by-step using the Intel ifx compiler.
 
 XIAMi2NQ.exe was built with the Intel(R) Fortran Compiler for applications running on Intel(R) 64, Version 2025.3.3.
@@ -249,25 +249,34 @@ Matrix elements given in J. Chem. Phys. 162, 234304 (2025) DOI: [10.1063/5.02676
 | `chi_xy, chi2_xy` |
 | `chi_xz, chi2_xz` |
 | `chi_yz, chi2_yz` |
+|-------------|
+| `chi_zJ, chi2_zJ` |
+| `chi_zK, chi2_zK` |
 
 ### Vibrational state interaction parameters
-Parameter E is always available. 
-For Wilson and Pickett Coriolis coupling parameters, vibrational coupling mode must be activated by setting control parameter ctrl to  `ctrl 1`.
-Can only be used with the “old” approximate nuclear quadrupole coupling (elements off diagonal in J neglected)  with a single quadrupolar nucleus.  
+Since v1.00 available simultaneously with exact quadrupole coupling. 
 
 Reference Wilson parameters: J. Chem. Phys. 4, 313–316 (1936) DOI: [10.1063/1.1749846](https://doi.org/10.1063/1.1749846)  
 Reference Pickett parameters: J. Chem. Phys. 56, 1715–1723 (1972) DOI: [10.1063/1.1677430](https://doi.org/10.1063/1.1677430)
 
+Wilson type Coriolis coupling parameters for coupling between states should not be mixed with Pickett type or vibrationally off-diagonal NQC terms at the moment, due to a likely phase inconsistency.
 
+Pickett type Coriolis coupling parameters go well with vibrationally off-diagonal NQC-terms
 
 | `Parameter` | `Description` |
 |------------|---------------|
 | `E` | `Energy-offset assignable to the various vibrational states` |
-| `Gx12,Gx34,Gx56,Gy12,Gy34,Gy56,Gz12,Gz34,Gz56` | `Wilson type Coriolis coupling parameters for coupling between states 1&2, 3&4, and 5&6. Should not be mixed with Pickett type at the moment, due to a likely phase inconsistency.` |
-| `Fxy12,Fxy34,Fxy56,Fyz12,Fyz34,Fyz56,Fxz12,Fxz34,Fxz56` | `Pickett type Coriolis coupling parameters for coupling between states 1&2, 3&4, and 5&6. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency` |
-| `chixy12,chixy34,chixy56,chiyz12,chiyz34,chiyz56,chixz12,chixz34,chixz56` | `Quadrupole coupling terms, but used offdiagonal in v.  Matrix elements offdiagonal in J neglected. These parameters go with Pickett type Coriolis parameters. Should not be mixed with Wilson type at the moment, due to a likely phase inconsistency.` |
-
+| `Gx12,Gx34,Gx56,Gy12,Gy34,Gy56,Gz12,Gz34,Gz56` | `Wilson type Coriolis coupling parameters for coupling between states 1&2, 3&4, and 5&6. ` |
+|------------|---------------|
+| `Fxy12,Fxy34,Fxy56,Fyz12,Fyz34,Fyz56,Fxz12,Fxz34,Fxz56` | `Pickett type Coriolis coupling parameters for coupling between states 1&2, 3&4, and 5&6.` |
+| `FxyJ12,...` | `Pickett type Coriolis coupling parameters multiplied with 'P**2'` |
+| `FxyK12,...` | `Pickett type Coriolis coupling parameters multiplied with 'Pz**2'` |
+| `chixy12,chixy34,chixy56,chiyz12,chiyz34,chiyz56,chixz12,chixz34,chixz56` | `Quadrupole coupling terms for first nucleus, but used off-diagonal in vibration. These parameters go well with Pickett type Coriolis parameters.` |
+| `ch2xy12,ch2xy34,ch2xy56,ch2yz12,ch2yz34,ch2yz56,ch2xz12,ch2xz34,ch2xz56` | `Quadrupole coupling terms for second nucleus, but used off-diagonal in vibration. These parameters go well with Pickett type Coriolis parameters.` |
 ## Update Notes
+  XIAM-2NQ v1.00 - 06-September-2026 <br>
+   
+
   XIAM-2NQ v0.46b - 05-August-2026 <br>
   Various output improvements from Luyao Zou's `pr/1` branch have been merged into the main branch:
   - Added printout of the lower-state energy in units of cm<sup>−1</sup> to intensity predictions.
