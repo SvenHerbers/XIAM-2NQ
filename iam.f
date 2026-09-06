@@ -49,35 +49,56 @@ C     real*8  ab(DIMPAR)
       integer myand,myor
       external myand,myor
       integer sig_stat
+      character*10 date_clock(3)!Herbers2026
+      integer date_output(8)    !Herbers2026
+      
       common/sig_com/sig_stat
+      
 
       include 'iamdata.fi'
-      call mysignal()
       
       pi=dacos(-1.0d0)
       inkj=3.9903132D-04
       inkc=3.9903132D-04/4.186903D0
       indeg=180.0d0/pi
       incm=1.0d0/29.9792458d0! 
-      write(*,'(A,A)')
-     $     ' Rotational, Centrifugal Distortion,'
-     $     ,' Internal Rotation Calculation (V2.5e)' 
-      write(*,'(23X,A)')
-     $     'Holger Hartwig 08-Nov-96 (hartwig@phc.uni-kiel.de)'
-      write(*,'(/,2A,/)') ' Please cite:',
-     $     ' H.Hartwig and H.Dreizler, Z.Naturforsch, 51a (1996) 923.'
-C      write(*,'(A,$)') ' Calculation date and time: '
-      call mydate()
+      CALL DATE_AND_TIME(date_clock(1),date_clock(2),date_clock(3)   !Herbers 2026, added time stamp
+     $ ,date_output)                                                 !Herbers 2026, added time stamp
+
+      write(*,'(2A)') 
+     $'==============================================================',
+     $'======='
+      write(*,'(A)') '                         XIAM-2NQ v1.00'
+      write(*,'(A)') '                           2026/09/06'
+      write(*,'(2A)') 
+     $'==============================================================',
+     $'======='
+      write(*,'(A)') ''
+      write(*,'(" Execution time : ",I4,"/",I2.2,"/"
+     $          ,I2.2,1X,I2.2,":",I2.2,":",I2.2)') 
+     $    date_output(1), date_output(2), date_output(3), 
+     $    date_output(5), date_output(6), date_output(7)
+      write(*,'(A)') ''
+      write(*,'(A)') ' Author         : Sven Herbers'
+      write(*,'(A)') ' Email          : sven_herbers@web.de'
+      write(*,'(A)') ''
+      write(*,'(A)') ' Based on XIAM (v2.5e)'
+      write(*,'(A)') ' Holger Hartwig (1996/11/08)'
+      write(*,'(A)') ''
+      write(*,'(A)') ' Please cite:'
+      write(*,'(A)') ''
+      write(*,'(A)') '   J. Chem. Phys., 2025, 162, 234304'
+      write(*,'(A)') '   DOI: 10.1063/5.0267651'
+      write(*,'(A)') ''
+      write(*,'(A)') '   Z. Naturforsch. A, 1996, 51a, 923'
+      write(*,'(A)') '   DOI: 10.1515/zna-1996-0807'
+      write(*,'(A)') ''
+      write(*,'(2A)') 
+     $'==============================================================',
+     $'======='
       write(*,*)
-      write(*,'(A,A)') 'Modified Version: XIAM-2NQ v0.46b -' 
-     $                  ,'By Sven Herbers 05-August-2026' !Last change from 044 to 045 only added Dimension printing
-      write(*,*) 'sven_herbers@web.de'
-      write(*,*) 'Cite: J. Chem. Phys., 2025, '
-     $         ,'162, 234304, DOI: 10.1063/5.0267651 ' 
-      write(*,*)
-      write(*,'(A)') ' Type help now for the list of parameters : '
+C      write(*,'(A)') ' Type "help" for a list of parameters '
       call parinp(a,palc,pali,ifit,dfit,npar,nfit)
-      call mysignal()
       
 C     the array todo is the list of (good) quantum no.s which
 C     have to be calculated to assign all transitions
@@ -130,8 +151,8 @@ c          vb(qlin(i,Q_B,iq))=qlin(i,Q_V1,iq)
       end do
       if (((ctlint(C_SPIN).ne.0).or.(ctlint(C_SPIN2).ne.0))
      $  .and.(ctlint(C_DW).eq.3))    !Herbers2024
-     $              size(S_MAXK)=size(S_MAXK)+ctlint(C_SPIN)!Herbers2024
-     $                           +ctlint(C_SPIN2)!h2024
+     $              size(S_MAXK)=int(2*size(S_MAXK)+ctlint(C_SPIN)!Herbers2024
+     $                           +ctlint(C_SPIN2))/2!fixed 2026
 C     write(0,*) size(S_MAXK),ctlint(C_SPIN),ctlint(C_SPIN2)
 C     for intensities all j,b,f,gam are needed
       if (ctlint(C_NTOP).le.0) then
@@ -218,7 +239,7 @@ C     sort b values in first place, followed by ascending J values
       if (((ctlint(C_SPIN).ne.0).or.(ctlint(C_SPIN2).ne.0))
      $    .and.(ctlint(C_DW).ne.0)) then    !Herbers2024
       write(*,'(/,2X,A,I4)') '\\  Maximal K = J ='               !Herbers2024
-     $       ,size(S_MAXK)-ctlint(C_SPIN)-ctlint(C_SPIN2)        !Herbers2024 h2024
+     $       ,(2*size(S_MAXK)-ctlint(C_SPIN)-ctlint(C_SPIN2))/2        !Herbers2024 h2024
       write(*,'(/,2X,A,I4)') '\\  Used maxJ in NQC matrix ='    !Herbers2024
      $       ,size(S_MAXK)                                       !Herbers2024
       else                                                       !Herbers2024
@@ -595,20 +616,6 @@ C           write(0,*) binfname
       end
 
 C----------------------------------------------------------------------
-      subroutine sig_func(sig_no)
-C     called with signal(2)=SIGINT=control C
-C     see procedure mysignal() in iamsys.f
-      implicit none
-      integer sig_stat,sig_no
-      common/sig_com/sig_stat
-      sig_stat=1
-      write(0,*)'Signal no.',sig_no
-      write(0,*)'Control-C: premature termiation of xiam, finishing...'
-      write(*,*)'Control-C: premature termiation of xiam, finishing...'
-      return
-      end
-
-C----------------------------------------------------------------------
       subroutine funcs(ix,df,dfda,a,sig,nfit,ifit,dfit,idfrq)
 C     interface subroutine between LM Fit and the dnv matrix
       implicit none
@@ -815,7 +822,7 @@ C     the deviations DE/DPi in dnv(1..ndata,2-DIMPAR,Q_UP/LO(i))
       integer caseff1
       
 C      real*8  hsdq(DIMQ2,DIMQ,DIMTOT,DIMTOT)               
-      real*8  evhsdq(DIMQ2,DIMQ+DIMQ2,DIMTOT)                      
+      real*8  evhsdq(DIMQ2,DIMQT,DIMTOT)                      
       integer jsaved
       integer jcheck
       integer runj
@@ -825,8 +832,6 @@ C      real*8  hsdq(DIMQ2,DIMQ,DIMTOT,DIMTOT)
       integer stepf1
       
 C     work
-      real*8  hsdw(DIMDW,DIMTOT,DIMTOT) 
-      real*8  evhsdw(DIMDW,DIMTOT)!one extra to keep double well working...
       real*8  h(DIMTOT,DIMTOT)
       real*8  evh   (DIMTOT)!one extra to keep double well working...
       real*8  evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
@@ -841,12 +846,74 @@ C     work
       character*30 fmtstr2
       integer j,gam,qf,ib,oib,ic,i,itop,maxi,mini,iv,ntop,is      
       integer qf1
+      logical tun 
+      logical tp12(18)
+      logical tp34(18)
+      logical tp56(18)
       integer myand,not
       external myand
       save    evalv,ovv,rotm,rott,tori,qmv,oib
       fstatus=-1
-
-
+      
+      tp12=.false.
+      tp34=.false.
+      tp56=.false.
+      tun=.false.
+      if ( a(P_GX12,1).ne.0) tp12( 1) =.true.
+      if ( a(P_GY12,1).ne.0) tp12( 2) =.true.
+      if ( a(P_GZ12,1).ne.0) tp12( 3) =.true.
+      if ( a(P_FXY1,1).ne.0) tp12( 4) =.true.
+      if ( a(P_FYZ1,1).ne.0) tp12( 5) =.true.
+      if ( a(P_FXZ1,1).ne.0) tp12( 6) =.true.
+      if (a(P_WQXY1,1).ne.0) tp12( 7) =.true.
+      if (a(P_WQXZ1,1).ne.0) tp12( 8) =.true.
+      if (a(P_WQYZ1,1).ne.0) tp12( 9) =.true.
+      if (a(P_W2XY1,1).ne.0) tp12(10) =.true.
+      if (a(P_W2XZ1,1).ne.0) tp12(11) =.true.
+      if (a(P_W2YZ1,1).ne.0) tp12(12) =.true.
+      if (a(P_FXYJ1,1).ne.0) tp12(13) =.true.
+      if (a(P_FYZJ1,1).ne.0) tp12(14) =.true.
+      if (a(P_FXZJ1,1).ne.0) tp12(15) =.true.
+      if (a(P_FXYK1,1).ne.0) tp12(16) =.true.
+      if (a(P_FYZK1,1).ne.0) tp12(17) =.true.
+      if (a(P_FXZK1,1).ne.0) tp12(18) =.true.
+      if ( a(P_GX34,1).ne.0) tp34( 1) =.true.
+      if ( a(P_GY34,1).ne.0) tp34( 2) =.true.
+      if ( a(P_GZ34,1).ne.0) tp34( 3) =.true.
+      if ( a(P_FXY3,1).ne.0) tp34( 4) =.true.
+      if ( a(P_FYZ3,1).ne.0) tp34( 5) =.true.
+      if ( a(P_FXZ3,1).ne.0) tp34( 6) =.true.
+      if (a(P_WQXY3,1).ne.0) tp34( 7) =.true.
+      if (a(P_WQXZ3,1).ne.0) tp34( 8) =.true.
+      if (a(P_WQYZ3,1).ne.0) tp34( 9) =.true.
+      if (a(P_W2XY3,1).ne.0) tp34(10) =.true.
+      if (a(P_W2XZ3,1).ne.0) tp34(11) =.true.
+      if (a(P_W2YZ3,1).ne.0) tp34(12) =.true.
+      if (a(P_FXYJ3,1).ne.0) tp34(13) =.true.
+      if (a(P_FYZJ3,1).ne.0) tp34(14) =.true.
+      if (a(P_FXZJ3,1).ne.0) tp34(15) =.true.
+      if (a(P_FXYK3,1).ne.0) tp34(16) =.true.
+      if (a(P_FYZK3,1).ne.0) tp34(17) =.true.
+      if (a(P_FXZK3,1).ne.0) tp34(18) =.true.
+      if ( a(P_GX56,1).ne.0) tp56( 1) =.true.
+      if ( a(P_GY56,1).ne.0) tp56( 2) =.true.
+      if ( a(P_GZ56,1).ne.0) tp56( 3) =.true.
+      if ( a(P_FXY5,1).ne.0) tp56( 4) =.true.
+      if ( a(P_FYZ5,1).ne.0) tp56( 5) =.true.
+      if ( a(P_FXZ5,1).ne.0) tp56( 6) =.true.
+      if (a(P_WQXY5,1).ne.0) tp56( 7) =.true.
+      if (a(P_WQXZ5,1).ne.0) tp56( 8) =.true.
+      if (a(P_WQYZ5,1).ne.0) tp56( 9) =.true.
+      if (a(P_W2XY5,1).ne.0) tp56(10) =.true.
+      if (a(P_W2XZ5,1).ne.0) tp56(11) =.true.
+      if (a(P_W2YZ5,1).ne.0) tp56(12) =.true.
+      if (a(P_FXYJ5,1).ne.0) tp56(13) =.true.
+      if (a(P_FYZJ5,1).ne.0) tp56(14) =.true.
+      if (a(P_FXZJ5,1).ne.0) tp56(15) =.true.
+      if (a(P_FXYK5,1).ne.0) tp56(16) =.true.
+      if (a(P_FYZK5,1).ne.0) tp56(17) =.true.
+      if (a(P_FXZK5,1).ne.0) tp56(18) =.true.
+      
       do i=1,ctlint(C_NDATA)
         qlin(i,Q_STAT,Q_UP)=myand(qlin(i,Q_STAT,Q_UP),(not(1)))
         qlin(i,Q_STAT,Q_LO)=myand(qlin(i,Q_STAT,Q_LO),(not(1)))
@@ -898,7 +965,6 @@ C     work
           do itop=1,ctlint(C_NTOP)
             oldj(itop)=0
           end do
-
           call adjusta(a(1,ib),npar,ctlint(C_ADJF))
           if ((myand(ctlint(C_PRI),AP_PC).ne.0)
      $         .and.(xde.ne.0)) then
@@ -935,19 +1001,18 @@ C     $     +log(1.+j*(j+1))*a(P1_BLOGJ+DIMPIR*(itop-1),ib)
 C  !!!!!!!!!!!!!!!!!!  ntop !!!!!!!!!!!!!!!!!!!
         ntop=ctlint(C_NTOP)
         if (gam.eq.0) ctlint(C_NTOP)=0
-      if (ctlint(C_DW).eq.1) then ! IF-DW
-        if ( ((ib.le.6).and.(size(S_NB).ge.6)).or.
-     $       ((ib.le.4).and.(size(S_NB).ge.4)).or.
-     $       ((ib.le.2).and.(size(S_NB).ge.2))) then ! only use tunneling matrix if two states that mix are defined.
-         call calvjk_d(j,gam,qf,ib,qf1,evalv,ovv,rotm,rott,tori
-     $    ,a,qmv,ifit,dfit,palc,pali,npar,fistat
-     $    ,hsdw,evhsdw)      
+        if ((ib.eq.1).or.(ib.eq.2)) then
+          tun = any(tp12)
+        else if ((ib.eq.3).or.(ib.eq.4)) then
+          tun = any(tp34)
+        else if ((ib.eq.5).or.(ib.eq.6)) then
+          tun = any(tp56)
         else
-         call calvjk(j,gam,qf,ib,qf1,h,evalv,ovv,rotm,rott,tori
-     $    ,a(1,ib),qmv,ifit(1,ib),dfit,palc,pali,npar,fistat,evh)
+          tun = .false.
         end if
-      else ! ELSE-DW
-       if ((ctlint(C_DW).eq.3).and.((ctlint(C_SPIN).ne.0))) then !IF-Q
+
+       if (((ctlint(C_DW).eq.3).and.(ctlint(C_SPIN).ne.0)).or.
+     $     (tun)) then !IF-Q
           if (mod(qf,2).eq.1) then  !IF-ODD-F
             hf=(qf+1)/2
           else !ELSE-ODD-F
@@ -960,27 +1025,24 @@ C  !!!!!!!!!!!!!!!!!!  ntop !!!!!!!!!!!!!!!!!!!
             hf1=(qf1)/2
           endif !END-IF-ODD-F1
           caseff1=0
-          if (qf1.ge.0) then !IF-QF1
           if (qf.eq.-1) then !IF-QF-NOTUSED
           hf=hf1 ! use f1 in case F is not used (single nucleus.
           caseff1=0
           else !ELSE-QF-NOTUSED
           caseff1=1
           end if !END-IF-QF-NOTUSED
-            if (fstatus(hf,caseff1,gam,ib).ne.-1)then !IF-FSTATUS (checks if F matrix was already calculated
+          if (ctlint(C_INTS).eq.0)then !INTENSITY MARKER intensity part... not checked for correctness yet in uni subroutine
+          if ((fstatus(hf,caseff1,gam,ib).ne.-1).and.(qf1.ne.-1))then !IF-FSTATUS (checks if F matrix was already calculated, ignored in case F1=-1)
 C              DO NOTHING!
 C              DO NOTHING!
 C              DO NOTHING!
-            else !ELSE-FSTATUS
-                 call calvjk_qdj2f12(j,gam,qf,ib,qf1,evalv,ovv,rotm
+          else !ELSE-FSTATUS
+                 call calvjk_uni(j,gam,qf,ib,qf1,evalv,ovv,rotm
      $        ,rott,tori,a,qmv,ifit,dfit,palc,pali,npar,fistat
-     $        ,evhsdq)
+     $        ,evhsdq,tun)
               fstatus(hf,caseff1,gam,ib)=j
-            end if !END-IF-FSTATUS
-          else ! ELSE-QF1 !no exception yet implemented. But this is the case for intensities. I will put standard xiam routine
-C                 call calvjk_qdj2f12(j,gam,qf,ib,qf1,evalv,ovv,rotm
-C     $        ,rott,tori,a,qmv,ifit,dfit,palc,pali,npar,fistat
-C     $        ,evhsdq)
+          end if !END-IF-FSTATUS
+          else !INTENSITY MARKER intensity part... not checked for correctness yet with uni subroutine
           call calvjk(j,gam,qf,ib,qf1,h,evalv,ovv,rotm,rott,tori
      $    ,a(1,ib),qmv,ifit(1,ib),dfit,palc,pali,npar,fistat,evh)
           if ((fistat.eq.0).and.(ctlint(C_INTS).ge.1)) then   !IF-INT                 !Intensity f loop for energy calculation and saving
@@ -1000,19 +1062,18 @@ C     $        ,evhsdq)
           end if
            
            if (newf.ge.0) then !IF-F only calculate F matrices with F bigger equal to 0
-                 call calvjk_qdj2f12(j,gam,newf,ib,newf1,evalv,ovv,rotm          !Intensity f loop     ! some of these are redundant.
+                 call calvjk_uni(j,gam,newf,ib,newf1,evalv,ovv,rotm          !Intensity f loop     ! some of these are redundant.
      $        ,rott,tori,a,qmv,ifit,dfit,palc,pali,npar,fistat                 !Intensity f loop       ! some of these are redundant.
-     $        ,evhsdq)                                                         !Intensity f loop
+     $        ,evhsdq,tun)                                                         !Intensity f loop
            end if !END-IF-F
           end do                                                               !Intensity f loop
           end if                                            !END-INT
-          end if !END-QF1 (end of case that qf1<0, a marker for intensity calculation, but could also be used in linelists to deactivate hyperfine effects.
+          end if !END IF INTENSITY MARKER
           
         else !ELSE-Q!Standard XIAM, with no offdiagonal elements in J
           call calvjk(j,gam,qf,ib,qf1,h,evalv,ovv,rotm,rott,tori
      $    ,a(1,ib),qmv,ifit(1,ib),dfit,palc,pali,npar,fistat,evh)
         endif !END-IF-Q
-      endif !END-IF-DW
 
 C     calc the intens
 C     calc the intensities for this ib of all eigenvalues are done
@@ -1439,6 +1500,9 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P_FXY1  ) /'Fxy12   '/, parfit(P_FXY1  ) /1/ !Herbers2024 Picketts coriolis coupling 
       data parstr(P_FYZ1  ) /'Fyz12   '/, parfit(P_FYZ1  ) /1/ !Herbers2024 Picketts coriolis coupling 
       data parstr(P_FXZ1  ) /'Fxz12   '/, parfit(P_FXZ1  ) /1/ !Herbers2024 Picketts coriolis coupling 
+      data parstr(P_test1 ) /'txy     '/, parfit(P_test1 ) /1/ !Herbers2026 - different implementation of chixy12 with no off-diags in J
+      data parstr(P_test2 ) /'tyz     '/, parfit(P_test2 ) /1/ !Herbers2026 - different implementation of chiyz12 with no off-diags in J
+      data parstr(P_test3 ) /'txz     '/, parfit(P_test3 ) /1/ !Herbers2026 - different implementation of chixz12 with no off-diags in J
       data parstr(P_GX34  ) /'Gx34    '/, parfit(P_GX34  ) /1/ !Herbers2024 Wilsons coriolis coupling  
       data parstr(P_GY34  ) /'Gy34    '/, parfit(P_GY34  ) /1/ !Herbers2024 Wilsons coriolis coupling  
       data parstr(P_GZ34  ) /'Gz34    '/, parfit(P_GZ34  ) /1/ !Herbers2024 Wilsons coriolis coupling  
@@ -1451,15 +1515,42 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P_FXY5  ) /'Fxy56   '/, parfit(P_FXY5  ) /1/ !Herbers2026 Picketts coriolis coupling 
       data parstr(P_FYZ5  ) /'Fyz56   '/, parfit(P_FYZ5  ) /1/ !Herbers2026 Picketts coriolis coupling 
       data parstr(P_FXZ5  ) /'Fxz56   '/, parfit(P_FXZ5  ) /1/ !Herbers2026 Picketts coriolis coupling 
-      data parstr(P_WQXY1 ) /'chixy12 '/, parfit(P_WQXY1 ) /1/ !Herbers2026 Nguyen & Stahl used parameters of this type to deal with off-diags of a tunneling nitrogen nucleus.
-      data parstr(P_WQXZ1 ) /'chixz12 '/, parfit(P_WQXZ1 ) /1/ !Herbers2026
-      data parstr(P_WQYZ1 ) /'chiyz12 '/, parfit(P_WQYZ1 ) /1/ !Herbers2026
-      data parstr(P_WQXY3 ) /'chixy34 '/, parfit(P_WQXY3 ) /1/ !Herbers2026
-      data parstr(P_WQXZ3 ) /'chixz34 '/, parfit(P_WQXZ3 ) /1/ !Herbers2026
-      data parstr(P_WQYZ3 ) /'chiyz34 '/, parfit(P_WQYZ3 ) /1/ !Herbers2026
-      data parstr(P_WQXY5 ) /'chixy56 '/, parfit(P_WQXY5 ) /1/ !Herbers2026
-      data parstr(P_WQXZ5 ) /'chixz56 '/, parfit(P_WQXZ5 ) /1/ !Herbers2026
-      data parstr(P_WQYZ5 ) /'chiyz56 '/, parfit(P_WQYZ5 ) /1/ !Herbers2026
+      data parstr(P_WQXY1 ) /'ch1xy12 '/, parfit(P_WQXY1 ) /1/ !Herbers2026  
+      data parstr(P_WQXZ1 ) /'ch1xz12 '/, parfit(P_WQXZ1 ) /1/ !Herbers2026
+      data parstr(P_WQYZ1 ) /'ch1yz12 '/, parfit(P_WQYZ1 ) /1/ !Herbers2026
+      data parstr(P_WQXY3 ) /'ch1xy34 '/, parfit(P_WQXY3 ) /1/ !Herbers2026
+      data parstr(P_WQXZ3 ) /'ch1xz34 '/, parfit(P_WQXZ3 ) /1/ !Herbers2026
+      data parstr(P_WQYZ3 ) /'ch1yz34 '/, parfit(P_WQYZ3 ) /1/ !Herbers2026
+      data parstr(P_WQXY5 ) /'ch1xy56 '/, parfit(P_WQXY5 ) /1/ !Herbers2026
+      data parstr(P_WQXZ5 ) /'ch1xz56 '/, parfit(P_WQXZ5 ) /1/ !Herbers2026
+      data parstr(P_WQYZ5 ) /'ch1yz56 '/, parfit(P_WQYZ5 ) /1/ !Herbers2026
+      data parstr(P_W2XY1 ) /'ch2xy12 '/, parfit(P_W2XY1 ) /1/ !Herbers2026 
+      data parstr(P_W2XZ1 ) /'ch2xz12 '/, parfit(P_W2XZ1 ) /1/ !Herbers2026
+      data parstr(P_W2YZ1 ) /'ch2yz12 '/, parfit(P_W2YZ1 ) /1/ !Herbers2026
+      data parstr(P_W2XY3 ) /'ch2xy34 '/, parfit(P_W2XY3 ) /1/ !Herbers2026
+      data parstr(P_W2XZ3 ) /'ch2xz34 '/, parfit(P_W2XZ3 ) /1/ !Herbers2026
+      data parstr(P_W2YZ3 ) /'ch2yz34 '/, parfit(P_W2YZ3 ) /1/ !Herbers2026
+      data parstr(P_W2XY5 ) /'ch2xy56 '/, parfit(P_W2XY5 ) /1/ !Herbers2026
+      data parstr(P_W2XZ5 ) /'ch2xz56 '/, parfit(P_W2XZ5 ) /1/ !Herbers2026
+      data parstr(P_W2YZ5 ) /'ch2yz56 '/, parfit(P_W2YZ5 ) /1/ !Herbers2026
+      data parstr(P_FXYJ1 ) /'FxyJ12  '/, parfit(P_FXYJ1 ) /1/ !Herbers2026
+      data parstr(P_FYZJ1 ) /'FyzJ12  '/, parfit(P_FYZJ1 ) /1/ !Herbers2026
+      data parstr(P_FXZJ1 ) /'FxzJ12  '/, parfit(P_FXZJ1 ) /1/ !Herbers2026
+      data parstr(P_FXYJ3 ) /'FxyJ34  '/, parfit(P_FXYJ3 ) /1/ !Herbers2026
+      data parstr(P_FYZJ3 ) /'FyzJ34  '/, parfit(P_FYZJ3 ) /1/ !Herbers2026
+      data parstr(P_FXZJ3 ) /'FxzJ34  '/, parfit(P_FXZJ3 ) /1/ !Herbers2026
+      data parstr(P_FXYJ5 ) /'FxyJ56  '/, parfit(P_FXYJ5 ) /1/ !Herbers2026
+      data parstr(P_FYZJ5 ) /'FyzJ56  '/, parfit(P_FYZJ5 ) /1/ !Herbers2026
+      data parstr(P_FXZJ5 ) /'FxzJ56  '/, parfit(P_FXZJ5 ) /1/ !Herbers2026
+      data parstr(P_FXYK1 ) /'FxyK12  '/, parfit(P_FXYK1 ) /1/ !Herbers2026
+      data parstr(P_FYZK1 ) /'FyzK12  '/, parfit(P_FYZK1 ) /1/ !Herbers2026
+      data parstr(P_FXZK1 ) /'FxzK12  '/, parfit(P_FXZK1 ) /1/ !Herbers2026
+      data parstr(P_FXYK3 ) /'FxyK34  '/, parfit(P_FXYK3 ) /1/ !Herbers2026
+      data parstr(P_FYZK3 ) /'FyzK34  '/, parfit(P_FYZK3 ) /1/ !Herbers2026
+      data parstr(P_FXZK3 ) /'FxzK34  '/, parfit(P_FXZK3 ) /1/ !Herbers2026
+      data parstr(P_FXYK5 ) /'FxyK56  '/, parfit(P_FXYK5 ) /1/ !Herbers2026
+      data parstr(P_FYZK5 ) /'FyzK56  '/, parfit(P_FYZK5 ) /1/ !Herbers2026
+      data parstr(P_FXZK5 ) /'FxzK56  '/, parfit(P_FXZK5 ) /1/ !Herbers2026
       data parstr(P_DBJ1  ) /'S1_BJ   '/, parfit(P_DBJ1  ) /0/ !Herbers 2026 Same as BJ BK B-. but separate for S1,2,3,4,5... 
       data parstr(P_DBJ2  ) /'S2_BJ   '/, parfit(P_DBJ2  ) /0/ 
       data parstr(P_DBJ3  ) /'S3_BJ   '/, parfit(P_DBJ3  ) /0/ 
@@ -1528,11 +1619,15 @@ C     data parstr(P_R6    ) /'R6      '/, parfit(P_R6    ) /0/
       data parstr(P_DZ11  ) /'S11_Dz  '/, parfit(P_DZ11  ) /0/ 
       data parstr(P_DUMP  ) /'dummy   '/, parfit(P_DUMP  ) /1/ !Herbers2024 A dummy parameter not used for anything.   
       data parstr(P_QZ    ) /'chi_z   '/, parfit(P_QZ    ) /0/
+      data parstr(P_QZJ   ) /'chi_zJ  '/, parfit(P_QZJ   ) /0/ !Herbers2026 implemented to reproduce Ne-Cl2H2C data
+      data parstr(P_QZK   ) /'chi_zK  '/, parfit(P_QZK   ) /0/ !Herbers2026 implemented to reproduce Ne-Cl2H2C data
       data parstr(P_QD    ) /'chi_-   '/, parfit(P_QD    ) /0/
       data parstr(P_QXY   ) /'chi_xy  '/, parfit(P_QXY   ) /0/
       data parstr(P_QXZ   ) /'chi_xz  '/, parfit(P_QXZ   ) /0/
       data parstr(P_QYZ   ) /'chi_yz  '/, parfit(P_QYZ   ) /0/
       data parstr(P_Q2Z   ) /'chi2_z  '/, parfit(P_Q2Z   ) /0/ !h2024, parameters of 2nd nucleus.
+      data parstr(P_Q2ZJ  ) /'chi2_zJ '/, parfit(P_Q2ZJ  ) /0/ !Herbers2026 implemented to reproduce Ne-Cl2H2C data
+      data parstr(P_Q2ZK  ) /'chi2_zK '/, parfit(P_Q2ZK  ) /0/ !Herbers2026 implemented to reproduce Ne-Cl2H2C data
       data parstr(P_Q2D   ) /'chi2_-  '/, parfit(P_Q2D   ) /0/ !h2024, parameters of 2nd nucleus.
       data parstr(P_Q2XY  ) /'chi2_xy '/, parfit(P_Q2XY  ) /0/ !h2024, parameters of 2nd nucleus.
       data parstr(P_Q2XZ  ) /'chi2_xz '/, parfit(P_Q2XZ  ) /0/ !h2024, parameters of 2nd nucleus.

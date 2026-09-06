@@ -6,6 +6,7 @@ C     the evalues are put in the field of evalv(1..sizev)
 C     the matrix_elements are in ovv(1..sizev,1..sizev,x)
       implicit none
       include 'iam.fi'
+      
       integer sigma,k,maxm,minv,sizev
       real*8  h(DIMTOT,DIMTOT),evalv(DIMV),ovv(DIMV,DIMV,DIMOVV)
       real*8  am(DIMPM), ai(DIMPIR)!Herbers2026
@@ -18,7 +19,6 @@ C     work
       real*8  ao(DIMOVV)
       integer qm(DIMTOT)
       integer sizem,ir,ic,i,ierr
-
       sizem=2*maxm+1
       if (sizem.lt.sizev+minv)  stop 'ERROR: size m < size v'
       if (sizev.gt.DIMV)   stop 'ERROR: sizev > DIMV in calcm'

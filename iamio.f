@@ -958,7 +958,45 @@ c        end do
 
       return
       end
+C----------------------------------------------------------------------
+C----------------------------------------------------------------------
+      subroutine print_tors_v0k0(a,itop,sizev) !Herbers2026
 
+      implicit none
+      include 'iam.fi'
+
+      real*8 h(DIMTOT,DIMTOT),evalv(DIMV),ovv(DIMV,DIMV,DIMOVV)
+      real*8 mvec(DIMM,DIMV)
+      real*8  a(DIMPAR)
+      real*8  am(DIMPM), ai(DIMPIR)!Herbers2026
+      integer i
+      integer itop
+      integer sigma,k,maxm,minv,sizev
+      integer qmv(DIMV),ifit(DIMOVV)
+      k     = 0
+      minv  = 1
+      do i=1, DIMPM 
+        am(i)=a(DIMPRR+(itop-1)*DIMPIR+i)
+      end do
+      do i=1, DIMPIR
+          ai(i)=a(DIMPRR+(itop-1)*DIMPIR+i)
+      end do
+      maxm=size(S_MAXM+itop)
+      
+      
+      write(*,'(A,I3)') "Torsional V=0 k=0 energies for top ",
+     $                                                            itop
+      do sigma = 0,DIMSIG
+      
+      call calcm(sigma,h,evalv,ovv,mvec,
+     $     am,qmv,ifit,k,maxm,minv,sizev,ai,itop)
+      write(*,'(A,I2,A,F16.9,A$)') 'sigma =',
+     $                     sigma,' : ',evalv(1),' GHz'
+      write(*,*)
+      end do
+      
+      return
+      end
 C----------------------------------------------------------------------
       subroutine prrrp(a,da,covar,palc,pali,nfit,ib)
 C     print rotational constants and errors
@@ -1086,6 +1124,7 @@ C     print potential paramaters
      $       ,a(P1_VN1+ift)*incm,' cm +/- ',da(P1_VN1+ift)*incm
      $       ,' cm ','   s = 4V1n/9F = ' !Herbers2026 - added definition of F
      $       ,4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F+ift))!Herbers2026 - added +ift for correct print of reduced barrier
+        call print_tors_v0k0(a,itop,1)
       end do
       if (a(P1_VN2+ift).ne.0.0d0) then
       do itop=1, ctlint(C_NTOP)

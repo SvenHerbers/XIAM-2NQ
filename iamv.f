@@ -1,7 +1,7 @@
 C----------------------------------------------------------------------
-      subroutine calvjk_qdj2f12(jselect,gam,f,ib,f1select,evalv
+      subroutine calvjk_uni(jselect,gam,f,ib,f1select,evalv
      $ ,ovv,rotm,rott,tori,atot,qmv,ifittot,dfit,palc
-     $ ,pali,npar,fistat,evhs)
+     $ ,pali,npar,fistat,evhs,tun) !! tun at the moment hardwired to on below - change later for compute time opt.
 C     calculation of the eigenvalues of one matrix with specified j,f,gam
 C     the evalues are put in the field of dnv(1..ndata,Q_ENG,Q_UP/LO)
 C     the deviations DE/DPi in dnv(1..ndata,DQ_ENG,Q_UP/LO(i))
@@ -9,6 +9,32 @@ C     fistat = 0 for regular calculation of Eigenvalues
 C     fistat > 0  Eigenvalues for differential quotient
       implicit none
       include 'iam.fi'
+      ! Tunneling related parameters (except hamiltonian matrices)
+      logical tun! carry out tunneling treatment - only should be true if One of the tunnelin parameters is non zero.
+      real*8  al(DIMPAR), au(DIMPAR)
+      integer gam1, gam2
+      integer ibl, ibu, ibselect
+      real*8  uhs(DIMQ2,DIMQT,DIMTOT,DIMTOT)
+      real*8  uevhs(DIMQ2,DIMQT,DIMTOT)                    
+      real*8  uh_2(DIMQ*DIMTOT,DIMQ*DIMTOT) 
+      real*8  uh_2NQ1(DIMQ*DIMTOT,DIMQ*DIMTOT)
+      real*8  uh_3(DIMUNI,DIMUNI) !h2024
+      real*8  uh_3NQ2(DIMUNI,DIMUNI) !For elements off-diagonal in F1 for HQ2
+      real*8  tunh_4(DIMUNI,DIMUNI) ! for tunneling
+      integer uqmv(DIMV)
+      integer uqmvs(DIMQ2,DIMQ,DIMV)
+C     quantum unumbers
+      integer uqmks(DIMQ2,DIMQ,DIMTOT,DIMQLP)
+      integer uqvks(DIMQ2,DIMQ,DIMTOT,Q_K:Q_V+DIMTOP) 
+      integer uqvs(DIMQ2,DIMQ,DIMTOT)
+      real*8  hsdw(DIMDW,DIMUNI,DIMUNI)        !DIMUNI/2 could be used here instead
+      real*8  evhdws(DIMDW,DIMUNI)     !DIMUNI/2 could be used here instead
+      integer counter1,counter2 !used in B assignment
+      real*8 normi1, normi2
+      integer off1, off2
+      integer Difcounters         ! used to fix assignment when it breaks down
+      logical DWfixflag           ! used to fix assignment when it breaks down
+      real*8  nstore(DIMDW,DIMUNI)! used to fix assignment when it breaks down
       integer j, gam, f, ib, npar, fistat, is, f1, k, p, w, Temp                    
       integer startf1, endf1
       integer jselect
@@ -17,10 +43,10 @@ C     fistat > 0  Eigenvalues for differential quotient
       integer sj,ej,cm,cmb
       integer cm2
       integer minJ,maxJ
-      integer occupied
+      integer ocpied
       integer n
-      real*8  hs(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMTOT)
-      real*8  evhs(DIMQ2,DIMQ+DIMQ2,DIMTOT)                    
+      real*8  hs(DIMQ2,DIMQT,DIMTOT,DIMTOT)
+      real*8  evhs(DIMQ2,DIMQT,DIMTOT)                    
       real*8  h_2(DIMQ*DIMTOT,DIMQ*DIMTOT) 
       real*8  h_2NQ1(DIMQ*DIMTOT,DIMQ*DIMTOT)
       integer h_2_sizes(DIMQ2) 
@@ -42,27 +68,27 @@ C     fistat > 0  Eigenvalues for differential quotient
      $     -DIMSIG:DIMSIG,DIMTOP) 
       real*8  atot(DIMPAR,DIMVB)
       real*8  palc(DIMFIT,-1:DIMPLC) ! not used, but maybe later
-      real*8  normis(DIMQ+DIMQ2)
+      real*8  normis(DIMQT)
       real*8  normis2(DIMQ2)
       real*8  normisF1(DIMUNI,DIMQ2)     ! F1 quantum number assignment is not as easy as I thought. 
-      real*8  nF1s(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMQ2)         ! same as normisF1 but after F1 block assignment.
+      real*8  nF1s(DIMQ2,DIMQT,DIMTOT,DIMQ2)         ! same as normisF1 but after F1 block assignment.
       integer wF1s(DIMQ2)         ! I need to save the vector normisF1 as well as wF1s to write them to file for improved intensity prediciton.
               
-      integer noJsinF1s(DIMQ+DIMQ2,DIMQ2)
-      integer nJPPMinF1(DIMQ+DIMQ2,0:1,0:1,DIMQ2)
-      real*8  collectnorms((DIMQ+DIMQ2)*(2*DIMJ+1),DIMQ2) ! A
-      real*8  newnorms((DIMQ+DIMQ2)*(2*DIMJ+1))           ! B
+      integer noJsinF1s(DIMQT,DIMQ2)
+      integer nJPPMinF1(DIMQT,0:1,0:1,DIMQ2)
+      real*8  collectnorms((DIMQT)*(2*DIMJ+1),DIMQ2) ! A
+      real*8  newnorms((DIMQT)*(2*DIMJ+1))           ! B
       real*8  NormF1(DIMQ2)
       integer qcasesF1(DIMUNI)
       real*8  normisEO(0:1)                                !Even or odd
       real*8  normisPM(0:1)                                !PM for wang assignment
       integer EOofI(DIMUNI)                            ! separation by odd and even K quantum numbers.
       integer PMofI(DIMUNI)                            ! separation by wangs gamma + or -
-      integer indicesJ(DIMQ+DIMQ2,(DIMQ+DIMQ2)*(2*DIMJ+1))
-      integer indicesJPPM(DIMQ+DIMQ2,0:1,0:1,(DIMQ+DIMQ2)*(DIMJ+1))
-      integer indis((DIMQ+DIMQ2)*(2*DIMJ+1))
-      integer hitsj(DIMQ+DIMQ2)
-      integer hitsJPPM(DIMQ+DIMQ2,0:1,0:1)
+      integer indicesJ(DIMQT,(DIMQT)*(2*DIMJ+1))
+      integer indicesJPPM(DIMQT,0:1,0:1,(DIMQT)*(DIMJ+1))
+      integer indis((DIMQT)*(2*DIMJ+1))
+      integer hitsj(DIMQT)
+      integer hitsJPPM(DIMQT,0:1,0:1)
       integer qcasesJ(DIMUNI)
       integer pali(DIMFIT, 0:DIMPLC,2)       ! not used but maybe later.
       integer qmv(DIMV),ifittot(DIMPAR,DIMVB),dfit(DIMFIT)
@@ -73,8 +99,8 @@ C     quantum numbers
       integer qvs(DIMQ2,DIMQ,DIMTOT)
       integer qcase
 C     work
-      real*8  zrs(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMTOT)
-      real*8  zis(DIMQ2,DIMQ+DIMQ2,DIMTOT,DIMTOT)
+      real*8  zrs(DIMQ2,DIMQT,DIMTOT,DIMTOT)
+      real*8  zis(DIMQ2,DIMQT,DIMTOT,DIMTOT)
 C      real*8  dedp(DIMPAR) ! not used but maybe later
       integer check2
       integer results
@@ -82,9 +108,9 @@ C      real*8  dedp(DIMPAR) ! not used but maybe later
       integer ie,i,itop,ivr,ivc,it1,it2
       integer eused(DIMTOT), ierr
       integer ruse(DIMVV,DIMVV,DIMTOP)
-      integer mycounters(DIMQ2,DIMQ+DIMQ2)
-      integer hitsJP((DIMQ+DIMQ2),0:1)                         ! remove if not needed.
-      integer indicesJP(DIMQ+DIMQ2,0:1,(DIMQ+DIMQ2)*(DIMJ+1)) ! remove if not needed.
+      integer mycounters(DIMQ2,DIMQT)
+      integer hitsJP((DIMQT),0:1)                         ! remove if not needed.
+      integer indicesJP(DIMQT,0:1,(DIMQT)*(DIMJ+1)) ! remove if not needed.
       integer initdim
       character*4 fnpre
 C      character*6 fnpost
@@ -102,47 +128,50 @@ C      character*6 fnpost
       masave=.false.
       
       if (ctlint(C_SPIN2).eq.1) then                                 !Some program termination conditions for input errors.
-       write(0,*) "spin2 read as 1, but I_2 = 0.5",                  !Some program termination conditions for input errors.
+       write(*,*) "spin2 read as 1, but I_2 = 0.5",                  !Some program termination conditions for input errors.
      $  "is not implemented, stopping the program."                  !Some program termination conditions for input errors.
        stop                                                          !Some program termination conditions for input errors.
       end if                                                         !Some program termination conditions for input errors.
       if (ctlint(C_SPIN).eq.1) then                                  !Some program termination conditions for input errors.
-       write(0,*) "spin read as 1, but I_2 = 0.5",                   !Some program termination conditions for input errors.
+       write(*,*) "spin read as 1, but I_2 = 0.5",                   !Some program termination conditions for input errors.
      $ "is not implemented with exact quadrupole coupling,",         !Some program termination conditions for input errors.
      $ "stopping the program."                                       !Some program termination conditions for input errors.
        if (ctlint(C_SPIN2).eq.0) then                                !Some program termination conditions for input errors.
-        write(0,*) "You can try XIAM's spin rotation constants,",    !Some program termination conditions for input errors.
+        write(*,*) "You can try XIAM's spin rotation constants,",    !Some program termination conditions for input errors.
      $   "with a 0.5 nucleus using DWctrl 0 ."                       !Some program termination conditions for input errors.
        end if                                                        !Some program termination conditions for input errors.
        stop                                                          !Some program termination conditions for input errors.
       end if                                                         !Some program termination conditions for input errors.
-      if (mod(f1select+ctlint(C_SPIN),2).ne.0) then                  !Some program termination conditions for input errors.
-       write(0,*) "INPUT Error in 2f1=",f1select," vs 2I1=",         !Some program termination conditions for input errors.
-     $ ctlint(C_SPIN),"both must be even or both must be odd",       !Some program termination conditions for input errors.
+      if ((f1select.ne.-1).and.
+     $  (mod(f1select+ctlint(C_SPIN),2).ne.0)) then                  !Some program termination conditions for input errors.
+       write(*,*) "INPUT Error in 2f1=",f1select," vs 2I1=",         !Some program termination conditions for input errors.
+     $ ctlint(C_SPIN)," both must be even or both must be odd",       !Some program termination conditions for input errors.
      $ "stopping the program."                                       !Some program termination conditions for input errors.
        stop                                                          !Some program termination conditions for input errors.
       end if                                                         !Some program termination conditions for input errors.
       if ((f.ne.-1).and.(mod(f+ctlint(C_SPIN)
      $                       +ctlint(C_SPIN2),2).ne.0)) then         !Some program termination conditions for input errors.
-       write(0,*) "INPUT Error in 2f=",f," vs 2I1+2I2=",             !Some program termination conditions for input errors.
+       write(*,*) "INPUT Error in 2f=",f," vs 2I1+2I2=",             !Some program termination conditions for input errors.
      $ ctlint(C_SPIN),"+",ctlint(C_SPIN),"both quantities must be",  !Some program termination conditions for input errors.
      $ "even or both must be odd, stopping the program."             !Some program termination conditions for input errors.
        stop                                                          !Some program termination conditions for input errors.
       end if                                                         !Some program termination conditions for input errors.
       if ((2*DIMJ).le.(f+ctlint(C_SPIN2))) then                      !An extra condition checking for DIMJ.
        if (ctlint(C_SPIN2).gt.0) then                                !An extra condition checking for DIMJ.
-       write(0,*) "DIMJ too small for input f, stopping program"     !An extra condition checking for DIMJ.
+       write(*,*) "DIMJ too small for input f, stopping program"     !An extra condition checking for DIMJ.
         stop                                                         !An extra condition checking for DIMJ.
        end if                                                        !An extra condition checking for DIMJ.
       end if                                                         !An extra condition checking for DIMJ.
       if ((DIMUNI).le.((2*jselect+1)*
      $       (ctlint(C_SPIN2)+1)*(ctlint(C_SPIN)+1))) then                  !An extra condition checking for DIMUNI
        if (ctlint(C_SPIN2).gt.0) then                                 
-       write(0,*) "DIMUNI too small. Increase its value in",         !Add ',' otherwise gfortran gives compilation error.
+       write(*,*) "DIMUNI too small. Increase its value in",
      $ "iam.fi before compilation."      
         stop                                                         
        end if                                                        
       end if                                                         
+      
+      
       
 C      h_2=0.0
       hs=0.0! (:ctlint(C_SPIN),:(ctlint(C_SPIN)+ctlint(C_SPIN2)),:,:) dimension restriction didnt cause speedup in intialization.
@@ -151,6 +180,59 @@ C      h_2=0.0
       mycounters=1
       wF1s=-1
       nF1s=0.0
+      
+      if (tun) then
+       uhs=0.0! (:ctlint(C_SPIN),:(ctlint(C_SPIN)+ctlint(C_SPIN2)),:,:) dimension restriction didnt cause speedup in intialization.
+       uevhs=0.0
+      end if
+      
+      if (tun) then
+      
+      if (ib.le.2) then
+        ibl=1
+        ibu=2
+        if (ib.eq.1) then !ib1 is ib low shall be afilliated with Slow
+          ibselect=1
+          call dw_idgam(gam,gam1,gam2,ibselect)!,1,0)
+        else
+          ibselect=2
+          call dw_idgam(gam,gam1,gam2,ibselect)!,1,0)
+        end if
+      else if (ib.le.4) then
+        ibl=3
+        ibu=4  
+        if (ib.eq.3) then
+         ibselect=1
+         call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
+        else
+          ibselect=2
+          call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
+        endif
+       else 
+        ibl=5
+        ibu=6  
+        if (ib.eq.5) then
+         ibselect=1
+         call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
+        else
+          ibselect=2
+          call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
+        endif
+      end if     
+      al=atot(:,ibl)
+      au=atot(:,ibu)
+      else
+      ibl=ib
+      ibselect=ib
+      gam1=gam
+      gam2=gam
+      al=atot(:,ib) ! if no tunneling is used, the lower state is only computed, which is set to the input state. There is no upper state.
+      end if 
+      
+      
+      
+      
+      
 
       startf1=f-ctlint(C_SPIN2)
       endf1=(f+ctlint(C_SPIN2))
@@ -159,11 +241,10 @@ C      h_2=0.0
       end if
       !if spin2 is equal to 0 this should return f1select.
       !if spin2 is 0 then f=f1.
-      if (f.lt.ctlint(C_SPIN2))then ! if F is smaller than I, then there are F1 states that can not exist
+
        if ((abs(f+startf1)).lt.ctlint(C_SPIN2))then
        startf1=ctlint(C_SPIN2)-f
        end if
-      end if
 
       if (f.eq.-1) then !only place where f1select should be needed
        startf1=f1select !only place where f1select should be needed
@@ -174,8 +255,12 @@ C      h_2=0.0
       if (minJ.lt.0) then
        minJ=0
       end if
-       maxJ=(endf1+ctlint(C_SPIN))/2 ! these will be needed to get the vector components right later.
-      
+      maxJ=(endf1+ctlint(C_SPIN))/2 ! these will be needed to get the vector components right later.
+       
+      if ((f1select.eq.-1).and.(f.eq.-1)) then
+       minJ = jselect
+       maxJ = jselect
+      end if
 
       !!! for non existing J/F states with J>jselect no matrix has to be built up
       if (ctlint(C_EVAL).gt.3)   masave=.true.
@@ -211,6 +296,9 @@ C      h_2=0.0
       end do
 
 
+
+
+
 C------Construction of Htot Starts
 C------Construction of Htot Starts  
 C------Construction of Htot Starts
@@ -228,6 +316,12 @@ C
       end if
       h_3NQ2(1:initdim,1:initdim) = 0.0
       h_3(1:initdim,1:initdim) = 0.0
+      if (tun) then
+          uh_3NQ2(1:initdim,1:initdim)=0.0
+          uh_3(1:initdim,1:initdim) =0.0
+          tunh_4(1:DIMDW*initdim,1:DIMDW*initdim) = 0.0
+      end if 
+      
       
       do f1=startf1,endf1,2 ! uses a step size of 2
        
@@ -237,26 +331,39 @@ C       h_2=0.0 ! is reinitilaized in nqvmat_ir anyway
        sj=(2*jselect-(f1-ctlint(C_SPIN)))/2!startj offset
        ej=((f1+ctlint(C_SPIN))-2*jselect)/2!endj offset
        if ((jselect-sj).lt.0) sj=jselect   ! the start incidces and end indices for the F1 matrix depend on the f1 used
-
-      if (f1.lt.ctlint(C_SPIN))then ! if F is smaller than I, then there are J states that can not exist
        if (abs(f1+2*(jselect-sj)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
-       sj=sj-(abs(abs(f1-2*(jselect-sj))-ctlint(C_SPIN))/2)
+       sj = -(ctlint(C_SPIN)-f1- 2*jselect)/2
        end if 
-      end if
-
        
        if (f1select.eq.-1) then
         sj=0
         ej=0
        end if
-       
-       call nqcmat_ir(jselect,gam,f1,ib,evalv,ovv,rotm,rott !This sets up the semi-rigid rotor and internal rotation matrix elements for the various J blocks in the F matrix
+                       ! notice here the differentiation between iblu ibu and h as well as uh ibl and ibu
+                       
+       call nqcmat_ir(jselect,gam1,f1,ibl,evalv,ovv,rotm,rott !This sets up the semi-rigid rotor and internal rotation matrix elements for the various J blocks in the F matrix
      $  ,tori,atot,qmv,h_2,qvks(cm+1,:,:,:),qmks(cm+1,:,:,:)
-     $  ,qmvs(cm+1,:,:),qvs(cm+1,:,:),ruse)  
+     $  ,qmvs(cm+1,:,:),qvs(cm+1,:,:),npar,ifittot,fistat,ruse,tun)  
      
-     
-       call nqcmat_NQ1(jselect,f1,ib,h_2NQ1,atot,ctlint(C_SPIN)) ! This builds the Matrix elements for HQ1, these are all diagonal in F1.
+       if (tun) then
+         call nqcmat_ir(jselect,gam2,f1,ibu,evalv,ovv,rotm,rott !This sets up the semi-rigid rotor and internal rotation matrix elements for the various J blocks in the F matrix
+     $  ,tori,atot,uqmv,uh_2,uqvks(cm+1,:,:,:),uqmks(cm+1,:,:,:)
+     $  ,uqmvs(cm+1,:,:),uqvs(cm+1,:,:),npar,ifittot,fistat,ruse,tun)  
+       end if
+       
+       
+
+       
+       
+       if (ctlint(C_SPIN).ne.0) then !I1 != 0
+       call nqcmat_NQ1(jselect,f1,ibl,h_2NQ1,atot,ctlint(C_SPIN)) ! This builds the Matrix elements for HQ1, these are all diagonal in F1.
        h_2=h_2+h_2NQ1 ! adding first nucleus hamiltonian 
+       if (tun) then 
+        call nqcmat_NQ1(jselect,f1,ibu,uh_2NQ1,atot,ctlint(C_SPIN)) ! if tunneling is active also set the NQ1 matrix up (for first nucleus) for the upper state u
+        uh_2=uh_2+uh_2NQ1 
+       end if
+       end if                        !End I1 != 0
+     
        size(s_h)=0  
        do j=jselect-sj,jselect+ej ! the sizes depend on the specific F1 also.
          cm2=j-minJ
@@ -273,30 +380,51 @@ C       h_2=0.0 ! is reinitilaized in nqvmat_ir anyway
          end do
          if (j.ge.0) size(s_h)=size(s_h)+2*j+1             ! 
        end do
-       occupied=sum(h_2_sizes)
+       ocpied=sum(h_2_sizes)
        h_2_sizes(cm+1)=size(s_h)
+       
+       
+       
+       
+       
+       
+       
       
 C      !Matrix elements diagonal in J for second nucleus
-       if (ctlint(C_SPIN2).ne.0) then
-        call nqcmat_NQ2df1eqn(jselect,f1,f,ib,atot,h_3NQ2,occupied,0) ! Matrix HQ2, diagonal in F1
+       if (ctlint(C_SPIN2).ne.0) then  !I2 != 0
+        call nqcmat_NQ2df1eqn(jselect,f1,f,ibl,atot,h_3NQ2,ocpied,0) ! Matrix HQ2, diagonal in F1
+        if (tun) then       !tunnelin case
+         call nqcmat_NQ2df1eqn(jselect,f1,f,ibu,atot,uh_3NQ2,ocpied,0) ! Matrix HQ2, diagonal in F1
+        end if
         if (f1.le.endf1-1) then
-         call nqcmat_NQ2df1eqn(jselect,f1,f,ib,atot,h_3NQ2,occupied,1) ! Matrix HQ2, offdiagonal in F1 by +-1
+         call nqcmat_NQ2df1eqn(jselect,f1,f,ibl,atot,h_3NQ2,ocpied,1) ! Matrix HQ2, offdiagonal in F1 by +-1
+         if (tun) then      !tunnelin case
+          call nqcmat_NQ2df1eqn(jselect,f1,f,ibu,atot,uh_3NQ2,ocpied,1) ! Matrix HQ2, offdiagonal in F1 by +-1
+         end if
         end if
         if (f1.le.endf1-2) then
-         call nqcmat_NQ2df1eqn(jselect,f1,f,ib,atot,h_3NQ2,occupied,2) ! Matrix HQ2, offdiagonal in F1 by +-2
+         call nqcmat_NQ2df1eqn(jselect,f1,f,ibl,atot,h_3NQ2,ocpied,2) ! Matrix HQ2, offdiagonal in F1 by +-2
+         if (tun) then      !tunnelin case
+          call nqcmat_NQ2df1eqn(jselect,f1,f,ibu,atot,uh_3NQ2,ocpied,2) ! Matrix HQ2, offdiagonal in F1 by +-2
+         end if
         end if
-       end if
+       end if                         !END I2 != 0
 C      !Off diagonal elements delta F1 pm 1
-
-      h_3(1+occupied:occupied+size(s_h)
-     $             ,1+occupied:occupied+size(s_h))=h_2(1:size(s_h)
+      h_3(1+ocpied:ocpied+size(s_h)
+     $             ,1+ocpied:ocpied+size(s_h))=h_2(1:size(s_h)
      $             ,1:size(s_h)) ! filling up the diagonals.
-      end do
+      if (tun) then 
+       uh_3(1+ocpied:ocpied+size(s_h)
+     $             ,1+ocpied:ocpied+size(s_h))=uh_2(1:size(s_h)
+     $             ,1:size(s_h)) ! filling up the diagonals.
+      end if 
+      end do !end f1 look
 
+      
       
 C     Updating size
 
-      size(s_h)=occupied+size(s_h)
+      size(s_h)=ocpied+size(s_h)
       
 C     Adding second nucleus to hamiltonian
       D2=DIMUNI!DIMQ2*DIMQ*DIMTOT 
@@ -315,43 +443,273 @@ C------Construction of Htot finished
 C------Construction of Htot finished   
 C------Construction of Htot finished   
      
-      
+      if (tun) then 
+      uh_3(1:size(S_H),1:size(S_H)) = 
+     $   uh_3(1:size(S_H),1:size(S_H)) 
+     $ + uh_3NQ2(1:size(S_H),1:size(S_H)) ! Adding NQ2 matrix to total matrix.
+      do i=1,size(S_H)                     !
+      if (abs(uh_3(i,i)).le.1.0E-14) then   !The diagonalization can not handle zero rows + columns, so this offset was added.
+       uh_3(i,i) = 5.0E-14                  !
+      end if                               !
+      end do                               !
+      end if 
+C------Construction of Htot including tun finished
+C------Construction of Htot including tun finished   
+C------Construction of Htot including tun finished    !h3 and h3u should be complete and ready to be mixed (currently - 11.07.2026 - no tunneling matrix elements included yet)
 
-C       e_3(1:D2)=0.0      ! These are outputs of htrid3, intialization should be not required.
-C       e2_3(1:D2)=0.0     ! These are outputs of htrid3, intialization should be not required.
-C       evh_3(1:D2)=0.0    ! These are outputs of htrid3, intialization should be not required.
-C       tau_3=0.0          ! These are outputs of htrid3, intialization should be not required.
+
+      if (tun) then ! if tun
+        do i=1, size(S_H)
+          do ie=1, size(S_H)
+            tunh_4(i,ie)=h_3(i,ie) !copying lower to h4
+          end do
+        end do
+      
+        do i=1, size(S_H)
+          do ie=1, size(S_H)
+            tunh_4(i+size(S_H),ie+size(S_H))=uh_3(i,ie) !copying uper to h4
+          end do
+        end do
+        
+C        setting off diags to zero
+        do i=1, size(S_H)
+          do ie=1, size(S_H)
+            tunh_4(i+size(S_H),ie)=0.0 !set off diags to zero for now  
+            tunh_4(i,ie+size(S_H))=0.0 !set off diags to zero for now
+          end do
+        end do
+      end if ! if tun end
+C-------- Check here if tunh_4 is constructed properly.
+C-------- Should be quadrupole matrices for both b states, if E(2) is set to 1000, it should add 1000 to all diags in upper state
+
+
+C       CCCC Adding in      addoffdiags_unidw(off1,off2,ib,j,f1,al,au,h_2)
+      if (tun) then ! 1
+      off1=0 
+      off2=size(S_H)
+C      h_3(1:DIMUNI,1:DIMUNI) = 0.0
+      do f1=startf1,endf1,2 ! uses a step size of 2
+       cm=(f1-startf1)/2
+       if (ctlint(C_SPIN).ne.0) then  ! 2
+       call add_nqcmat_dwNQ1(off1,off2,jselect, 
+     $         f1,ib,tunh_4,atot,ctlint(C_SPIN),0)
+       call add_nqcmat_dwNQ1(off1,off2,jselect, 
+     $         f1,ib,tunh_4,atot,ctlint(C_SPIN),1)
+       call add_nqcmat_dwNQ1(off1,off2,jselect, 
+     $         f1,ib,tunh_4,atot,ctlint(C_SPIN),2)
+       end if ! 1
+       if (ctlint(C_SPIN2).ne.0) then ! 2
+        
+        call add_nqcmat_dwNQ2(0,size(S_H),
+     $                        jselect,f1,f,ib,atot,tunh_4,off1,0) ! Matrix HQ2, diagonal in F1
+     
+        if (f1.le.endf1-1) then ! 3
+        call add_nqcmat_dwNQ2(0,size(S_H),
+     $                        jselect,f1,f,ib,atot,tunh_4,off1,1) ! Matrix HQ2, diagonal in F1
+        end if ! 2
+        if (f1.le.endf1-2) then ! 3
+        call add_nqcmat_dwNQ2(0,size(S_H),
+     $                        jselect,f1,f,ib,atot,tunh_4,off1,2) ! Matrix HQ2, diagonal in F1
+        end if ! 2
+       end if ! 1
+
+       sj=(2*jselect-(f1-ctlint(C_SPIN)))/2!startj offset
+       ej=((f1+ctlint(C_SPIN))-2*jselect)/2!endj offset
+       if ((jselect-sj).lt.0) sj=jselect   ! the start incidces and end indices for the F1 matrix depend on the f1 used
+       if (abs(f1+2*(jselect-sj)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
+       sj = -(ctlint(C_SPIN)-f1- 2*jselect)/2
+       end if 
+       if (f1select.eq.-1) then
+        sj=0
+        ej=0
+       end if
+       do j=jselect-sj,jselect+ej ! the sizes depend on the specific F1 also.
+             call addoffdiags_unidw(off1,off2,ib,j,f1,al,au,tunh_4)
+             off1 = off1+(2*j+1)
+             off2 = off2+(2*j+1)
+       end do
+      end do
+C      tunh_4(:2*size(S_H),:2*size(S_H))=
+C     $ tunh_4(:2*size(S_H),:2*size(S_H))+h_3(:2*size(S_H),:2*size(S_H))
+      end if ! belongs to if (tun) then
+      
+CCCCCCC FINISHED ADDING OFF DIAGS
+
        zr_3(1:D2,1:D2)=0.0
       do i=1, D2 !initialize zr_2 for diagonalization routine
        zr_3(i,i)=1.0
       end do
+      if (tun) then ! if tun # d2 remains the same but size(S_H) become DW*size(S_H)
+C        
+C        DIAG CASE TUNNELIN ON:
+C        
+        call htrid3 (D2,DIMDW*size(S_H),tunh_4(:D2,:D2), ! requires zr to be a unit matrix as input.
+     $        evh_3(:D2),e_3(:D2),e2_3(:D2),tau_3(:,:D2))
 
-      call htrid3 (D2,size(S_H),h_3(:D2,:D2),evh_3(:D2),e_3(:D2), ! requires zr to be a unit matrix as input.
-     $  e2_3(:D2),tau_3(:,:D2))
-      ierr=0.0
-      call tql2 (D2,size(S_H),evh_3(:D2),e_3(:D2),zr_3(:D2,:D2),ierr)
+     
+        ierr=0.0
+        call tql2 (D2,DIMDW*size(S_H),evh_3(:D2)
+     $       ,e_3(:D2),zr_3(:D2,:D2),ierr)
 
-      if (ierr.ne.0) then
+        if (ierr.ne.0) then
           write (*,'(a,i5)') 'Error in tql2 ',ierr
           stop
-      endif
-      call htrib3 (D2,size(S_H),h_3(:D2,:D2),tau_3(:,:D2)
-     $           ,size(S_H),zr_3(:D2,:D2),zi_3(:D2,:D2))
-cc     sort eigenvalues in **ascending** order
-      call heigsrt(evh_3(:D2),zr_3(:D2,:D2),zi_3(:D2,:D2),size(S_H),D2) 
-
-      do i=1, size(S_H)
-        do ie=1, size(S_H)
-            h_3(i,ie)=sign(dsqrt(zr_3(i,ie)**2+zi_3(i,ie)**2)
+        endif
+        call htrib3(D2,DIMDW*size(S_H),tunh_4(:D2,:D2),tau_3(:,:D2)
+     $           ,DIMDW*size(S_H),zr_3(:D2,:D2),zi_3(:D2,:D2))
+     
+     
+cc      sort eigenvalues in **ascending** order
+        call heigsrt(evh_3(:D2),zr_3(:D2,:D2),
+     $                      zi_3(:D2,:D2),DIMDW*size(S_H),D2) 
+     
+     
+        do i=1, DIMDW*size(S_H)
+            do ie=1, DIMDW*size(S_H)
+                tunh_4(i,ie)=sign(dsqrt(zr_3(i,ie)**2+zi_3(i,ie)**2)
      $           ,zr_3(i,ie)+zi_3(i,ie))              
+            end do
         end do
-      end do
+C        
+C        DIAG CASE TUNNELIN OFF:
+C        
+      else 
+        call htrid3 (D2,size(S_H),h_3(:D2,:D2),evh_3(:D2),e_3(:D2), ! requires zr to be a unit matrix as input.
+     $   e2_3(:D2),tau_3(:,:D2))
+        ierr=0.0
+        call tql2 (D2,size(S_H),evh_3(:D2),e_3(:D2),zr_3(:D2,:D2),ierr)
+
+        if (ierr.ne.0) then
+          write (*,'(a,i5)') 'Error in tql2 ',ierr
+          stop
+        endif
+        call htrib3 (D2,size(S_H),h_3(:D2,:D2),tau_3(:,:D2)
+     $           ,size(S_H),zr_3(:D2,:D2),zi_3(:D2,:D2))
+cc      sort eigenvalues in **ascending** order
+        call heigsrt(evh_3(:D2),zr_3(:D2,:D2),
+     $                      zi_3(:D2,:D2),size(S_H),D2) 
+        do i=1, size(S_H)
+            do ie=1, size(S_H)
+                h_3(i,ie)=sign(dsqrt(zr_3(i,ie)**2+zi_3(i,ie)**2)
+     $           ,zr_3(i,ie)+zi_3(i,ie))              
+            end do
+        end do
       
+      end if 
+      
+      
+C     COPIED B ASSIGN FROM calvjk_d - only done if tun is true
 
-C------Diagnoalization finished
-C------Diagnoalization finished
-C------Diagnoalization finished
+      if (tun) then
+        DWfixflag=.false. ! There are two cases that trigger the DW fix routine. Case 1) Vector contributions to an ib that deviate less than 0.05 from 0.5. Case 2) The count of levels in both ib levels is not the same
+        counter1=0
+        counter2=0
+        do i = 1, 2*size(S_H)   !adding and renormalizing the vector components....
+          normi1=sum((tunh_4(1:size(S_H),i)**2)) 
+          normi2=sum((tunh_4(size(S_H)+1:2*size(S_H),i)**2))
+          if ((normi1<0.55).and.(normi2<0.55)) then
+              DWfixflag=.true.
+          end if
+         if (normi1.ge.0.5) then !e.g. for empty matrix entries where all normis are zero
+          counter1=counter1+1
+          evhdws(1,counter1)=evh_3(i)
+          hsdw(1,1:size(S_H),counter1)=SIGN(sqrt( ! sqrt was omitted in calvjk_d - I dont know why though.
+     $         tunh_4(1:size(S_H),i)**2+
+     $         tunh_4(size(S_H)+1:2*size(S_H),i)**2),
+     $         tunh_4(1:size(S_H),i))  ! This is different for normalization - I use the K info from both states.
+          nstore(1,counter1)=sum(tunh_4(1:size(S_H),i)**2)
+         else
+          counter2=counter2+1
+          evhdws(2,counter2)=evh_3(i)
+          hsdw(2,1:size(S_H),counter2)=SIGN(sqrt( ! sqrt was omitted in calvjk_d - I dont know why though.
+     $         tunh_4(1:size(S_H),i)**2+
+     $         tunh_4(size(S_H)+1:2*size(S_H),i)**2),
+     $         tunh_4(size(S_H)+1:2*size(S_H),i))  ! This is different for normalization - I use the K info from both states.
+          nstore(2,counter2)=sum(tunh_4(size(S_H)+1:2*size(S_H),i)**2)
+         end if
+        end do
+        
+       if (counter2.ne.counter1) then
+         DWfixflag=.true.
+       end if
+      
+C--------  
+C--------  
+C--------                  Fixing Tunneling ib assignment
+C--------  on the routine shuffle dw, put the last argument from 0 to 1 to get printed feedback about assignment swaps
+C--------  C
+C-------- Bad ib assignment due to strong mixing? the following treatment restores the assignment with some sucess
+      if (DWfixflag) then
+      difcounters=(counter2-counter1)/2
+C      write(*,*)("ENTERING Shuffle subroutine"), ib, jselect
+      call shuffledw(hsdw,evhdws,nstore,size(S_H), 
+     $                     counter1,counter2,0)
 
+C--------------After shufflin reordering by energy
+C          write(0,*) h_2_sizes, ocpied, size(S_H)
+
+          do j=1,size(S_H)
+              do i=1,size(S_H)
+                  h_3(i,j)=hsdw(1,i,j)  !introduction of h_3 is nessecary since for larger than two dimensional arrays substitution of A(1,:,:,:) or similar to get a submatrix might not work. due to some memory allocation related stuff?
+              end do
+          end do
+
+          call argsortEH(evhdws(1,:),h_3,
+     $           DIMUNI,size(S_H))
+     
+          do j=1,size(S_H)
+              do i=1,size(S_H)
+                  hsdw(1,i,j)=h_3(i,j)
+              end do
+          end do
+     
+          do j=1,size(S_H)
+              do i=1,size(S_H)
+                  h_3(i,j)=hsdw(2,i,j)
+              end do
+          end do
+     
+          call argsortEH(evhdws(2,:),h_3,
+     $           DIMUNI,size(S_H))
+     
+          do j=1,size(S_H)
+              do i=1,size(S_H)
+                  hsdw(2,i,j)=h_3(i,j)
+              end do
+          end do
+          
+         end if 
+C--------  
+C--------  
+C--------           End of Fixing tunneling ib assignment
+C--------  
+C--------  
+        
+        
+        
+       if (ib.eq.ibl) then  ! To decrease compute time by factor of 2, both upper and lower state could be processed here and stored - will require a do loop 1,2 around the whole  subsequent quad treatment.
+       h_3(1:size(S_H),1:size(S_H)) =  hsdw(1,1:size(S_H),1:size(S_H))
+       evh_3(1:size(S_H)) = evhdws(1,1:size(S_H))
+       else if (ib.eq.ibu) then
+       h_3(1:size(S_H),1:size(S_H)) =  hsdw(2,1:size(S_H),1:size(S_H))
+       evh_3(1:size(S_H)) = evhdws(2,1:size(S_H))
+       else
+       write(*,*) "ERROR, ib is neither bl nor bu"
+       stop
+       end if 
+       
+      end if  !end if tun
+      
+C------Diagnoalization finished
+C------Diagnoalization finished
+C------Diagnoalization finished
+        if (ctlint(C_SPIN).eq.0) then
+        evhs(1,1,1:size(S_H))=evh_3(1:size(S_H))
+        hs(1,1,1:size(S_H),1:size(S_H))=h_3
+        goto 17 !  All of the F1/F assignment is skipped if no quadrupole is present
+        end if
+        
+        
         cm2=0                                     
         hitsj=0
         hitsJPPM=0
@@ -376,12 +734,13 @@ C------Diagnoalization finished
            sj=(2*jselect-(f1-ctlint(C_SPIN)))/2!startj offset
            ej=((f1+ctlint(C_SPIN))-2*jselect)/2!endj offset
            if ((jselect-sj).lt.0) sj=jselect
-           if (f1.lt.ctlint(C_SPIN))then ! if F is smaller than I, then there are J states that can not exist
             if (abs(f1+2*(jselect-sj)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
-            sj=sj-(abs(abs(f1-2*(jselect-sj))-ctlint(C_SPIN))/2)
+            sj = -(ctlint(C_SPIN)-f1- 2*jselect)/2
             end if 
+           if (f1select.eq.-1) then
+            sj=0
+            ej=0
            end if
-           
            check2=0
            
            do j=jselect-sj,jselect+ej
@@ -462,28 +821,6 @@ C             write(0,*) h_3(sizepre+check2+1+j-3:sizepre+check2+1+j+3,i)
          end if
          end if
          
-C         if (gam.eq.1) then
-C         write(0,*) normisPM(0), normisPM(1) ! 
-C         end if
-C         if (abs(normisPM(1)).ge.0.9) then
-C          qcase=maxloc(normis,1)-1+minJ
-C          write(0,*) qcase
-C          write(0,*) startf1,endf1
-C          check2=0
-C          do n=0,qcase-1
-C          check2=check2+2*i+1
-C          end do
-C          do f1= startf1, endf1,2         
-C           cm2=(f1-startf1)/2
-C                 sizef1=h_2_sizes(cm2+1)  
-C                 sizepre=sum(h_2_sizes(1:cm2+1))-sizef1                  
-CC          write(0,*) h_3(sizepre+check2+1:
-CC     $         sizepre+check2+2*qcase+1,i)
-C         end do
-C         if (qcase.eq.7) then
-C         write(0,*) h_3(49+11+13:,i)
-C         end if
-C         end if
 
          qcase2=maxloc(normis2,1) !F1 for testing, not assignment
          sizef1=h_2_sizes(qcase2) 
@@ -505,20 +842,14 @@ C         end if
         
           ! qcase2 gives the f1 quantum numbers, qcase gives the J quantum number.
          if (normis2(qcase2).le.0.05) then
-          write(0,*) 'Vector f1 not found'
+          write(0,*) 'Vector f1 not found - increase DIMs?'
           qcase2=-1          !e.g. for empty matrix entries where all normis2 are zero
          end if
           if (normis(qcase).le.0.05) then !e.g. for empty matrix entries where all normis are zero
-           write(0,*) 'Vector j not found'
+           write(0,*) 'Vector j not found - increase DIMs?'
            qcase=-1
           end if
         end do   !end for column i of h_3  
-        
-        
-        
-        
-        
-        
         
         if ((ctlint(C_SORT).eq.1).or.
      $          ((ctlint(C_SORT).eq.3).and.
@@ -538,7 +869,7 @@ C        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! IF CASES FOR
             cm2=(f1-startf1)/2
             newnorms=collectnorms(:,cm2+1)              !load vector contributions to F1
             call argsort(newnorms,
-     $         indis,2*(DIMJ+DIMQ+DIMQ2)+1,hitsJPPM(cm+1,p,w)) ! sort
+     $         indis,(DIMQT)*(2*DIMJ+1),hitsJPPM(cm+1,p,w)) ! sort
             do n=1,nJPPMinF1(cm+1,p,w,cm2+1)
                qcasesF1(indicesJPPM(cm+1,p,w,indis(n)))=cm2+1 ! intial F1 assignment
                collectnorms(indis(n),:)=0! this line is already assigned, and is removed from subsequent assignment processes.
@@ -587,7 +918,7 @@ C        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ELSE CASES F
             cm2=(f1-startf1)/2
             newnorms=collectnorms(:,cm2+1)              !load vector contributions to F1
             call argsort(newnorms,
-     $         indis,2*(DIMJ+DIMQ+DIMQ2)+1,hitsJP(cm+1,p)) ! sort
+     $         indis,(DIMQT)*(2*DIMJ+1),hitsJP(cm+1,p)) ! sort
             do n=1,nJPPMinF1(cm+1,p,0,cm2+1)+nJPPMinF1(cm+1,p,1,cm2+1)
                qcasesF1(indicesJP(cm+1,p,indis(n)))=cm2+1
                collectnorms(indis(n),:)=0! this line is already assigned, and is removed from subsequent assignment processes.
@@ -638,11 +969,14 @@ C        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! END IF CASES
            sj=(2*jselect-(f1-ctlint(C_SPIN)))/2!startj offset 
            ej=((f1+ctlint(C_SPIN))-2*jselect)/2!endj offset
            if ((jselect-sj).lt.0) sj=jselect   
-           if (f1.lt.ctlint(C_SPIN))then ! if F is smaller than I, then there are J states that can not exist
             if (abs(f1+2*(jselect-sj)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
-            sj=sj-(abs(abs(f1-2*(jselect-sj))-ctlint(C_SPIN))/2)
+            sj = -(ctlint(C_SPIN)-f1- 2*jselect)/2
             end if 
+           if (f1select.eq.-1) then
+                sj=0
+                ej=0
            end if
+
            check2=0
 
            do j=jselect-sj,jselect+ej              !another j loop to find the propper indices using check2.
@@ -677,30 +1011,31 @@ C        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! END IF CASES
      $           ,signs(results:results2)) !now the signs were restored following the signs of the largest contributing f1 !normalization should not be required since all components are used.
          mycounters(qcase2,qcase)=mycounters(qcase2,qcase)+1   !counter start at 1
          end do   !end for column i of h_3   
-         
-      if ((ctlint(C_INTS).gt.0).and.(fistat.eq.0)) then
+
+ 17   if ((ctlint(C_INTS).gt.0).and.(fistat.eq.0)) then
       zis=0.0
       zrs=hs   
       end if
-      
       do f1= startf1, endf1,2 
       cm2=(f1-startf1)/2
       sj=(2*jselect-(f1-ctlint(C_SPIN)))/2!startj offset 
       ej=((f1+ctlint(C_SPIN))-2*jselect)/2!endj offset
       if ((jselect-sj).lt.0) sj=jselect
-      if (f1.lt.ctlint(C_SPIN))then ! if F is smaller than I, then there are J states that can not exist
        if (abs(f1+2*(jselect-sj)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
-       sj=sj-(abs(abs(f1-2*(jselect-sj))-ctlint(C_SPIN))/2)
+       sj = -(ctlint(C_SPIN)-f1- 2*jselect)/2
        end if 
+      if (f1select.eq.-1) then
+        sj=0
+        ej=0
       end if
-
+       
+       
       do j=jselect-sj,jselect+ej
       cm=j-minJ
       cmb=j-(jselect-sj)
       
       size(S_H)= 2*(j)+1  ! added because it is used in wvrec,
       size(S_K)= 2*(j)+1 ! saved S_K added because S_K will be used in other routines
-      
       
       
       call assgn(j,gam,f,ib,f1,hs(cm2+1,cm+1,:,:),evhs(cm2+1,cm+1,:)
@@ -728,6 +1063,7 @@ C     $           ,qvks(cm2+1,cmb+1,:,:),qmks(cm2+1,cmb+1,:,:))
         
       return
        end 
+C----------------------------------------------------------------------
 C----------------------------------------------------------------------
 C----------------------------------------------------------------------
       subroutine calvjk(j,gam,f,ib,f1,h,evalv,ovv,rotm,rott,tori
@@ -1084,547 +1420,6 @@ c        end do
       end if
       return
       end 
-C----------------------------------------------------------------------
-      subroutine calvjk_d(j,gam,f,ib,f1,evalv,ovv,rotm,rott,tori
-     $     ,atot,qmv,ifittot,dfit,palc,pali,npar,fistat,hs,evhs)
-C     calculation of the eigenvalues of one matrix with specified j,f,gam
-C     the evalues are put in the field of dnv(1..ndata,Q_ENG,Q_UP/LO)
-C     the deviations DE/DPi in dnv(1..ndata,DQ_ENG,Q_UP/LO(i))
-C     fistat = 0 for regular calculation of Eigenvalues
-C     fistat > 0  Eigenvalues for differential quotient
-
-      implicit none
-      include 'iam.fi'
-      integer j, gam,gam1,gam2, f, ib, npar, fistat, is, f1
-      real*8  h(DIMTOT,DIMTOT),evh(DIMTOT)
-      real*8  hs(2,DIMTOT,DIMTOT),evhs(2,DIMTOT)
-      real*8  h_2(2*DIMTOT,2*DIMTOT), evh_2(2*DIMTOT)
-      integer sorti(2*DIMTOT)
-      integer counti,countis
-      real*8  evalv(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  evalvu(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  evalvl(DIMV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovv(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovvu(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  ovvl(DIMV,DIMV,DIMOVV,-DIMSIG:DIMSIG,-DIMJ:DIMJ,DIMTOP)
-      real*8  rotm(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  rotmu(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  rotml(-DIMJ:DIMJ,-DIMJ:DIMJ,1:2,DIMTOP)
-      real*8  rott(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
-      real*8  rottu(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
-      real*8  rottl(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,DIMTOP)
-      real*8  tori(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-      real*8  toriu(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-      real*8  toril(-DIMJ:DIMJ,-DIMJ:DIMJ,DIMV,DIMV,
-     $     -DIMSIG:DIMSIG,DIMTOP)
-      real*8  atot(DIMPAR,DIMVB)
-      real*8  al(DIMPAR), au(DIMPAR)
-      real*8  palc(DIMFIT,-1:DIMPLC)
-      real*8  normi1, normi2 !renormalization in spearted hamiltonian matrices
-      real*8  beta_tot
-      integer pali(DIMFIT, 0:DIMPLC,2)
-      integer qmv(DIMV),ifittot(DIMPAR,DIMVB),dfit(DIMFIT)
-      integer qmvs(2,DIMV)
-C     quantum numbers
-      integer qvk(DIMTOT,Q_K:Q_V+DIMTOP), qmk(DIMTOT,DIMQLP)
-      integer qmks(2,DIMTOT,DIMQLP)
-      integer qvks(2,DIMTOT,Q_K:Q_V+DIMTOP) 
-      integer qv(DIMTOT)
-      integer qvs(2,DIMTOT)
-      integer oldju, oldjl
-      integer off1,off2 
-C     work
-      real*8  e(DIMTOT),e2(DIMTOT),tau(2,DIMTOT)
-      real*8  e_2(2*DIMTOT),e2_2(2*DIMTOT),tau_2(2,2*DIMTOT)
-      real*8  zr(DIMTOT,DIMTOT),zi(DIMTOT,DIMTOT)
-      real*8  zr_2(DIMTOT*2,DIMTOT*2),zi_2(DIMTOT*2,DIMTOT*2)
-      real*8  zrs(2,DIMTOT,DIMTOT),zis(2,DIMTOT,DIMTOT)
-      real*8  dedp(DIMPAR)
-      real*8  Gx,Gy,Gz,Fxy,Fxz,Fyz,Chixy,Chiyz,Chixz
-      real*8  check1,check2               
-      real*8  fjn
-      integer id,ie,i,iv,ik,itop,ivr,ivc,ir,ic,it1,it2,ikr,ikc
-      integer ibl, ibu, ibselect
-      integer eused(DIMTOT), usert,ierr
-      integer ruse(DIMVV,DIMVV,DIMTOP)
-      integer counter1
-      integer counter2
-      integer mini,maxi
-      real*8 dj,djj1,e1,djjc,di,dii1,df,dff1,dg
-      character*30 fmtstr
-      character*30 fmtstr2
-      character*4 fnpre
-      character*6 fnpost
-      real*8 tt
-      logical masave
-      logical complex
-      integer myand
-      external myand
-
-      integer  mclock,t1,t2
-      external mclock
-      masave=.false.
-      h=0.0
-      h_2=0.0
-      sorti=0
-      counti= 0
-      countis=0
-      counter1=0
-      counter2=0
-      
-      gam2=gam
-      gam1=gam
-C      if (ctlint(C_DWVOFF).eq.1) then !initialization not needed.
-C        evalvu=evalv
-C        ovvu=ovv
-C        rotmu=rotm
-C        rottu=rott
-C        toriu=tori
-C        evalvl=evalv
-C        ovvl=ovv
-C        rotml=rotm
-C        rottl=rott
-C        toril=tori
-C      end if 
-      
-
-      dj=dble(j)
-      djj1=dj*(dj+1.0)
-      e1=0.0
-C     djjc is used for spin rotation coupling to prevent a division by zero
-C     for J=0
-      djjc=1.0
-      if ((ctlint(C_SPIN).ne.0).and.(j.gt.0).and.(f1.ge.0)) then
-        di=dble(ctlint(C_SPIN))/2.0d0
-        dii1=di*(di+1.0)
-        df=dble(f1)/2.0d0!using f1 here
-        dff1=df*(df+1.0)
-        djjc=djj1
-        dg=dff1-dii1-djj1
-        if (ctlint(C_SPIN).gt.1) then
-          e1= (0.75*dg*(dg+1.0)-dii1*djj1)
-     $         /(2.0*di*(2.0*di-1.0)*djj1*(2.0*dj-1.0)*(2.0*dj+3.0))
-        else
-          e1=0.0
-        end if
-      end if
-      
-      if (ib.le.2) then
-        ibl=1
-        ibu=2
-        if (ib.eq.1) then !ib1 is ib low shall be afilliated with Slow
-          ibselect=1
-          call dw_idgam(gam,gam1,gam2,ibselect)!,1,0)
-        else
-          ibselect=2
-          call dw_idgam(gam,gam1,gam2,ibselect)!,1,0)
-        end if
-      else if (ib.le.4) then
-        ibl=3
-        ibu=4  
-        if (ib.eq.3) then
-         ibselect=1
-         call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
-        else
-          ibselect=2
-          call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
-        endif
-       else 
-        ibl=5
-        ibu=6  
-        if (ib.eq.5) then
-         ibselect=1
-         call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
-        else
-          ibselect=2
-          call dw_idgam(gam,gam1,gam2,ibselect)!,0,1)
-        endif
-      end if     
-      al=atot(:,ibl)
-      au=atot(:,ibu)  
-C      write(*,*) gam,gam1, gam2
-
-      if (ctlint(C_EVAL).gt.3)   masave=.true.
-
-      fnpre='xiam'
-      if (gam1.eq.0) ctlint(C_NTOP)=0
-      complex=.true. ! this marks the hamiltonian as containing complex matrix elements in several subroutines. Not sure if putting it false for certain parametersets really speeds things up, I will keep it as true for now
-
-      usert = 1
-C     Copied introt part from iam.f Herbers2026
-C     Recalculation of internal rotation part in case the Bs are affiliated with different Vs
-C     This is repeated for the upper ibu state further down the code.
-C     DWVoff must be set to 1 for the recalculation to be carried out.
-      if (ctlint(C_DWVOFF).eq.1) then
-        size(S_VV)=1
-        do iv=1, DIMVV
-          if (qvv(iv,1,ibl).eq.-1) goto 11
-          size(S_VV)=iv
-        end do
- 11     continue
-        do itop=1, ctlint(C_NTOP)
-          mini=99
-          maxi=-1
-          do iv=1, size(S_VV)
-            if (qvv(iv,itop,ibl).lt.mini) mini=qvv(iv,itop,ibl) 
-            if (qvv(iv,itop,ibl).gt.maxi) maxi=qvv(iv,itop,ibl) 
-          end do
-          size(S_V+itop)=maxi-mini+1
-          size(S_MINV+itop)=mini
-          if (size(S_V+itop).lt.0) stop 'error in up reint calvjk_d'
-        end do
-       
-            call adjusta(atot(1,ibl),npar,ctlint(C_ADJF))
-C      calc the |m> and |K> part in the rho-system
-           call calmk(ibl,h,evalvl,ovvl,rotml,rottl,toril
-     $          ,atot(1,ibl),qmv,ifittot(1,ibl),npar,fistat,0)
-           h=0.0
-C      set up the rotation matrix  !Herbers2026
-        do itop=1,ctlint(C_NTOP)
-         beta_tot=atot(P1_BETA+DIMPIR*(itop-1),ibl)
-     $      +dble((j*(j+1))**1)*atot(P1_BETJ1+DIMPIR*(itop-1),ibl)
-     $      +dble((j*(j+1))**2)*atot(P1_BETJ2+DIMPIR*(itop-1),ibl)
-     $      +dble((j*(j+1))**3)*atot(P1_BETJ3+DIMPIR*(itop-1),ibl)
-     $      +dble((j*(j+1))**4)*atot(P1_BETJ4+DIMPIR*(itop-1),ibl)
-         oldjl=0
-           call rotate(rotml(-DIMJ,-DIMJ,1,itop)
-     $          ,beta_tot,j,oldjl)
-        end do
-      end if
-C     
-C     End of Recalculation of internal rotation part DWVoff=1 case
-C     
-      
-      do ivr=1, size(S_H) 
-        do ivc=1, size(S_H)
-          h(ivr,ivc)=0.0
-        end do
-      end do
-
-      size(S_K)=2*j+1
-C     initialize the quantum no.s qvk
-      i=0
-      do iv=1, size(S_VV)
-        do ik=1, size(S_K)
-          i=i+1
-          qvk(i,Q_K) =ik-j-1
-          qv(i)=iv
-          do itop=1, ctlint(C_NTOP)
-            qvk(i,Q_V+itop)=qvv(iv,itop,ibl)
-          end do
-        end do
-      end do
-      size(S_H)=i
-
-      do itop=1, ctlint(C_NTOP)
-        do ivr=1, size(S_VV)
-          do ivc=1, size(S_VV)
-            ruse(ivr,ivc,itop)=1
-          end do
-        end do
-      end do
-
-      do it1=1, ctlint(C_NTOP)
-        do it2=1, ctlint(C_NTOP)
-          if (it2.ne.it1) then
-            do ivr=1, size(S_VV)
-              do ivc=1, size(S_VV)
-                if (qvv(ivr,it2,ibl).ne.qvv(ivc,it2,ibl)) then    
-                  ruse(ivr,ivc,it1)=0
-                end if
-              end do
-            end do
-          end if
-        end do
-      end do
-
-      if (gam1.ne.0) then 
-      if (ctlint(C_DWVOFF).eq.1) then
-        call bld2vjk(j,gam1,f1
-     $         ,qvk,ruse,h,al,evalvl,ovvl,rotml,rottl,toril,complex)
-      else 
-        call bld2vjk(j,gam1,f1
-     $         ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
-      end if 
-C        end if
-
-c      write(*,*) 'bld2vjk',mclock()-t1
-
-      else
-        if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
-      end if
-C      t1=mclock()
-      if (ctlint(C_DWVOFF).eq.1) then
-      call addrig(j,gam1,f1
-     $     ,qvk,ruse,h,al,evalvl,ovvl,rotml,rottl,toril,complex)
-      else
-      call addrig(j,gam1,f1
-     $     ,qvk,ruse,h,al,evalv,ovv,rotm,rott,tori,complex)
-      end if
-C---
-C      t1=mclock()
-       do i=1, size(S_H)
-         do ie=1, size(S_H)
-           h_2(i,ie)=h(i,ie) !copying h to h2
-         end do
-       end do 
-      qvks(ibl,:,:)=qvk
-      qmks(ibl,:,:)=qmk
-      qmvs(ibl,:)=qmv
-      qvs(ibl,:)=qv
-
-
-C     Starting a copy with ibu
-C     Starting a copy with ibu
-C     Starting a copy with ibu
-C     Starting a copy with ibu
-C     Starting a copy with ibu
-C     Starting a copy with ibu
-
-
-C     Recalculation of internal rotation part in case the Bs are affiliated with different Vs
-C     This is repeated for the lower ibl state further up the code.
-C     DWVoff must be set to 1 for the recalculation to be carried out.
-      if (ctlint(C_DWVOFF).eq.1) then
-        size(S_VV)=1
-        do iv=1, DIMVV
-          if (qvv(iv,1,ibu).eq.-1) goto 12
-          size(S_VV)=iv
-        end do
- 12     continue
-        do itop=1, ctlint(C_NTOP)
-          mini=99
-          maxi=-1
-          do iv=1, size(S_VV)
-            if (qvv(iv,itop,ibu).lt.mini) mini=qvv(iv,itop,ibu) 
-            if (qvv(iv,itop,ibu).gt.maxi) maxi=qvv(iv,itop,ibu) 
-          end do
-          size(S_V+itop)=maxi-mini+1
-          size(S_MINV+itop)=mini
-          if (size(S_V+itop).lt.0) stop 'error in up reint calvjk_d'
-        end do
-
-          call adjusta(atot(1,ibu),npar,ctlint(C_ADJF))
-C     calc the |m> and |K> part in the rho-system
-          call calmk(ibu,h,evalvu,ovvu,rotmu,rottu,toriu
-     $         ,atot(1,ibu),qmv,ifittot(1,ibu),npar,fistat,0)
-C     set up the rotation matrix  !Herbers2026
-        do itop=1,ctlint(C_NTOP)
-        beta_tot=atot(P1_BETA+DIMPIR*(itop-1),ibu)
-     $     +dble((j*(j+1))**1)*atot(P1_BETJ1+DIMPIR*(itop-1),ibu)
-     $     +dble((j*(j+1))**2)*atot(P1_BETJ2+DIMPIR*(itop-1),ibu)
-     $     +dble((j*(j+1))**3)*atot(P1_BETJ3+DIMPIR*(itop-1),ibu)
-     $     +dble((j*(j+1))**4)*atot(P1_BETJ4+DIMPIR*(itop-1),ibu)
-        oldju=0
-          call rotate(rotmu(-DIMJ,-DIMJ,1,itop)
-     $         ,beta_tot,j,oldju)
-        end do
-      end if 
-C     
-C     End of Recalculation of internal rotation part DWVoff=1 case
-C     
-      
-      
-      i=0
-      do iv=1, size(S_VV)
-        do ik=1, size(S_K)
-          i=i+1
-          qvk(i,Q_K) =ik-j-1
-          qv(i)=iv
-          do itop=1, ctlint(C_NTOP)
-            qvk(i,Q_V+itop)=qvv(iv,itop,ibu)
-          end do
-        end do
-      end do
-      size(S_H)=i
-      do ivr=1, size(S_H)
-        do ivc=1, size(S_H)
-          h(ivr,ivc)=0.0
-        end do
-      end do
-
-      do itop=1, ctlint(C_NTOP)
-        do ivr=1, size(S_VV)
-          do ivc=1, size(S_VV)
-            ruse(ivr,ivc,itop)=1
-          end do
-        end do
-      end do
-
-      do it1=1, ctlint(C_NTOP)
-        do it2=1, ctlint(C_NTOP)
-          if (it2.ne.it1) then
-            do ivr=1, size(S_VV)
-              do ivc=1, size(S_VV)
-                if (qvv(ivr,it2,ibu).ne.qvv(ivc,it2,ibu)) then    
-                  ruse(ivr,ivc,it1)=0
-                end if
-              end do
-            end do
-          end if
-        end do
-      end do
-
-      if (gam2.ne.0) then 
-      if (ctlint(C_DWVOFF).eq.1) then
-        call bld2vjk(j,gam2,f1
-     $         ,qvk,ruse,h,au,evalvu,ovvu,rotmu,rottu,toriu,complex)
-      else
-        call bld2vjk(j,gam2,f1
-     $         ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
-      end if
-      else
-        if (size(S_VV).gt.1) stop ' size vv > 1 for rigid rotor!'
-      end if
-C      t1=mclock()
-      if (ctlint(C_DWVOFF).eq.1) then
-      call addrig(j,gam2,f1
-     $     ,qvk,ruse,h,au,evalvu,ovvu,rotmu,rottu,toriu,complex)
-      else
-      call addrig(j,gam2,f1
-     $     ,qvk,ruse,h,au,evalv,ovv,rotm,rott,tori,complex)
-      end if
-        
-
-C---
-C      t1=mclock()
-        do i=1, size(S_H)
-          do ie=1, size(S_H)
-            h_2(i+size(S_H),ie+size(S_H))=h(i,ie) !copying 2nd h to h2
-          end do
-        end do
-        
-       qvks(ibu,:,:)=qvk
-       qmks(ibu,:,:)=qmk
-       qmvs(ibu,:)=qmv
-        qvs(ibu,:)=qv
-      
-C      End of copy
-C      End of copy        
-
-        off1=0
-        off2=size(S_H)
-        call addoffdiags_dw(off1,off2,ib,j,f1,al,au,h_2) !
-        
-        
-C       The problem is that there can be 0 energy levels e.g. J=0. 
-C       however the diagonalization routine does not accept zero entries. 
-C       This means I have to check, if for both rotational states the entries are zero.
-C       If this is not the case, I will add a small offset to the one that is non zero
-        do i = 1, 2*size(S_H) !
-        check1=abs(h_2(i,i))    
-        if (check1.le.1.0e-14) then
-            h_2(i,i)=5.0e-14 
-        end if
-       end do     
-       
-        
-        do ir=1, 2*size(S_H)
-          do ic=1, 2*size(S_H)
-            zr_2(ir,ic)=0.0
-          end do
-          zr_2(ir,ir)=1.0
-        end do
-        ierr=0
-        
-        call htrid3 (2*DIMTOT,2*size(s_h),h_2,evh_2,e_2,e2_2,tau_2)
-        call tql2 (2*DIMTOT,2*size(s_h),evh_2,e_2,zr_2,ierr)
-        
-        
-        if (ierr.ne.0) then
-          write (*,'(a,i5)') 'Error in tql2 ',ierr
-          stop
-        endif
-        call htrib3 (2*DIMTOT,2*size(S_H),h_2,tau_2
-     &           ,2*size(S_H),zr_2,zi_2)
-
-C     sort eigenvalues in **ascending** order
-        call heigsrt(evh_2,zr_2,zi_2,2*size(S_H),2*DIMTOT)
-
-        do i=1, 2*size(S_H)
-          do ie=1, 2*size(S_H)
-            h_2(i,ie)=sign(dsqrt(zr_2(i,ie)**2+zi_2(i,ie)**2)
-     $           ,zr_2(i,ie)+zi_2(i,ie))              
-          end do
-        end do
-        
-        counter1=0
-        counter2=0
-        do i = 1, 2*size(S_H)   !adding and renormalizing the vector components....
-          normi1=sum((h_2(1:size(S_H),i)**2)) 
-          normi2=sum((h_2(size(S_H)+1:2*size(S_H),i)**2))
-         if (normi1.ge.0.5) then !e.g. for empty matrix entries where all normis are zero
-          counter1=counter1+1
-          evhs(1,counter1)=evh_2(i)
-          hs(1,1:size(S_H),counter1)=SIGN(h_2(1:size(S_H),i)**2+
-     $         h_2(size(S_H)+1:2*size(S_H),i)**2,h_2(1:size(S_H),i))  ! This is different for normalization - I use the K info from both states.
-         else
-          counter2=counter2+1
-          evhs(2,counter2)=evh_2(i)
-          hs(2,1:size(S_H),counter2)=SIGN(h_2(1:size(S_H),i)**2+
-     $         h_2(size(S_H)+1:2*size(S_H),i)**2,
-     $         h_2(size(S_H)+1:2*size(S_H),i))  ! This is different for normalization - I use the K info from both states.
-         end if
-        end do
-        
-C       do i=1, 2*size(S_H)
-C          do ie=1, 2*size(S_H)
-C            zi_2(i,ie)=0.0
-C            zr_2(i,ie)=h_2(i,ie)
-C          end do
-C       end do        
-       do i=1, size(S_H)
-          do ie=1, size(S_H)
-            zis(1,i,ie)=0.0
-            zrs(1,i,ie)=hs(1,i,ie)
-          end do
-       end do        
-       do i=1, size(S_H)
-          do ie=1, size(S_H)
-            zis(2,i,ie)=0.0
-            zrs(2,i,ie)=hs(2,i,ie)
-          end do
-       end do        
-      call assgn(j,gam,f,ib,f1,hs(ibselect,:,:),evhs(ibselect,:)
-     $           ,qvks(ibselect,:,:),qmvs(ibselect,:),
-     $           qmks(ibselect,:,:),qvs(ibselect,:),fistat)
-        
-      call esave(j,gam,f,ib,f1,qmks(ibselect,:,:)
-     $           ,evhs(ibselect,:),eused)
-C
-C     write the eigenvalues and vectors to disk
-      if ((ctlint(C_INTS).gt.0).and.(fistat.eq.0)) then
-       call wrvec(zrs(ibselect,:,:),zis(ibselect,:,:),evhs(ibselect,:)
-     $           ,j,gam,f,ib,f1,qvks(ibselect,:,:),qmks(ibselect,:,:))
-      end if
-            
-C     calculate the deviation dedp ! removed analytical gradients for now.
-C     complex=.true.
-C     if (complex) then
-C       do id=1, size(S_H)
-C         if ((eused(id).ne.0).or.(ctlint(C_DFRQ).ne.0)) then
-C           do ie=1, size(S_H)
-C             e(ie)=zrs(ib,ie,id)
-C             e2(ie)=zis(ib,ie,id)
-C           end do
-C           call hcaldev(e,e2,j,gam,f,ib,ifittot(:,ib),npar
-C    $           ,qvks(ibselect,:,:),ruse,atot(:,ib),dedp
-C    $           ,evalv,ovv,rotm,tori)
-C           call devsave(j,gam,f,ib,qmks(ib,id,Q_T)
-C    $           ,ifittot(:,ib),dfit,dedp,palc,pali)
-C         end if
-C       end do
-C      end if
-C      qmk= qmks(ibselect,:,:)
-C      qvk=qvks(ibselect,:,:)
-C      zr=zrs(ibselect,:,:)
-C      zi=zis(ibselect,:,:)
-C      evh=evhs(ibselect,:)
-C      h=hs(ibselect,:,:)
-       return
-       end 
 
 C----------------------------------------------------------------------
 C----------------------------------------------------------------------
@@ -2445,57 +2240,7 @@ C     vfnd=.true.
           end if
         end do
       end if
-c      write(*,'(A,2I3)') ' vsum: j,gam,',j,gam
-c      do i=1, size(S_H)
-c        write(*,'(I2,(F10.5,$))') i,
-c     $       (vsum(iv,i),iv=1, size(S_VV))
-c        write(*,*)
-c      end do
-c      write(*,'(A,2I3)') ' vvsum: j,gam,',j,gam
-c      do i=1, size(S_H)
-c        write(*,'(I2,F15.5,(F10.5,$))') i,
-c     $       eval(i),(vvsum(iv,i),iv=1, size(S_VV))
-c        write(*,*)
-c      end do
 
-c        if ((v1.eq.v2).or.(not.vfnd)) then
-c          do ik=1, size(S_K)
-c            i1=(iv1-1)*size(S_K)+ik
-c            vvsum(iv1,i)=vvsum(iv1,i)+(h(i1,i))**2
-c          end do
-c        end if  
-c      end do
-c      kof=j+1
-c      do iv=1, size(S_H)
-c        do i=1, size(S_H)
-c          do itop=1, ctlint(C_NTOP)
-c            vsum(qvk(iv,Q_V+itop),i,itop)
-c     $           = vsum(qvk(iv,Q_V+itop),i,itop)+h(iv,i)**2
-c          end do
-c          ksum(qvk(iv,Q_K)+kof,i)=ksum(qvk(iv,Q_K)+kof,i)+h(iv,i)**2
-c          vvsum(qv(iv),i)       =vvsum(qv(iv),i)+h(iv,i)**2
-c        end do  
-c      end do
-c      kof=j+1
-
-c     if (gam.eq.0) then
-c     do i=1, size(S_H)
-c       do ik1=1, size(S_K)/2
-c         ik2=size(S_K)-ik1+1
-c         do iv=1, size(S_VV)
-c           i1=(iv-1)*size(S_K)+ik1
-c           i2=(iv-1)*size(S_K)+ik2
-c           ksum(ik1,i)=ksum(ik1,i)+0.5d0*(h(i1,i)+h(i2,i))**2
-c           ksum(ik2,i)=ksum(ik2,i)+0.5d0*(h(i1,i)-h(i2,i))**2
-c         end do
-c       end do  
-c       ik=size(S_K)/2+1
-c       do iv=1, size(S_VV)
-c         i1=(iv-1)*size(S_K)+ik
-c         ksum(ik,i)=ksum(ik,i)+h(i1,i)**2
-c       end do
-c     end do
-c     else
       do i=1, size(S_H)
         do ik=1, size(S_K)
           do iv=1, size(S_VV)
@@ -2645,7 +2390,8 @@ C----------------------------------------------------------------------
 
 C----------------------------------------------------------------------
       subroutine nqcmat_ir(jselect,gam,f,ib,evalv,ovv,rotm,rott
-     $ ,tori,atot,qmv,h_2,qvks,qmks,qmvs,qvs,ruse)
+     $ ,tori,atot,qmv,h_2,qvks,qmks,qmvs,qvs,npar,ifittot,fistat
+     $ ,ruse,recalcv)
       ! The original exact matrix built was removed and instead this routine is used to only fill in semi-rigid rotor matrix elements and internal rotation contribution.
       ! f should be f1 in input.
       implicit none
@@ -2683,6 +2429,10 @@ C     work
       integer id,ie,i,iv,ik,itop,ivr,ivc,ir,ic,it1,it2,ikr,ikc
       integer ruse(DIMVV,DIMVV,DIMTOP)
       logical complex
+      logical recalcv
+      integer mini, maxi
+      integer npar, fistat
+      integer ifittot(DIMPAR,DIMVB)
       
       complex = .true.
 
@@ -2692,11 +2442,9 @@ C     work
       sj=(2*jselect-(f-ctlint(C_SPIN)))/2!startj offset
       ej=((f+ctlint(C_SPIN))-2*jselect)/2!endj offset
       if ((jselect-sj).lt.0) sj=jselect
-      if (f.lt.ctlint(C_SPIN))then ! if F is smaller than I, then there are J states that can not exist
        if (abs(f+2*(jselect-sj)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
-       sj=sj-(abs(abs(f-2*(jselect-sj))-ctlint(C_SPIN))/2)
+       sj = -(ctlint(C_SPIN)-f- 2*jselect)/2
        end if 
-      end if
       
       if (f.eq.-1) then
        sj=0
@@ -2712,6 +2460,34 @@ C     work
       do j=jselect-sj,jselect+ej
       cm=j-(jselect-sj)!count matrices
       
+      if (recalcv) then
+        size(S_VV)=1
+        do iv=1, DIMVV
+          if (qvv(iv,1,ib).eq.-1) goto 12
+          size(S_VV)=iv
+        end do
+ 12     continue
+        do itop=1, ctlint(C_NTOP)
+          mini=99
+          maxi=-1
+          do iv=1, size(S_VV)
+            if (qvv(iv,itop,ib).lt.mini) mini=qvv(iv,itop,ib) 
+            if (qvv(iv,itop,ib).gt.maxi) maxi=qvv(iv,itop,ib) 
+          end do
+          size(S_V+itop)=maxi-mini+1
+          size(S_MINV+itop)=mini
+          if (size(S_V+itop).lt.0) stop 'error in recalcv nqcmat_ir'
+        end do
+          call adjusta(atot(1,ib),npar,ctlint(C_ADJF))
+C     calc the |m> and |K> part in the rho-system
+          call calmk(ib,h,evalv,ovv,rotm,rott,tori
+     $         ,atot(1,ib),qmv,ifittot(1,ib),npar,fistat,0)
+C     set up the rotation matrix  !Herbers2026
+      end if 
+C     
+C     End of Recalculation of internal rotation recalcv
+      
+      
       if (j.ge.0) then   !START IF HERE 
       do itop=1,ctlint(C_NTOP)
         beta_tot=a(P1_BETA+DIMPIR*(itop-1))
@@ -2724,7 +2500,7 @@ C     $     +log(1.+j*(j+1))*a(P1_BLOGJ+DIMPIR*(itop-1))
           call rotate(rotm(-DIMJ,-DIMJ,1,itop)
      $         ,beta_tot,j,oldj(itop))
       end do
-
+      
 C       if ((abs((j)-df).le.abs(di)).or.(df.eq.-0.5)) then ! For some reason this exception leads to malfunction.
       size(S_K)=2*j+1
       i=0
@@ -2811,6 +2587,212 @@ C       if ((abs((j)-df).le.abs(di)).or.(df.eq.-0.5)) then ! For some reason thi
       end 
 C------------------------------------------------------------------  
 C------------------------------------------------------------------  
+      subroutine add_nqcmat_dwNQ2(o1,o2,jselect,f1select,f! same as nqcmat_NQ2df1eqn, but matrix elements are added rather than defined (h=h+...)
+     $ ,ib,atot,h_3,occupied,n)                           ! offsets o1 and o2 are added, chi diags set to zero. 
+C      This subroutine builds the matrix elements for the second nucleus, offdiagonal in f1 by n
+C      n=0 means that the elements diagonal in f1 are added.
+       implicit none
+       include 'iam.fi'
+       real*8 h_3(DIMUNI,DIMUNI)
+       real*8  atot(DIMPAR,DIMVB)
+       integer h_sizesr(DIMQ)
+       integer sizeprer
+       integer sizejr
+       integer h_sizesc(DIMQ)
+       integer sizeprec
+       integer sizejc
+       integer totsizef1c
+       integer n
+       integer f1c, f1r
+       integer f1cp1
+       integer offsetf1
+       integer occupied
+       integer o1,o2
+       integer kcstart
+       
+       integer jselect,f1select,f,ib
+       integer jr,jc !j of row, j of column.
+       integer jcp1
+       integer startjr, endjr, startjc, endjc ! first J and last J in loop
+       integer startjcp1, endjcp1
+       integer cmr,cmc    !position index in dependence of j (counts matrices)
+       integer ir,ic   ! indices for rows and columns of a matrix
+       integer ir2,ic2 ! indices for rows and columns of a matrix tunneling df.ne.0
+       integer start_ic, end_ic ! limits the ic loop, since delta K=2 is maximum.
+       integer kc,kr ! K quantum numbers for the matrix elements (columns and rows)
+       integer t2    !determins the exponent on the (-1) prefactor.
+       
+       real*8 tj,wsj !output from wigner 3j and wigner 6j soubroutine.
+       real*8 tji !the threej symbol involving only I only has to be calculated once and can be kept in memory since start of this subroutine (even earlier actually)
+                      !the wsj symbol involving only F,F1,and I can also be calculated once and kept for the elements DIAGONAL in F1, which are calculated in this subroutine.
+       real*8 chiq_r(-2:2) ! the various real parts of chiq
+       real*8 chiq_i(-2:2) ! the various imaginary parts of chiq
+       real*8 q2z, q2d, q2xz, q2yz, q2xy 
+       integer q
+       
+       real*8 totprod    !total value of matrix element
+       
+       
+       f1c=f1select
+       f1r=f1select+n*2 !the nth offdiagonal in f1
+       f1cp1=f1c+2  !f1+1
+      
+      
+      call threej(ctlint(C_SPIN2), 4, ctlint(C_SPIN2)
+     $         ,-ctlint(C_SPIN2), 0 , ctlint(C_SPIN2), tji) !threej for i2 only has to be calculated one times here.
+      startjc=(f1c-ctlint(C_SPIN))/2!startj ! for columns
+      endjc=(f1c+ctlint(C_SPIN))/2!endj      ! for columns
+      startjr=((f1r)-ctlint(C_SPIN))/2!startj ! for rows, offset by two halfs for delf1 eq 1
+      endjr=((f1r)+ctlint(C_SPIN))/2!endj      ! for columns
+      
+      
+      startjcp1=(f1cp1-ctlint(C_SPIN))/2 ! these are required to calculate matrix size offset for deltaF1 eq.2
+      endjcp1=(f1cp1+ctlint(C_SPIN))/2   ! these are required to calculate matrix size offset for deltaF1 eq.2
+      
+      !SET this up in dependence of atot!
+      q2z  = 0.0 !-atot(P_Q2Z,ib)  !no diags for tunneling part
+      q2d  = 0.0 !-atot(P_Q2D,ib)  !no diags for tunneling part
+      if (ib.le.2) then
+        q2xy =atot(P_W2XY1,1)*(1.0) !Sign change to match relative signs in spfit output !these are offdiagonal nqcc matrix elements but used offdiagonal in v. Matrix elements offdiagonal in J neglected.
+        q2yz =atot(P_W2YZ1,1)*(-1.0) !
+        q2xz =atot(P_W2XZ1,1)*(-1.0) !
+      else if (ib.le.4) then
+        q2xy =atot(P_W2XY3,3)* (1.0)
+        q2yz =atot(P_W2YZ3,3)*(-1.0)
+        q2xz =atot(P_W2XZ3,3)*(-1.0)
+      else if (ib.le.6) then
+        q2xy =atot(P_W2XY5,5)* (1.0)
+        q2yz =atot(P_W2YZ5,5)*(-1.0)
+        q2xz =atot(P_W2XZ5,5)*(-1.0)
+      end if
+      
+      chiq_r(0)=q2z
+      chiq_i(0)=0.0 !no imaginary part for q=0 (elements diagonal in K must be real)
+      
+      chiq_r(1)=-(2.0/3.0)**0.5*(q2xz)
+      chiq_i(1)=-(2.0/3.0)**0.5*(-q2yz)
+      
+      chiq_r(-1)=(2.0/3.0)**0.5*(q2xz) ! single sign change in real part
+      chiq_i(-1)=(2.0/3.0)**0.5*(q2yz)! double sign change in imaginary part
+      
+      chiq_r(2) =(1.0/6.0)**0.5*(q2d)
+      chiq_i(2) =(1.0/6.0)**0.5*(2*q2xy)
+      chiq_r(-2)=chiq_r(2) !no sign change in real part for q=2
+      chiq_i(-2)=-chiq_i(2)     
+      
+      !SET this up in dependence of atot!
+      
+      if (startjc.lt.0) startjc=0
+       if (abs(f1c+2*(startjc)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
+       startjc=(ctlint(C_SPIN)-f1c)/2
+       end if 
+
+      if (startjr.lt.0) startjr=0
+       if (abs((f1r)+2*(startjr)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
+       startjr=(ctlint(C_SPIN)-f1r)/2
+       end if 
+      
+      if (startjcp1.lt.0) startjcp1=0
+       if (abs((f1cp1)+2*(startjcp1)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
+       startjcp1=(ctlint(C_SPIN)-f1cp1)/2
+       end if 
+      
+      
+      
+      offsetf1=0   !the offset will be used to find the correct position for the diagonal and offdiagonal delta f1 blocks.
+      if (n.ge.1) then
+       do jc=startjc,endjc
+       offsetf1=offsetf1+2*jc+1
+       end do
+       if (n.ge.2) then
+       do jcp1=startjcp1,endjcp1
+        offsetf1=offsetf1+2*jcp1+1
+       end do
+       end if
+      end if 
+
+      do jr=startjr,endjr
+       cmr=jr-startjr!count matrices starting at 0
+       sizejr=2*jr+1 
+       h_sizesr(cmr+1)=sizejr
+       sizeprer=sum(h_sizesr(:cmr+1))-sizejr
+       do jc=startjc,endjc
+        cmc=jc-startjc!count matrices starting at 0
+        sizejc=2*jc+1 
+        h_sizesc(cmc+1)=sizejc
+        sizeprec=sum(h_sizesc(:cmc+1))-sizejc
+C
+CCC           All elements delta J in one clause.
+CC
+        
+C        if ((n.ne.0).or.(jr.ge.jc)) then !for elements diagonal in F1, elements with jr lower than jc would fall into the imaginary upper right triangle. => Not true anymore when sperated by o2/o1 in dw treatment
+        if (abs(jc-jr).le.2) then
+        do kr=-jr,jr
+         do kc=-jc,+jc
+             ! sizepre counts J blocks within an F1 block
+             ! offsetf1 depending on n, describes df1=0,1,2
+             ! occupied is used to skip F1 blocks that are already dealt with
+             ! o1, o2 are just 0 and size(S_H) to describe the tun_h4 structure
+             ir  = offsetf1 + occupied + sizeprer + kr + jr + 1 + o2
+             ir2 =            occupied + sizeprec + kc + jc + 1 + o2
+             ic  =            occupied + sizeprec + kc + jc + 1 + o1
+             ic2 = offsetf1 + occupied + sizeprer + kr + jr + 1 + o1
+         if (ir.ge.ic) then
+           do q=-2,2    !the 5 cases for q.   
+            if ((-kc-q+kr).eq.0) then !triangle condition for tj symbol.
+             
+             call sixj(f,ctlint(C_SPIN2),f1c,4
+     $                      ,f1r,ctlint(C_SPIN2),wsj)
+             totprod=wsj*((f1c+1)*(f1r+1))**0.5 !sj1*((2f1+1)*(2f1'+1))**0.5
+ 
+             call sixj(2*jc,f1c,ctlint(C_SPIN)
+     $                               ,f1r,2*jr,4,wsj)
+             totprod=totprod*wsj*((2*jc+1)*(2*jr+1))**0.5 !sj1*((2f1+1)*(2f1'+1))**0.5*sj2*((2j+1)*(2j+2))**0.5
+             
+             call threej(2*jc, 4, 2*jr, -2*kc, -2*q , 2*kr, tj)
+             totprod=totprod*tj !sj1*((2f1+1)*(2f1'+1))**0.5*sj2*((2j+1)*(2j+2))**0.5*tj1
+ 
+             
+             tj=tji
+             totprod=totprod/tj
+             totprod=totprod/4
+             t2=2*kc+2+ctlint(C_SPIN)+f1r
+     $                       +ctlint(C_SPIN2)+f1r+f
+             if(mod(t2,2).ne.0) then
+              write(0,*) "t2*2 is not even, this can not be. dj0nq2", t2
+              stop
+             end if
+             t2=t2/2
+             totprod=totprod*(-1)**t2 !(-1)**t2*sj1*((2f1+1)*(2f1'+1))**0.5*sj2*((2j+1)*(2j+2))**0.5*tj1/tj2/4 ! only thing missing at this point is the chis.
+             h_3(ir,ic)=h_3(ir,ic)+
+     $       totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal  
+              if(n.ne.0) then !ne.0 not needed because of C        if ((n.ne.0).or.(jr.ge.jc)) then  being removed before start of the k loops
+               h_3(ir2,ic2)=h_3(ir2,ic2)+                   !Extra elements due to tunneling
+     $       totprod*chiq_r(-q) !Extra elements due to tunneling
+              end if
+              if (q.ne.0) then
+              h_3(ic,ir)=h_3(ic,ir)+
+     $        totprod*chiq_i(-q) !upper triangle, imaginary.
+               if(n.ne.0) then
+              h_3(ic2,ir2)=h_3(ic2,ir2)+
+     $        (-totprod*chiq_i(-q)) !upper triangle, imaginary. Sign change due to adjunct properties of underlying matrix
+               end if
+              end if
+            end if !check only those where non zero matrix elements are expected (see also the first wigner 3jsymbol for this condition)
+           end do !q
+        end if
+          end do !ic
+         end do   !ir 
+        end if ! Jpm2 condition
+C        end if !delta F1=0 condition for imaginary triangle.
+        
+       end do!!! jc loop ends.
+      end do!!! jr loop ends.
+      return 
+      end 
+      
+      
+C------------------------------------------------------------------  
       subroutine nqcmat_NQ2df1eqn(jselect,f1select,f
      $ ,ib,atot,h_3,occupied,n)
 C      This subroutine builds the matrix elements for the second nucleus, offdiagonal in f1 by n
@@ -2848,7 +2830,7 @@ C      n=0 means that the elements diagonal in f1 are added.
                       !the wsj symbol involving only F,F1,and I can also be calculated once and kept for the elements DIAGONAL in F1, which are calculated in this subroutine.
        real*8 chiq_r(-2:2) ! the various real parts of chiq
        real*8 chiq_i(-2:2) ! the various imaginary parts of chiq
-       real*8 q2z, q2d, q2xz, q2yz, q2xy 
+       real*8 q2z, q2d, q2xz, q2yz, q2xy , q2zj, q2zk 
        integer q
        
        real*8 totprod    !total value of matrix element
@@ -2872,6 +2854,8 @@ C      n=0 means that the elements diagonal in f1 are added.
       
       !SET this up in dependence of atot!
       q2z  = -atot(P_Q2Z,ib)  ! working hypothesis, sign change required to match previous outputs.
+      q2zj = -atot(P_Q2ZJ,ib)
+      q2zk = -atot(P_Q2ZK,ib)
       q2d  = -atot(P_Q2D,ib)  ! working hypothesis, sign change required to match previous outputs.
       q2xz = -atot(P_Q2XZ,ib) ! working hypothesis, sign change required to match previous outputs.
       q2yz = -atot(P_Q2YZ,ib) ! working hypothesis, sign change required to match previous outputs.
@@ -2894,25 +2878,19 @@ C      n=0 means that the elements diagonal in f1 are added.
       !SET this up in dependence of atot!
       
       if (startjc.lt.0) startjc=0
-      if (f1c.lt.ctlint(C_SPIN))then ! if F is smaller than I, then there are J states that can not exist
        if (abs(f1c+2*(startjc)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
        startjc=(ctlint(C_SPIN)-f1c)/2
        end if 
-      end if
 
       if (startjr.lt.0) startjr=0
-      if ((f1r).lt.ctlint(C_SPIN))then ! if F is smaller than I, then there are J states that can not exist
        if (abs((f1r)+2*(startjr)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
        startjr=(ctlint(C_SPIN)-f1r)/2
        end if 
-      end if
       
       if (startjcp1.lt.0) startjcp1=0
-      if ((f1cp1).lt.ctlint(C_SPIN))then ! if F is smaller than I, then there are J states that can not exist
        if (abs((f1cp1)+2*(startjcp1)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
        startjcp1=(ctlint(C_SPIN)-f1cp1)/2
        end if 
-      end if
       
       
       
@@ -2945,10 +2923,12 @@ CC
         if ((n.ne.0).or.(jr.ge.jc)) then !for elements diagonal in F1, elements with jr lower than jc would fall into the imaginary upper right triangle.
         if (abs(jc-jr).le.2) then
         do kr=-jr,jr
-         do kc=-jc,+jc
+          do kc=-jc,jc
            do q=-2,2    !the 5 cases for q.   
             if ((-kc-q+kr).eq.0) then !triangle condition for tj symbol.
-             
+             ir = offsetf1 + occupied + sizeprer + kr + jr + 1 
+             ic =            occupied + sizeprec + kc + jc + 1 
+         if (ir.ge.ic) then                                     ! for n=0 dJ=0 cases ir might not be smaller then ic in some cases, to avoid double calculation, this was added.
              call sixj(f,ctlint(C_SPIN2),f1c,4
      $                      ,f1r,ctlint(C_SPIN2),wsj)
              totprod=wsj*((f1c+1)*(f1r+1))**0.5 !sj1*((2f1+1)*(2f1'+1))**0.5
@@ -2972,21 +2952,20 @@ CC
              end if
              t2=t2/2
              totprod=totprod*(-1)**t2 !(-1)**t2*sj1*((2f1+1)*(2f1'+1))**0.5*sj2*((2j+1)*(2j+2))**0.5*tj1/tj2/4 ! only thing missing at this point is the chis.
-             
-             ir = sizeprer + kr + jr + 1
-             ic = sizeprec + kc + jc + 1
-C             if ((occupied+offsetf1+ir.eq.10).and.
-C     $               (occupied+ic.eq.1).and.(f1c.eq.1)) then
-C              write(0,*) f, f1c, jc, kc, f1r, jr, kr, totprod*chiq_r(-q)
-C              write(0,*) occupied+offsetf1+ir, occupied+ic
-C              write(0,*) startjr, startjc, sizeprec
-C             end if
-             h_3(occupied+offsetf1+ir,occupied+ic)=totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal 
+             h_3(ir,ic)=h_3(ir,ic)+totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal 
              ! offsetf1 is here used as an offset, since it is equal to the lower state matrix dimension.
              ! occupied jumps the f1select part of the matrix.
              if (q.ne.0) then
-              h_3(occupied+ic,occupied+offsetf1+ir)=totprod*chiq_i(-q) !upper triangle, imaginary.
+              h_3(ic,ir)=h_3(ic,ir)+totprod*chiq_i(-q) !upper triangle, imaginary.
              end if
+            if (q.eq.0) then !adding terms for chizJ and chizK as required for the Ne-Cl2H2C complex.
+             h_3(ir,ic)=  
+     $         h_3(ir,ic)+totprod*(
+     $         0.5*(jr*(jr+1)+jc*(jc+1))*q2zj+0.5*(kr**2+kc**2)*q2zk)
+            end if
+         end if
+             
+             
             end if !check only those where non zero matrix elements are expected (see also the first wigner 3jsymbol for this condition)
            end do !q
           end do !ic
@@ -3028,7 +3007,7 @@ C      arguments here, so I can swap for testing purposes
                       !the wsj symbol involving only F,F1,and I can also be calculated once and kept for the elements DIAGONAL in F1, which are calculated in this subroutine.
        real*8 chiq_r(-2:2) ! the various real parts of chiq
        real*8 chiq_i(-2:2) ! the various imaginary parts of chiq
-       real*8 qz, qd, qxz, qyz, qxy 
+       real*8 qz, qd, qxz, qyz, qxy , qzj, qzk
        integer q
        
        real*8 totprod    !total value of matrix element
@@ -3044,6 +3023,8 @@ C      arguments here, so I can swap for testing purposes
       
       !SET this up in dependence of atot!
       qz  = -atot(P_QZ,ib)  ! working hypothesis, sign change required to match previous outputs.
+      qzj = -atot(P_QZJ,ib)
+      qzk = -atot(P_QZK,ib)
       qd  = -atot(P_QD,ib)  ! working hypothesis, sign change required to match previous outputs.
       qxz = -atot(P_QXZ,ib) ! working hypothesis, sign change required to match previous outputs.
       qyz = -atot(P_QYZ,ib) ! working hypothesis, sign change required to match previous outputs.
@@ -3068,14 +3049,10 @@ C      arguments here, so I can swap for testing purposes
       !SET this up in dependence of atot!
       
       if ((jselect-sj).lt.0) sj=jselect
-      if (f1select.lt.two_I)then ! if F is smaller than I, then there are J states that can not exist
        if (abs(f1select+2*(jselect-sj)).lt.two_I)then !The non existing states are characterized by F+J < I.
-       sj=sj-(abs(abs(f1select-2*(jselect-sj))-two_I)/2)
+       sj = -(two_I-f1select- 2*jselect)/2
        end if 
-      end if
-C      if (f1select.eq.3) then
-C      write(0,*) jselect, f1select, jselect-sj, jselect+ej
-C      end if
+
 C    First adding the elements diagonal in j 
 
       do j=jselect-sj,jselect+ej
@@ -3091,6 +3068,9 @@ CC           Diagonal Elements delta J=0
 C
        do kr=-j,j
         do kc=-j,+j
+            ir = sizepre + kr + j + 1
+            ic = sizepre + kc + j + 1
+            if (ir.ge.ic) then
           do q=-2,2    !the 5 cases for q.   
            if ((-kc-q+kr).eq.0) then !triangle condition for tj symbol.
             
@@ -3111,14 +3091,17 @@ C
             t2=t2/2
             totprod=totprod*(-1)**t2 !(-1)**t2*sj1*((2f1+1)*(2f1'+1))**0.5*sj2*((2j+1)*(2j+2))**0.5*tj1/tj2/4 ! only thing missing at this point is the chis.
             
-            ir = sizepre + kr + j + 1
-            ic = sizepre + kc + j + 1
             h_2(ir,ic)=totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal
             if (q.ne.0) then
              h_2(ic,ir)=totprod*chiq_i(-q) !upper triangle, imaginary.
             end if
+            if (q.eq.0) then !adding terms for chizJ and chizK as required for the Ne-Cl2H2C complex.
+             h_2(ir,ic)= h_2(ir,ic)+totprod*
+     $             (j*(j+1)*qzj+0.5*(kr**2+kc**2)*qzk)
+            end if
            end if !check only those where non zero matrix elements are expected (see also the first wigner 3jsymbol for this condition)
           end do !q
+             end if ! ir>ic
          end do !ic
         end do   !ir 
         
@@ -3151,6 +3134,10 @@ C           Off-Diagonal Elements delta J=1
             h_2(ir,ic)=totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal !row index shifts by 2j+1 +1 to match with the new K values
             if (q.ne.0) then
              h_2(ic,ir)= totprod*chiq_i(-q) !upper triangle, imaginary.
+            end if
+            if (q.eq.0) then !adding terms for chizJ and chizK as required for the Ne-Cl2H2C complex.
+             h_2(ir,ic)= h_2(ir,ic)+totprod*(
+     $          0.5*(j*(j+1)+(j+1)*(j+2))*qzj+0.5*(kr**2+kc**2)*qzk)
             end if
             
            end if !check only those where non zero matrix elements are expected (see also the first wigner 3jsymbol for this condition)
@@ -3194,13 +3181,12 @@ C           Off-Diagonal Elements delta J=2
             ic=sizepre+(kc+j+1)
 
             h_2(ir,ic)=totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal !row index shifts by 2j+1 +1 to match with the new K values
-C            if ((f1select.eq.3).and.(q.eq.2)) then
-C             write(0,*) j,f1select,two_I,q,kr,kc
-C             write(0,*) totprod*chiq_r(-q)
-C             stop
-C            end if
             if (q.ne.0) then
              h_2(ic,ir)= totprod*chiq_i(-q) !upper triangle, imaginary.
+            end if
+            if (q.eq.0) then !adding terms for chizJ and chizK as required for the Ne-Cl2H2C complex.
+             h_2(ir,ic)= h_2(ir,ic)+totprod*(
+     $          0.5*(j*(j+1)+(j+2)*(j+3))*qzj+0.5*(kr**2+kc**2)*qzk)
             end if
             
            end if !check only those where non zero matrix elements are expected (see also the first wigner 3jsymbol for this condition)
@@ -3209,6 +3195,237 @@ C            end if
         end do   !ir 
        end if ! condition for delta j=2
        
+       
+      end do !j
+     
+      !!!
+      
+      return 
+      end 
+C------------------------------------------------------------------  
+      subroutine add_nqcmat_dwNQ1(o1,o2,jselect, ! add_nqcmat_dwNQ1 is same as  nqcmat_NQ1 but with offest argumetns, to move the matrix elements  to their place, and with proper matrix size DIMUNI
+     $ f1select,ib,h_2,atot,two_I,dJ)          ! Furthermore, in contrast to dwnNQ1, the matrix is not initallized as 0.0, insted the additional elements are added to the input matrix
+                                             ! also different: matrix elements are stepped up here and not defined i.e. h_2(ic,ir)=h_2(ic,ir) + ... and not just h_2(ic,ir)= ...
+       implicit none
+       include 'iam.fi'
+       real*8 h_2(DIMUNI,DIMUNI)
+       real*8  atot(DIMPAR,DIMVB)
+       integer h_sizes(DIMQ)
+       integer sizepre
+       integer sizej
+       integer jselect,f1select,ib
+       integer dJ
+       integer j
+       integer sj,ej !offset of Jmin and Jmax relative to Jselect
+       integer cm    !position index in dependence of j (counts matrices)
+       integer ir,ic !running indices for rows and columns of a matrix
+       integer ir2,ic2 !ADDITONAL elements, that show up due to the complete tunneling matrix 
+       integer start_ic, end_ic ! limits the ic loop, since delta K=2 is maximum.
+       integer kc,kr ! K quantum numbers for the matrix elements (columns and rows)
+       integer t2    !determins the exponent on the (-1) prefactor.
+       integer two_I !replaces ctlint(C_SPIN) in this subroutine
+       
+       real*8 di,dii1,df,dff1 ! first nucleus
+       real*8 tj,wsj !output from wigner 3j and wigner 6j soubroutine.
+       real*8 tji!the threej symbol involving only I only has to be calculated once and can be kept in memory since start of this subroutine (even earlier actually)
+                      !the wsj symbol involving only F,F1,and I can also be calculated once and kept for the elements DIAGONAL in F1, which are calculated in this subroutine.
+       real*8 chiq_r(-2:2) ! the various real parts of chiq
+       real*8 chiq_i(-2:2) ! the various imaginary parts of chiq
+       real*8 qz, qd, qxz, qyz, qxy 
+       integer q
+       integer o1,o2
+       
+       real*8 totprod    !total value of matrix element
+       
+      !h_2=0.0
+      
+      call threej(two_I, 4, two_I
+     $         ,-two_I, 0 , two_I, tji) !threej for i2 only has to be calculated one times here.
+      
+      sj=(2*jselect-(f1select-two_I))/2!startj offset
+      ej=((f1select+two_I)-2*jselect)/2!endj offset
+      
+      
+      !SET this up in dependence of atot!
+      qz  = 0!-atot(P_QZ,ib)  ! working hypothesis, sign change required to match previous outputs.
+      qd  = 0!-atot(P_QD,ib)  ! working hypothesis, sign change required to match previous outputs.
+      if (ib.le.2) then
+        qxy =atot(P_WQXY1,1)*(1.0) !Sign change to match relative signs in spfit output !these are offdiagonal nqcc matrix elements but used offdiagonal in v. Matrix elements offdiagonal in J neglected.
+        qyz =atot(P_WQYZ1,1)*(-1.0) !
+        qxz =atot(P_WQXZ1,1)*(-1.0) !
+      else if (ib.le.4) then
+        qxy =atot(P_WQXY3,3)* (1.0)
+        qyz =atot(P_WQYZ3,3)*(-1.0)
+        qxz =atot(P_WQXZ3,3)*(-1.0)
+      else if (ib.le.6) then
+        qxy =atot(P_WQXY5,5)* (1.0)
+        qyz =atot(P_WQYZ5,5)*(-1.0)
+        qxz =atot(P_WQXZ5,5)*(-1.0)
+      end if
+      chiq_r(0)=qz
+      chiq_i(0)=0.0 !no imaginary part for q=0 (elements diagonal in K must be real)
+      
+      chiq_r(1)=-(2.0/3.0)**0.5*(qxz)
+      chiq_i(1)=-(2.0/3.0)**0.5*(-qyz)
+      
+      chiq_r(-1)=(2.0/3.0)**0.5*(qxz) ! single sign change in real part
+      chiq_i(-1)=(2.0/3.0)**0.5*(qyz)! double sign change in imaginary part
+      
+      chiq_r(2) =(1.0/6.0)**0.5*(qd)
+      chiq_i(2) =(1.0/6.0)**0.5*(2*qxy)
+      chiq_r(-2)=chiq_r(2) !no sign change in real part for q=2
+      chiq_i(-2)=-chiq_i(2)     
+      
+
+      
+      !SET this up in dependence of atot!
+      
+      if ((jselect-sj).lt.0) sj=jselect
+       if (abs(f1select+2*(jselect-sj)).lt.two_I)then !The non existing states are characterized by F+J < I.
+       sj = -(two_I-f1select- 2*jselect)/2
+       end if 
+C    First adding the elements diagonal in j 
+
+      do j=jselect-sj,jselect+ej
+       cm=j-(jselect-sj)!count matrices
+       sizej=2*j+1 
+       h_sizes(cm+1)=sizej
+       sizepre=sum(h_sizes(:cm+1))-sizej
+      
+
+
+
+CC           Diagonal Elements delta J=0
+C 
+       if (dJ.eq.0) then
+       do kr=-j,j
+        do kc=-j,+j
+            ir = sizepre + kr + j + 1 + o2
+            ic = sizepre + kc + j + 1 + o1
+          if (ir.ge.ic) then
+          do q=-2,2    !the 5 cases for q.   
+           if ((-kc-q+kr).eq.0) then !triangle condition for tj symbol.
+            
+            call sixj(f1select,two_I,2*j,4,2*j,two_I,wsj)
+            totprod=wsj*((2*j+1)*(2*j+1))**0.5 !sj1*((2f1+1)*(2f1'+1))**0.5*sj2*((2j+1)*(2j+2))**0.5
+
+            call threej(2*j, 4, 2*j, -2*kc, -2*q , 2*kr, tj)
+            totprod=totprod*tj !sj1*((2f1+1)*(2f1'+1))**0.5*sj2*((2j+1)*(2j+2))**0.5*tj1
+            
+            tj=tji
+            totprod=totprod/tj
+            totprod=totprod/4
+            t2=2*kc+two_I+f1select+2
+            if(mod(t2,2).ne.0) then
+             write(0,*) "t2*2 is not even dj0nq1 DW", t2
+             stop
+            end if
+            t2=t2/2
+            totprod=totprod*(-1)**t2 !(-1)**t2*sj1*((2f1+1)*(2f1'+1))**0.5*sj2*((2j+1)*(2j+2))**0.5*tj1/tj2/4 ! only thing missing at this point is the chis.
+            
+
+            h_2(ir,ic)=h_2(ir,ic)+totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal
+            if (q.ne.0) then
+             h_2(ic,ir)=h_2(ic,ir)+totprod*chiq_i(-q) !upper triangle, imaginary.
+            end if
+           end if !check only those where non zero matrix elements are expected (see also the first wigner 3jsymbol for this condition)
+          end do !q
+             END IF
+         end do !ic
+        end do   !ir 
+        end if
+        
+        
+C           Off-Diagonal Elements delta J=1
+       if (dJ.eq.1) then
+       if ((j).le.(jselect+ej-1)) then !always between j and j+1, requires to go one less j in the loop
+       do kr=-j-1,j+1
+        do kc=-j,+j
+          do q=-2,2    !the 5 cases for q.
+           if ((-kc-q+kr).eq.0) then !triangle condition for tj symbol.
+            call sixj(f1select,two_I,2*j,4,2*(j+1),two_I,wsj)
+            totprod=wsj*((2*j+1)*(2*(j+1)+1))**0.5 !sj1*((2f1+1)*(2f1'+1))**0.5*sj2*((2j+1)*(2j+2))**0.5
+            call threej(2*j, 4, 2*(j+1), -2*kc, -2*q , 2*kr, tj) !also here. 
+            totprod=totprod*tj
+            tj=tji
+            totprod=totprod/tj
+            totprod=totprod/4
+            t2=2*kc+two_I+f1select+2+2*j+2*(j+1) 
+            if(mod(t2,2).ne.0) then
+             write(0,*) "t2*2 is not even, this can not be. dj2nq1", t2
+             stop
+            end if
+            t2=t2/2
+            totprod=totprod*(-1)**t2
+            
+            ir=sizepre+(2*j+1)+(kr+j+2) + o2
+            ic=sizepre+(kc+j+1)         + o1
+            ic2=sizepre+(2*j+1)+(kr+j+2) + o1
+            ir2=sizepre+(kc+j+1)         + o2
+            
+            h_2(ir,ic)= h_2(ir,ic)+totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal !row index shifts by 2j+1 +1 to match with the new K values
+            h_2(ir2,ic2)= h_2(ir2,ic2)+totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal !row index shifts by 2j+1 +1 to match with the new K values
+            if (q.ne.0) then
+             h_2(ic,ir)=  h_2(ic,ir)+totprod*chiq_i(-q) !upper triangle, imaginary.
+             h_2(ic2,ir2)= h_2(ic2,ir2)-totprod*chiq_i(-q) !sign change
+            end if
+            
+           end if !check only those where non zero matrix elements are expected (see also the first wigner 3jsymbol for this condition)
+          end do !q
+         end do !ic
+        end do   !ir 
+       end if ! condition for delta j=1
+       end if
+       
+C           Off-Diagonal Elements delta J=2
+       if (dJ.eq.2) then
+       if ((j).le.(jselect+ej-2)) then !always between j and j+2, requires to go two less j in the loop
+       do kr=-j-2,j+2
+        do kc=-j,+j
+          do q=-2,2    !the 5 cases for q.
+           if ((-kc-q+kr).eq.0) then !triangle condition for tj symbol.
+            call sixj(f1select,two_I,2*j,4,2*(j+2),two_I,wsj)
+            
+            totprod=wsj*((2*j+1)*(2*(j+2)+1))**0.5 !sj1*((2f1+1)*(2f1'+1))**0.5*sj2*((2j+1)*(2j+2))**0.5
+            
+            call threej(2*j, 4, 2*(j+2), -2*kc, -2*q , 2*kr, tj) !also here. 
+            
+
+            
+            
+            totprod=totprod*tj
+            tj=tji
+            totprod=totprod/tj
+            totprod=totprod/4
+
+            t2=2*kc+two_I+f1select+2+2*j+2*(j+2)  !stays same as for diagonal elements.
+            if(mod(t2,2).ne.0) then
+             write(0,*) "t2*2 is not even, this can not be. dj2nq1", t2
+             stop
+            end if
+
+            t2=t2/2
+            totprod=totprod*(-1)**t2
+            
+            ir=sizepre+(2*j+1)+(2*(j+1)+1)+(kr+j+3) + o2
+            ic=sizepre+(kc+j+1) + o1
+            ic2=sizepre+(2*j+1)+(2*(j+1)+1)+(kr+j+3) + o1
+            ir2=sizepre+(kc+j+1) + o2
+            
+
+            h_2(ir,ic)=h_2(ir,ic)+totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal !row index shifts by 2j+1 +1 to match with the new K values
+            h_2(ir2,ic2)=h_2(ir2,ic2)+totprod*chiq_r(-q) ! real matrix elements, lower triangle and diagonal !row index shifts by 2j+1 +1 to match with the new K values
+            if (q.ne.0) then
+             h_2(ic,ir)= h_2(ic,ir)+totprod*chiq_i(-q) !upper triangle, imaginary.
+             h_2(ic2,ir2)= h_2(ic2,ir2)-totprod*chiq_i(-q) !sign change
+            end if
+            
+           end if !check only those where non zero matrix elements are expected (see also the first wigner 3jsymbol for this condition)
+          end do !q
+         end do !ic
+        end do   !ir 
+       end if ! condition for delta j=2
+       end if
        
       end do !j
      
@@ -3456,66 +3673,25 @@ C       logical case12, case34
           gam2=gam
          end if
         end if
+        else
+         gam1=gam !v0.47
+         gam2=gam !v0.47
        end if
-       
-C       if (case12) then
-C        if (ibselect.eq.1) then
-C            if (ctlint(C_DW12SL).ne.0) then 
-C                if      (gam.eq.ctlint(C_DW12SL)) then
-C                gam2=ctlint(C_DW12SH)           
-C                end if
-C                if      (gam.eq.ctlint(C_DW12SH)) then
-C                gam2=ctlint(C_DW12SL)
-C                end if
-C            endif
-C        end if
-C        if (ibselect.eq.2) then
-C            if (ctlint(C_DW12SL).ne.0) then 
-C                if      (gam.eq.ctlint(C_DW12SL)) then
-C                gam1=ctlint(C_DW12SH)           
-C                end if
-C                if      (gam.eq.ctlint(C_DW12SH)) then
-C                gam1=ctlint(C_DW12SL)
-C                end if
-C            endif
-C        end if
-C       end if
-C
-C       if (case34) then
-C        if (ibselect.eq.1) then
-C            if (ctlint(C_DW34SL).ne.0) then 
-C                if      (gam.eq.ctlint(C_DW34SL)) then
-C                gam2=ctlint(C_DW34SH)           
-C                end if
-C                if      (gam.eq.ctlint(C_DW34SH)) then
-C                gam2=ctlint(C_DW34SL)
-C                end if
-C            endif
-C        end if
-C        if (ibselect.eq.2) then
-C            if (ctlint(C_DW34SL).ne.0) then 
-C                if      (gam.eq.ctlint(C_DW34SL)) then
-C                gam1=ctlint(C_DW34SH)           
-C                end if
-C                if      (gam.eq.ctlint(C_DW34SH)) then
-C                gam1=ctlint(C_DW34SL)
-C                end if
-C            endif
-C        end if
-C       end if
        
        if (gam1.gt.size(S_G)) gam1=gam ! Error correction 
        if (gam2.gt.size(S_G)) gam2=gam
        return 
        end
 C---------------------
-      subroutine addoffdiags_dw(off1,off2,ib,j,f1,al,au,h_2)!Subroutine to add vib-vib corilois coupling. Inputquanta:ib,j,f1, input al,au,h_2 -> output: h_2
-      implicit none                               !f1 is only needed for the deltaJ=0 offdiag quadrupole tensorelements for the first nucleus that are available for tunneling treament
+      subroutine addoffdiags_unidw(off1,off2,ib,j,f1,al,au,h_2)!Same as addoffdiags_dw but using DIMUNI in h_2. Does not containt offdiags in chi, which are moved to a dedicated different routine.
+      implicit none 
       
       include 'iam.fi'
       real*8  Gx,Gy,Gz,Fxy,Fxz,Fyz,Chixy,Chiyz,Chixz
+      real*8  FxyJ,FxzJ,FyzJ
+      real*8  FxyK,FxzK,FyzK
       real*8  al(DIMPAR), au(DIMPAR)
-      real*8  h_2(2*DIMTOT,2*DIMTOT) 
+      real*8  h_2(DIMUNI,DIMUNI)
       real*8  check1
       integer i, ik, j, f1, ib
       integer off1,off2 ! where to put the matrix elements in the input matrix
@@ -3523,6 +3699,7 @@ C---------------------
       real*8 e1          !this is used for the off-diag chi parameters neglecting off diags in J
       real*8 dj,djj1,df, dff1
       real*8 di, dii1,dg
+      integer kr, kc
       
       dj=dble(j)
       djj1=dj*(dj+1.0)
@@ -3554,9 +3731,21 @@ C            --- Sven 25-07-2024
       Fxy   = 0.0
       Fxz   = 0.0
       Fyz   = 0.0
-      Chixy = 0.0
-      Chixz = 0.0
-      Chiyz = 0.0
+      Chixy = 0.0 !not used here at the moment - in the future perhaps for no offdiag J option.
+      Chixz = 0.0 !not used here at the moment - in the future perhaps for no offdiag J option.
+      Chiyz = 0.0 !not used here at the moment - in the future perhaps for no offdiag J option.
+      FxyJ   = 0.0
+      FxzJ   = 0.0
+      FyzJ   = 0.0
+      FxyK   = 0.0
+      FxzK   = 0.0
+      FyzK   = 0.0
+      
+      
+      
+      
+      
+      
       if (ib.le.2) then
         Gz =al(P_GZ12)
         Gy =al(P_GY12)
@@ -3564,9 +3753,15 @@ C            --- Sven 25-07-2024
         Fxy=al(P_FXY1)
         Fxz=al(P_FXZ1)
         Fyz=al(P_FYZ1)
-        Chixy=al(P_WQXY1)*(-1.0) !Sign change to match relative signs in spfit output !these are offdiagonal nqcc matrix elements but used offdiagonal in v. Matrix elements offdiagonal in J neglected.
-        Chiyz=al(P_WQYZ1)*(-1.0) !
-        Chixz=al(P_WQXZ1)*(-1.0) !
+        FxyJ=al(P_FXYJ1)
+        FxzJ=al(P_FXZJ1)
+        FyzJ=al(P_FYZJ1)
+        FxyK=al(P_FXYK1)
+        FxzK=al(P_FXZK1)
+        FyzK=al(P_FYZK1)
+        Chixy=al(P_test1)*(-1.0) !
+        Chiyz=al(P_test2)*(-1.0) !
+        Chixz=al(P_test3)*(-1.0) !
       else if (ib.le.4) then
         Gz =al(P_GZ34)
         Gy =al(P_GY34)
@@ -3574,9 +3769,15 @@ C            --- Sven 25-07-2024
         Fxy=al(P_FXY3)  
         Fxz=al(P_FXZ3)!
         Fyz=al(P_FYZ3)!      
-        Chixy=al(P_WQXY3)*(-1.0)
-        Chiyz=al(P_WQYZ3)*(-1.0)
-        Chixz=al(P_WQXZ3)*(-1.0)
+        FxyJ=al(P_FXYJ3)
+        FxzJ=al(P_FXZJ3)
+        FyzJ=al(P_FYZJ3)
+        FxyK=al(P_FXYK3)
+        FxzK=al(P_FXZK3)
+        FyzK=al(P_FYZK3)
+c        Chixy=al(P_WQXY3)*(-1.0)
+c        Chiyz=al(P_WQYZ3)*(-1.0)
+c        Chixz=al(P_WQXZ3)*(-1.0)
       else if (ib.le.6) then
         Gz =al(P_GZ56)
         Gy =al(P_GY56)
@@ -3584,15 +3785,21 @@ C            --- Sven 25-07-2024
         Fxy=al(P_FXY5)  
         Fxz=al(P_FXZ5)!
         Fyz=al(P_FYZ5)!      
-        Chixy=al(P_WQXY5)*(-1.0)
-        Chiyz=al(P_WQYZ5)*(-1.0)
-        Chixz=al(P_WQXZ5)*(-1.0)
+        FxyJ=al(P_FXYJ5)
+        FxzJ=al(P_FXZJ5)
+        FyzJ=al(P_FYZJ5)
+        FxyK=al(P_FXYK5)
+        FxzK=al(P_FXZK5)
+        FyzK=al(P_FYZK5)
+c        Chixy=al(P_WQXY5)*(-1.0)
+c        Chiyz=al(P_WQYZ5)*(-1.0)
+c        Chixz=al(P_WQXZ5)*(-1.0)
       end if
        
 C     ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
       if (Gz .ne. 0.0) then
         do ik=1, 2*j+1
-          h_2(off1+ik,off2+ik)=Gz*1.0*(ik-1-j)! on complex off diag Gordy_Cook eq 7.135 p290 
+          h_2(off1+ik,off2+ik)=h_2(off1+ik,off2+ik)+Gz*1.0*(ik-1-j)! on complex off diag Gordy_Cook eq 7.135 p290 
         end do !  
       end if 
       if (Gy .ne. 0.0) then
@@ -3613,41 +3820,61 @@ C     ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
       end if
       
       !FXY is imaginary!Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
-      if ((Fxy .ne. 0.0).or.(Chixy .ne. 0.0)) then !and based on doi.org/10.1063/1.1677430
+      if ((Fxy .ne. 0.0).or.(Chixy .ne. 0.0).or.
+     $        (FxyJ .ne. 0.0).or.(FxyK .ne. 0.0)) then !and based on doi.org/10.1063/1.1677430
         do ik=1, 2*j-1
+
           if(j.eq.1)then
             fjn=(0.5*j*(j+1))**2
           else
             fjn=0.25*(j*(j+1)-(ik-j)*((ik-j)+1))
      $         *(j*(j+1)-(ik-j)*((ik-j)-1))
           end if 
-            h_2(off1+ik,off2+ik+2)=h_2(off1+ik,off2+ik+2) 
-     $       +sqrt(fjn)*(Fxy-2*Chixy*e1)
-            h_2(off1+ik+2,off2+ik)=h_2(off1+ik+2,off2+ik)
-     $        -1.0*sqrt(fjn)*(Fxy-2*Chixy*e1)
+            kr = ik-j-1
+            kc = kr+2
+            h_2(off1+ik,off2+ik+2)=h_2(off1+ik,off2+ik+2)+
+     $       sqrt(fjn)*
+     $           (Fxy+j*(j+1)*FxyJ+0.5*(kr**2+kc**2)*FxyK-2*Chixy*e1)
+     
+            h_2(off1+ik+2,off2+ik)=h_2(off1+ik+2,off2+ik)-
+     $       sqrt(fjn)*
+     $           (Fxy+j*(j+1)*FxyJ+0.5*(kr**2+kc**2)*FxyK-2*Chixy*e1)
         end do
       end if        
       
       ! FYZ is put on the imaginary
       if ((Fyz .ne. 0.0).or.(Chiyz .ne. 0.0)) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
         do ik=1, 2*j
+          kr = ik-j-1
+          kc = kr+1
+        
             h_2(off1+ik,off2+ik+1)=
-     $ h_2(off1+ik,off2+ik+1)+0.5*(2*(ik-1-j)+1)
-     $ *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*(Fyz-2.0*Chiyz*e1)
+     $       h_2(off1+ik,off2+ik+1)+
+     $ 0.5*(2*(ik-1-j)+1)
+     $ *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*
+     $     (Fyz+j*(j+1)*FyzJ+0.5*(kr**2+kc**2)*FyzK-2.0*Chiyz*e1)
+     
             h_2(off1+ik+1,off2+ik)=
-     $ h_2(off1+ik+1,off2+ik)-0.5*(2*(ik-1-j)+1)
-     $ *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*(Fyz-2.0*Chiyz*e1)
+     $       h_2(off1+ik+1,off2+ik)-
+     $0.5*(2*(ik-1-j)+1)
+     $ *(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5*
+     $     (Fyz+j*(j+1)*FyzJ+0.5*(kr**2+kc**2)*FyzK-2.0*Chiyz*e1)
         end do
       end if        
       !FXZ is put on the real
       if ((Fxz .ne. 0.0).or.(Chixz .ne. 0.0)) then !Based on Evaluation and optimal computation of angular momentum matrix elements: An information theory approach
         do ik=1, 2*j
-           h_2(off2+ik+1,off1+ik)=h_2(off2+ik+1,off1+ik)+(0.5* 
+          kc = ik-j-1
+          kr = kc+1
+           h_2(off2+ik+1,off1+ik)=h_2(off2+ik+1,off1+ik)+
+     $     (0.5* 
      $        (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
-     $         *(Fxz-2.0*Chixz*e1)
-            h_2(off2+ik,off1+ik+1)=h_2(off2+ik,off1+ik+1)+(0.5*
+     $        *(Fxz+j*(j+1)*FxzJ+0.5*(kr**2+kc**2)*FxzK-2.0*Chixz*e1)
+     
+            h_2(off2+ik,off1+ik+1)=h_2(off2+ik,off1+ik+1)+
+     $      (0.5*
      $         (2*(ik-1-j)+1)*(j**2+j-(ik-1-j)**2-(ik-1-j))**0.5)
-     $         *(Fxz-2.0*Chixz*e1)
+     $        *(Fxz+j*(j+1)*FxzJ+0.5*(kr**2+kc**2)*FxzK-2.0*Chixz*e1)
         end do
       end if        
       
@@ -3656,3 +3883,344 @@ C     ADDING OFF DIAGONAL ELEMENTS FOR GX, GY, GZ
 
       return 
       end
+C-------------------
+      subroutine shuffledw(hsdw,evhdws,nstore,nh, 
+     $                     counter1,counter2,cprint)
+
+      implicit none
+      include 'iam.fi'
+      integer cprint
+
+      integer nh
+      integer counter1,counter2
+      integer difcounters
+      real*8 hsdw(DIMDW,DIMUNI,DIMUNI)
+      real*8 evhdws(DIMDW,DIMUNI)
+      real*8 nstore(DIMDW,DIMUNI)
+      integer i,j,k
+      integer moveidx
+      integer nmove
+      integer c1,c2
+      integer changed
+      integer pass
+
+      real*8 fomold
+      real*8 fomnew
+      real*8 tolerance
+
+      tolerance=1.0d-3
+
+C=======================================================================
+C     STEP 1:
+C     Make the number of vectors in the two IBs equal.
+C=======================================================================
+      difcounters=(counter2-counter1)/2
+      if (difcounters.gt.0) then
+
+C        ib 2 contains too many vectors.
+C        Move the difcounters smallest nstore(2,:) entries
+C        from ib 2 to ib 1.
+
+         nmove=abs(difcounters)
+
+         do k=1,nmove
+         
+C           Find smallest nstore in ib 2.
+
+            moveidx=1
+            do i=2,counter2
+               if (nstore(2,i).lt.nstore(2,moveidx)) then
+                  moveidx=i
+               end if
+            end do
+
+C           Append this vector to ib 1.
+
+            counter1=counter1+1
+            do j=1,nh
+               hsdw(1,j,counter1)=hsdw(2,j,moveidx)
+            end do
+
+            evhdws(1,counter1)=evhdws(2,moveidx)
+            nstore(1,counter1)=nstore(2,moveidx)
+
+C           Remove it from ib 2 by shifting subsequent entries.
+
+            do i=moveidx,counter2-1
+
+               do j=1,nh
+                  hsdw(2,j,i)=hsdw(2,j,i+1)
+               end do
+
+               evhdws(2,i)=evhdws(2,i+1)
+               nstore(2,i)=nstore(2,i+1)
+
+            end do
+
+C           Clear last entry.
+
+            do j=1,nh
+               hsdw(2,j,counter2)=0.0d0
+            end do
+
+            evhdws(2,counter2)=0.0d0
+            nstore(2,counter2)=0.0d0
+
+            counter2=counter2-1
+
+         end do
+
+      else if (difcounters.lt.0) then
+
+C        IB 1 contains too many vectors.
+C        Move the smallest abs(difcounters) nstore(1,:) entries
+C        from IB 1 to IB 2.
+
+         nmove=abs(difcounters)
+
+         do k=1,nmove
+
+C           Find smallest nstore in IB 1.
+
+            moveidx=1
+
+            do i=2,counter1
+               if (nstore(1,i).lt.nstore(1,moveidx)) then
+                  moveidx=i
+               end if
+            end do
+
+C           Append this vector to IB 2.
+
+            counter2=counter2+1
+
+            do j=1,nh
+               hsdw(2,j,counter2)=hsdw(1,j,moveidx)
+            end do
+
+            evhdws(2,counter2)=evhdws(1,moveidx)
+            nstore(2,counter2)=nstore(1,moveidx)
+
+C           Remove it from IB 1 by shifting subsequent entries.
+
+            do i=moveidx,counter1-1
+
+               do j=1,nh
+                  hsdw(1,j,i)=hsdw(1,j,i+1)
+               end do
+
+               evhdws(1,i)=evhdws(1,i+1)
+               nstore(1,i)=nstore(1,i+1)
+
+            end do
+
+C           Clear last entry.
+
+            do j=1,nh
+               hsdw(1,j,counter1)=0.0d0
+            end do
+
+            evhdws(1,counter1)=0.0d0
+            nstore(1,counter1)=0.0d0
+
+            counter1=counter1-1
+
+         end do
+
+      end if
+
+C
+C     Checking if routine is broken 
+C
+
+      if (counter1.ne.counter2) then
+         write(*,*) 'ERROR shuffledw: unequal counters:',
+     $              counter1,counter2
+         return
+      end if
+
+C=======================================================================
+C     STEP 2:
+C     Calculate initial figure of merit.
+C=======================================================================
+
+      call calcdwfom(hsdw,nh,counter1,fomold)
+      if (cprint.eq.1) then
+      write(*,*) 'DW shuffle: initial FOM = ',fomold
+      end if
+
+C=======================================================================
+C     STEP 3:
+C
+C     Try exchanging every column of IB 1 with every column of IB 2.
+C     If a swap improves the FOM, keep it and restart from column 1.
+C     If no possible swap improves the FOM, we are finished.
+C=======================================================================
+
+      pass=0
+      changed = 1
+      do while ((changed.ne.0).and.(pass.le.200000))
+ 37      continue
+         pass=pass+1
+         if (pass.eq.199999) then
+          write(*,*) 'ERROR shuffledw: exceeding swap limit'
+         end if
+         do c1=1,counter1
+
+            do c2=1,counter2
+
+C              Exchange the two vectors.
+              if ((abs(nstore(1,c1)-0.5d0).lt.0.05d0).and. !only check those vectors thar are strongly mixed
+     $             (abs(nstore(2,c2)-0.5d0).lt.0.05d0)) then
+
+
+               call swapdw(hsdw,evhdws,nstore,nh,c1,c2)
+
+C              Calculate new FOM.
+
+               call calcdwfom(hsdw,nh,counter1,fomnew)
+
+C              Keep swap if it improves the FOM.
+
+               if (fomnew.lt.(fomold-tolerance)) then
+
+                  fomold=fomnew
+                  changed=1
+                  if (cprint.eq.1) then
+                  write(*,*) 'DW shuffle: accepted swap ',
+     $                       c1,c2,' FOM = ',fomold
+                  end if
+
+C                 Start comparison again from first column.
+                  goto 37
+
+               else
+
+C                 Swap did not improve FOM.
+C                 Undo the swap.
+
+                  call swapdw(hsdw,evhdws,nstore,nh,c1,c2)
+               end if
+              end if
+
+            end do
+
+         end do
+      changed = 0
+
+
+      end do
+      if (cprint.eq.1) then
+      write(*,*) 'DW shuffle: final FOM = ',fomold
+      write(*,*) 'DW shuffle: number of vectors = ',counter1
+      write(*,*) 'DW shuffle: swaps = ',pass
+      end if
+
+      return
+      end
+C-------------------
+      subroutine calcdwfom(hsdw,nh,ncol,fom)
+
+      implicit none
+      include 'iam.fi'
+
+      integer nh
+      integer ncol
+      real*8 hsdw(DIMDW,DIMUNI,DIMUNI)
+      real*8 fom
+      real*8 rowsum
+      integer ib
+      integer i
+      integer j
+      fom=0.0d0
+
+C=======================================================================
+C     For each row and each IB:
+C        rowsum = sum over all columns of hsdw**2
+C        FOM contribution = (rowsum - 1)**2
+C     Perfect assignment:
+C        rowsum = 1
+C     for every row, giving FOM = 0.
+C=======================================================================
+
+      do ib=1,2
+         do i=1,nh
+            rowsum=0.0d0
+
+            do j=1,ncol
+               rowsum=rowsum+hsdw(ib,i,j)**2
+            end do
+
+            fom=fom+(rowsum-1.0d0)**2
+         end do
+      end do
+
+      return
+      end
+C-------------------
+      subroutine swapdw(hsdw,evhdws,nstore,nh,c1,c2)
+
+      implicit none
+      include 'iam.fi'
+      integer nh
+      integer c1,c2
+      integer i
+      real*8 hsdw(DIMDW,DIMUNI,DIMUNI)
+      real*8 evhdws(DIMDW,DIMUNI)
+      real*8 nstore(DIMDW,DIMUNI)
+      real*8 tmp
+      real*8 tmpev
+      real*8 tmpn
+
+C=======================================================================
+C     Swap the vector in IB 1, column c1
+C     with the vector in IB 2, column c2.
+C=======================================================================
+
+      do i=1,nh
+         tmp=hsdw(1,i,c1)
+         hsdw(1,i,c1)=hsdw(2,i,c2)
+         hsdw(2,i,c2)=tmp
+      end do
+
+C     Eigenvalue.
+      tmpev=evhdws(1,c1)
+      evhdws(1,c1)=evhdws(2,c2)
+      evhdws(2,c2)=tmpev
+C     Stored IB weight.
+      tmpn=nstore(1,c1)
+      nstore(1,c1)=nstore(2,c2)
+      nstore(2,c2)=tmpn
+
+      return
+      end
+C---------------------
+       subroutine argsortEH(E,H,DIM_A,D) !herbers2026
+       implicit none
+C      Simple routine that takes array, sorts it Acending, and returns the flipped indixes positions, starting from 1 to D
+       integer DIM_A
+       real*8 E(DIM_A)
+       real*8 H(DIM_A,DIM_A)
+       
+       real*8 T,TI
+       real*8 TH
+       integer D
+       integer i,j,k
+        DO i=1,D-1
+           DO j=i+1,D
+              IF (E(i) .GT. E(j)) THEN
+                T = E(i)  
+                do k=1,D
+                    TH = H(k,i)
+                    H(k,i) = H(k,j)
+                    H(k,j) = TH
+                end do
+                E(i)=E(j) 
+                E(j) = T  
+              END IF
+           END DO
+        END DO
+  
+       return
+       end
+C---------------------
