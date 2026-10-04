@@ -1,3 +1,8 @@
+### Latest Update
+XIAM-2NQ v1.01 - 04-Ocotber-2026<br>
+A minor speed-up update, with speedups on the order of **20% for selected NQC/tunneling problems**. The [example repository](https://github.com/SvenHerbers/XIAM-2NQ_Examples) is kept at v1.00 for now, since the outputs do not change.<br>
+For a detailed version history, see below.
+
 # XIAM-2NQ
 XIAM-2NQ is a spectral fitting program for molecules containing up to **two quadrupolar nuclei**, **four internal rotors**, and **up to one double-well** like tunneling motion. It extends the original XIAM code by Hartwig which is available at the [PROSPE](http://info.ifpan.edu.pl/~kisiel/prospe.htm) website.  
 This repository provides the complete source code required to build the program. A makefile is included for straightforward compilation on Linux systems. Alternatively, the source files can be compiled step-by-step using the Intel ifx compiler.
@@ -273,7 +278,19 @@ Pickett type Coriolis coupling parameters go well with vibrationally off-diagona
 | `FxyK12,...` | `Pickett type Coriolis coupling parameters multiplied with 'Pz**2'` |
 | `ch1xy12,ch1xy34,ch1xy56,ch1yz12,ch1yz34,ch1yz56,ch1xz12,ch1xz34,ch1xz56` | `Quadrupole coupling terms for first nucleus, but used off-diagonal in vibration. These parameters go well with Pickett type Coriolis parameters.` |
 | `ch2xy12,ch2xy34,ch2xy56,ch2yz12,ch2yz34,ch2yz56,ch2xz12,ch2xz34,ch2xz56` | `Quadrupole coupling terms for second nucleus, but used off-diagonal in vibration. These parameters go well with Pickett type Coriolis parameters.` |
-## Update Notes
+## Version History
+
+XIAM-2NQ v1.01 - 04-Ocotber-2026<br>
+A minor speed-up update, with speedups on the order of **20% for selected NQC/tunneling problems**. The [example repository](https://github.com/SvenHerbers/XIAM-2NQ_Examples) is kept at v1.00 for now, since the outputs do not change.<br>
+**Changes:**<br>
+  - In `iam.f`: followed the compiler recommendation for the *"Recommended relationship between field width 'W' and the number of fractional digits 'D'"* in several cases. This adds some spaces in front of some numbers in the output file.<br>
+  - In `iamv.f`, subroutine `calvjk_uni`: removed initialization of `hs` and completely removed the arrays `uhs` and `uevhs`, since they were not used. This accounts for the majority of the observed speedup.<br>
+  - In `iamv.f`: tightened the initialization dimension `initdim` to the actual matrix size.<br>
+  - In `iamv.f`: added a program termination interrupt for cases where `tun` is true and `DIMDW` is not set, to handle this case explicitly.
+  - In `iamv.f`: modified the `DIMUNI` vs. `size(S_H)` termination interrupt to use the precise `size(S_H)`.<br>
+  - In `iamv.f`: modified the addition of `h_2NQ1` and `uh_2NQ1` to match the used dimensions:<br>
+  ```h_2(:size(S_H),:size(S_H)) = h_2(:size(S_H),:size(S_H)) + h_2NQ1(:size(S_H),:size(S_H))```
+
   XIAM-2NQ v1.00 - 06-September-2026 <br>
     
   This release represents a major extension and restructuring of XIAM-2NQ since v0.46b. The main focus has been the merging of tunneling and quadrupole subroutines into a single subroutine `calvjk_uni`, the extension of vibrationally off-diagonal quadrupole and Coriolis interactions, and improved handling of state mixing and matrix dimensions.
@@ -309,11 +326,6 @@ Pickett type Coriolis coupling parameters go well with vibrationally off-diagona
   - Fixed a bug that caused an unnecessary `NULL` and `0` to be printed at the end of the control parameter summary. This was resolved by setting `parameter (C_LAST = 30)` in `iam.fi`.
   - Added the compile-time dimension `DIMUNI` to `iam.fi`, which defines the maximum matrix size allocated for quadrupole (`NQ`) treatments. Previously, this limit was hard-coded as `DIMQ*DIMQ2*DIMTOT`.
   - Added a printout of all compile-time dimensions to the output files, making it easier to verify whether a particular compiled XIAM executable is suitable for a given problem.
-
-  13-June-2026 - recompilation of v0.44 <br>
-  - The previously uploaded executable did not correspond to the provided `iam.fi` file. It was instead compiled for the treatment of excited torsional states in dimethyloxirane (see the [example directory](https://github.com/SvenHerbers/XIAM-2NQ_Examples/tree/main/23Dimethyloxirane) ).
-  - The executable has been recompiled and reuploaded so that it matches the supplied `iam.fi`.
-  - Executables compiled with `DIMVV` not equal to 1, including the previously uploaded compilation of v0.44, may give incorrect intensity predictions or no intensity output when quadrupole coupling is present.
 
   XIAM-2NQ v0.44 - 19-April-2026 <br>
   This release introduces a necessary bug fix for the migration from `ifort` to `ifx`, along with general code cleanup and performance improvements.
@@ -376,10 +388,6 @@ This has been corrected to `4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F+ift))` ensuring th
   - Reorded print-out of parameters to group them together by J,K,-,JJ,JK,KK,-j,-k,zx.
   - Streamlined matrix initialization and Hamiltonian construction in the exact quadrupole-coupling routines. For quadrupole-containing fits, this leads to noticeable performance improvements: from a few percent up to a factor of ~5, depending on `iam.fi` pre-compilation settings and the dataset.
 
-  28-January-2026
-  - Updated Example-Methylformate fit of the subset of v=0, Jmax=50, Kamax=20 lines. The unweighted rms of XIAM on this subset is 95 kHz; RAM36 global fits on the complete set of lines yield 71 kHz rms within this subset. 
-  - Added a fit to Example-Methylformate treating the *complete* set (49 parameters, Jmax=62, Kamax=27, fmax= 668.1 GHz, fmin= 1.6 GHz, 6976 assignments) of v=0 lines from the v=0,1 dataset of lines provided in V. Ilyushin, et al. J. Mol. Spectrosc. 255, 32–38 (2009) DOI: [10.1016/j.jms.2009.01.016](https://doi.org/10.1016/j.jms.2009.01.016). The unweighted rms of XIAM fits on this subset is 145 kHz; RAM36 global fits on the complete set of lines yield 75 kHz rms within this subset. 
-
   XIAM-2NQ v0.34 - 25-January-2026
   - Many new parameters available in Hird and Hir, parameter table will be updated in the following days.
 
@@ -412,15 +420,12 @@ It follows a list of changes compared to original XIAM, the original documentati
 for completeness.<br/> 
 New control parameters:  
 
-     ctrl (default 3)    If spin is not 0 this switches exact quadrupole coupling on (3) or off (0) 
+     ctrl (selected based on input file) If spin is not 0 this switches exact quadrupole coupling on (3) or off (0) 
                            by discarding matrix elements off-diagonal in J.                       
      ctrl 0 : Switches to XIAM_mod - matrix elements off-diagonal in J are ignored. It allows for 
                 analytical gradients for rigid rotor parameters and an increase in the torsional basis 
-                if DIMVV > 1 is used pre-compilation.
-     ctrl 1 : Sets up an experimental treatment of an uncoupled double well, without exact quadrupole 
-                treatment, which is currently still being tested. Analytical gradients not implemented.          
-     ctrl 2 : not used                      
-     ctrl 3 : Exact quadrupole treatment, analytical gradients not implemented, increase in torsional 
+                if DIMVV > 1 is used pre-compilation.              
+     ctrl 3 : Exact quadrupole treatment and/or tunneling, analytical gradients not implemented, increase in torsional 
                 basis (e.g. "V 0 1  V 1 0") not implemented.
      qsum    (default 1000) partition function for SPCAT-type intensities.
      fsort   (default 3) This controls at which stage the F1 quantum number is assigned, relevant only
@@ -429,6 +434,14 @@ New control parameters:
      fsort 1: Case I for A and E species
      fsort 2: Case II for A and E species
      fsort 3: Case I for A species and Case II for E species
+     nfold1, nfold2, nfold3, nfold4 : allows to set nfold for each rotor separately if deviating from nfold.
+     DWSoff   (default 0) Control parameter to handle tunneling if tunneling happens between different internal rotation species
+     DWSoff 0: tunneling happens between S 1 <-> S1    S 2 <-> S 2 ... etc of the upper and lower tunneling state
+     DWSoff 1: tunneling happens between S 1 <-> S2    S 2 <-> S 1  S 3 <-> S 3    S 3 <-> S 3  etc...
+     DWVoff  (default 0) Control parameter to turn on or off recalculation of internal rotation part for the different tunneling states.
+     DWVoff 1: internal rotation part recalculated in DW routine for upper and lower state (recommended if Rotational constants or internal rotation parameters are floated as independent parameters). It comes with increased computational costs.
+     DWVoff 0: internal rotation part is assumed the same for upper and lower state in DW treatment. Recommended if rotational constants and internal rotation parameters are the same for upper and lower state, or if deviating only little. 
+     
 
      altering fsort might help if quantum number confusions are encounter (not uncommon in cases where 
      F1 is far from being a good quantum number)
