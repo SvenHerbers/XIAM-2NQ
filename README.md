@@ -406,11 +406,11 @@ This has been corrected to `4.0d0*a(P1_VN1+ift)/(9.0d0*a(P1_F+ift))` ensuring th
   XIAM-2NQ v0.24 - 31-Jan-2025 
   A small update to the iamint.f file:
   - An error was fixed that caused int 3 predictions to not work if no spin was present.
-  - Modifications were made to allow for intensitiy predictions with J>100, if iam.fi 
+  - Modifications were made to allow for intensity predictions with J>100, if iam.fi 
     is modified accordingly and XIAM is recompiled. 
 
   XIAM-2NQ v0.23 - 6-Jan-2025
-  This is an updated version of XIAM-NQ with severale changes, the most important one
+  This is an updated version of XIAM-NQ with several changes, the most important one
 being the implementation of exact quadrupole coupling for two nuclei. 
 
 
@@ -430,14 +430,14 @@ New control parameters:
      qsum    (default 1000) partition function for SPCAT-type intensities.
      fsort   (default 3) This controls at which stage the F1 quantum number is assigned, relevant only
              for the two nuclei case. Case I: Separate by blocks of even and odd K as well as Wang signs
-             first. Case II: use only separte blocks of even and odd K.
+             first. Case II: use only separate blocks of even and odd K.
      fsort 1: Case I for A and E species
      fsort 2: Case II for A and E species
      fsort 3: Case I for A species and Case II for E species
      nfold1, nfold2, nfold3, nfold4 : allows to set nfold for each rotor separately if deviating from nfold.
      DWSoff   (default 0) Control parameter to handle tunneling if tunneling happens between different internal rotation species
      DWSoff 0: tunneling happens between S 1 <-> S1    S 2 <-> S 2 ... etc of the upper and lower tunneling state
-     DWSoff 1: tunneling happens between S 1 <-> S2    S 2 <-> S 1  S 3 <-> S 3    S 3 <-> S 3  etc...
+     DWSoff 1: tunneling happens between S 1 <-> S2    S 2 <-> S 1  S 3 <-> S 4    S 4 <-> S 3  etc...
      DWVoff  (default 0) Control parameter to turn on or off recalculation of internal rotation part for the different tunneling states.
      DWVoff 1: internal rotation part recalculated in DW routine for upper and lower state (recommended if Rotational constants or internal rotation parameters are floated as independent parameters). It comes with increased computational costs.
      DWVoff 0: internal rotation part is assumed the same for upper and lower state in DW treatment. Recommended if rotational constants and internal rotation parameters are the same for upper and lower state, or if deviating only little. 
@@ -487,7 +487,7 @@ Intensity calculations <br/>
 XIAM-2NQ uses 2I as input for control parameter 'spin', it also uses 2F as input for the quantum number 'F'.
 
 
-XIAM_mod parameters: The additional empirical disortion parameters (Dc3K and Dc3-) available in 
+XIAM_mod parameters: The additional empirical distortion parameters (Dc3K and Dc3-) available in 
                      XIAM_mod are also available in XIAM-NQ. 
 Internal rotation overall - rotation distortion operator in XIAM_mod:
 <pre>
