@@ -14,8 +14,6 @@ C     fistat > 0  Eigenvalues for differential quotient
       real*8  al(DIMPAR), au(DIMPAR)
       integer gam1, gam2
       integer ibl, ibu, ibselect
-      real*8  uhs(DIMQ2,DIMQT,DIMTOT,DIMTOT)
-      real*8  uevhs(DIMQ2,DIMQT,DIMTOT)                    
       real*8  uh_2(DIMQ*DIMTOT,DIMQ*DIMTOT) 
       real*8  uh_2NQ1(DIMQ*DIMTOT,DIMQ*DIMTOT)
       real*8  uh_3(DIMUNI,DIMUNI) !h2024
@@ -35,7 +33,8 @@ C     quantum unumbers
       integer Difcounters         ! used to fix assignment when it breaks down
       logical DWfixflag           ! used to fix assignment when it breaks down
       real*8  nstore(DIMDW,DIMUNI)! used to fix assignment when it breaks down
-      integer j, gam, f, ib, npar, fistat, is, f1, k, p, w, Temp                    
+      integer j, gam, f, ib, npar, fistat, is, f1, k, p, w, n, Temp                    
+      integer ie,i,itop,ivr,ivc,it1,it2
       integer startf1, endf1
       integer jselect
       integer f1select, D2
@@ -44,7 +43,6 @@ C     quantum unumbers
       integer cm2
       integer minJ,maxJ
       integer ocpied
-      integer n
       real*8  hs(DIMQ2,DIMQT,DIMTOT,DIMTOT)
       real*8  evhs(DIMQ2,DIMQT,DIMTOT)                    
       real*8  h_2(DIMQ*DIMTOT,DIMQ*DIMTOT) 
@@ -105,7 +103,6 @@ C      real*8  dedp(DIMPAR) ! not used but maybe later
       integer check2
       integer results
       integer results2
-      integer ie,i,itop,ivr,ivc,it1,it2
       integer eused(DIMTOT), ierr
       integer ruse(DIMVV,DIMVV,DIMTOP)
       integer mycounters(DIMQ2,DIMQT)
@@ -156,35 +153,30 @@ C      character*6 fnpost
      $ "even or both must be odd, stopping the program."             !Some program termination conditions for input errors.
        stop                                                          !Some program termination conditions for input errors.
       end if                                                         !Some program termination conditions for input errors.
-      if ((2*DIMJ).le.(f+ctlint(C_SPIN2))) then                      !An extra condition checking for DIMJ.
+      if ((2*DIMJ).le.(f+ctlint(C_SPIN2))) then                       
        if (ctlint(C_SPIN2).gt.0) then                                !An extra condition checking for DIMJ.
        write(*,*) "DIMJ too small for input f, stopping program"     !An extra condition checking for DIMJ.
         stop                                                         !An extra condition checking for DIMJ.
        end if                                                        !An extra condition checking for DIMJ.
       end if                                                         !An extra condition checking for DIMJ.
-      if ((DIMUNI).le.((2*jselect+1)*
-     $       (ctlint(C_SPIN2)+1)*(ctlint(C_SPIN)+1))) then                  !An extra condition checking for DIMUNI
-       if (ctlint(C_SPIN2).gt.0) then                                 
-       write(*,*) "DIMUNI too small. Increase its value in",
-     $ "iam.fi before compilation."      
-        stop                                                         
-       end if                                                        
-      end if                                                         
+      if (tun) then                                                   
+       if (DIMDW.lt.2) then                                          !An extra condition checking for DIMDW.
+       write(*,*) "DIMDW not 2 but tunneling parameters used,",      !An extra condition checking for DIMDW.
+     $            " stopping program"                                !An extra condition checking for DIMDW.
+        stop                                                         !An extra condition checking for DIMDW.
+       end if                                                        !An extra condition checking for DIMDW.
+      end if                                                         !An extra condition checking for DIMDW.
       
       
       
 C      h_2=0.0
-      hs=0.0! (:ctlint(C_SPIN),:(ctlint(C_SPIN)+ctlint(C_SPIN2)),:,:) dimension restriction didnt cause speedup in intialization.
+C      hs=0.0! removal speed up - Diethylamine: 21%
       evhs=0.0
       normis=0.0
       mycounters=1
       wF1s=-1
       nF1s=0.0
       
-      if (tun) then
-       uhs=0.0! (:ctlint(C_SPIN),:(ctlint(C_SPIN)+ctlint(C_SPIN2)),:,:) dimension restriction didnt cause speedup in intialization.
-       uevhs=0.0
-      end if
       
       if (tun) then
       
@@ -228,12 +220,6 @@ C      h_2=0.0
       gam2=gam
       al=atot(:,ib) ! if no tunneling is used, the lower state is only computed, which is set to the input state. There is no upper state.
       end if 
-      
-      
-      
-      
-      
-
       startf1=f-ctlint(C_SPIN2)
       endf1=(f+ctlint(C_SPIN2))
       if (startf1.lt.0) then
@@ -261,7 +247,6 @@ C      h_2=0.0
        minJ = jselect
        maxJ = jselect
       end if
-
       !!! for non existing J/F states with J>jselect no matrix has to be built up
       if (ctlint(C_EVAL).gt.3)   masave=.true.
 
@@ -294,32 +279,49 @@ C      h_2=0.0
           end if
         end do
       end do
-
-
-
-
-
+      
+      !!! Herbers 2026 - changed computation of initdim, and moved case for DIMUNI-too-small-interrupt
+      size(s_h)=0 !here s_h will be used to store the total size of the nqc,tun matrix, later it will be overwritten and have different meaning throughout this function
+      do f1=startf1,endf1,2 ! uses a step size of 2
+       cm=(f1-startf1)/2!count matrices
+       sj=(2*jselect-(f1-ctlint(C_SPIN)))/2!startj offset
+       ej=((f1+ctlint(C_SPIN))-2*jselect)/2!endj offset
+       if ((jselect-sj).lt.0) sj=jselect   ! the start incidces and end indices for the F1 matrix depend on the f1 used
+       if (abs(f1+2*(jselect-sj)).lt.ctlint(C_SPIN))then !The non existing states are characterized by F+J < I.
+        sj = -(ctlint(C_SPIN)-f1- 2*jselect)/2
+       end if 
+       if (f1select.eq.-1) then
+        sj=0
+        ej=0
+       end if
+       do j=jselect-sj,jselect+ej                   
+        if (j.ge.0) size(s_h)=size(s_h)+2*j+1       
+       end do                                       
+      end do
+      if ((DIMUNI).lt.(size(s_h))) then                  !An extra condition checking for DIMUNI
+       write(*,*) "DIMUNI too small. Increase its value in",
+     $ "iam.fi before compilation."      
+        stop                                                         
+      end if                                                        
+      initdim=size(s_h)  ! Initiallization dimensions for NQ2 matrices.
+                         ! Tunneling will be included manually for tunh_4
+                         
 C------Construction of Htot Starts
 C------Construction of Htot Starts  
 C------Construction of Htot Starts
       noJsinF1s=0
       nJPPMinF1=0
       h_2_sizes=0
-C      h_3NQ2=0.0
-C      h_3 =0.0  
-C      
-      initdim = ((2*maxJ+1)               ! close to max dimension, but a bit overestimating
-     $          * (ctlint(C_SPIN2) + 1)   ! init speed could still be improved tayloring this closer
-     $          * (ctlint(C_SPIN) + 1))    ! to the actual matrix size
-      if (initdim .ge. DIMUNI) then
-         initdim = DIMUNI
-      end if
+
+C      if (initdim .ge. DIMUNI) then ! DIMUNI termination statement makes this not required.
+C         initdim = DIMUNI
+C      end if
       h_3NQ2(1:initdim,1:initdim) = 0.0
       h_3(1:initdim,1:initdim) = 0.0
       if (tun) then
           uh_3NQ2(1:initdim,1:initdim)=0.0
           uh_3(1:initdim,1:initdim) =0.0
-          tunh_4(1:DIMDW*initdim,1:DIMDW*initdim) = 0.0
+          if (tun) tunh_4(1:DIMDW*initdim,1:DIMDW*initdim) = 0.0
       end if 
       
       
@@ -356,15 +358,24 @@ C       h_2=0.0 ! is reinitilaized in nqvmat_ir anyway
        
        
        if (ctlint(C_SPIN).ne.0) then !I1 != 0
-       call nqcmat_NQ1(jselect,f1,ibl,h_2NQ1,atot,ctlint(C_SPIN)) ! This builds the Matrix elements for HQ1, these are all diagonal in F1.
-       h_2=h_2+h_2NQ1 ! adding first nucleus hamiltonian 
+       size(s_h)=0                                  ! compute size for nqcmat_NQ1 subroutine and workspace limitations.
+       do j=jselect-sj,jselect+ej                   
+        if (j.ge.0) size(s_h)=size(s_h)+2*j+1       
+       end do                                       
+       
+       call nqcmat_NQ1(jselect,f1,ibl,h_2NQ1,atot,
+     $  ctlint(C_SPIN),size(s_h)) ! This builds the Matrix elements for HQ1, these are all diagonal in F1.
+       h_2(:size(S_H),:size(S_H))=h_2(:size(S_H),:size(S_H))+
+     $  h_2NQ1(:size(S_H),:size(S_H)) ! adding first nucleus hamiltonian 
        if (tun) then 
-        call nqcmat_NQ1(jselect,f1,ibu,uh_2NQ1,atot,ctlint(C_SPIN)) ! if tunneling is active also set the NQ1 matrix up (for first nucleus) for the upper state u
-        uh_2=uh_2+uh_2NQ1 
+        call nqcmat_NQ1(jselect,f1,ibu,uh_2NQ1,atot,
+     $  ctlint(C_SPIN),size(s_h)) ! if tunneling is active also set the NQ1 matrix up (for first nucleus) for the upper state u
+       uh_2(:size(S_H),:size(S_H))=uh_2(:size(S_H),:size(S_H))+
+     $  uh_2NQ1(:size(S_H),:size(S_H)) ! adding first nucleus hamiltonian 
        end if
        end if                        !End I1 != 0
      
-       size(s_h)=0  
+C       size(s_h)=0  
        do j=jselect-sj,jselect+ej ! the sizes depend on the specific F1 also.
          cm2=j-minJ
          noJsinF1s(cm2+1,cm+1)=noJsinF1s(cm2+1,cm+1)+2*j+1  !will later be used in quantum number assignments...
@@ -378,7 +389,7 @@ C       h_2=0.0 ! is reinitilaized in nqvmat_ir anyway
            nJPPMinF1(cm2+1,1,1,cm+1)=nJPPMinF1(cm2+1,1,1,cm+1)+1 ! one with odd one with even wang factor
           end if
          end do
-         if (j.ge.0) size(s_h)=size(s_h)+2*j+1             ! 
+C         if (j.ge.0) size(s_h)=size(s_h)+2*j+1             ! 
        end do
        ocpied=sum(h_2_sizes)
        h_2_sizes(cm+1)=size(s_h)
@@ -2980,10 +2991,11 @@ CC
       
       
 C------------------------------------------------------------------  
-      subroutine nqcmat_NQ1(jselect,f1select,ib,h_2,atot,two_I)
+      subroutine nqcmat_NQ1(jselect,f1select,ib,h_2,atot,two_I,D)
 C      Same as nqcmat_NQ2, but for testing if the old implementation can be changed with this new one for a single nucleus (general expression vs explicit matrix elelemts)
 C      arguments change a bit compared to NQ2, since the wigner symbols also change, ie f is not used anymore, also i give spin and quadrupole coupling tensor components as 
 C      arguments here, so I can swap for testing purposes
+C      D - Size of matrix space (all j submatrices) to limit initalization !Herbers2026
        implicit none
        include 'iam.fi'
        real*8 h_2(DIMQ*DIMTOT,DIMQ*DIMTOT)
@@ -3000,6 +3012,7 @@ C      arguments here, so I can swap for testing purposes
        integer kc,kr ! K quantum numbers for the matrix elements (columns and rows)
        integer t2    !determins the exponent on the (-1) prefactor.
        integer two_I !replaces ctlint(C_SPIN) in this subroutine
+       integer D
        
        real*8 di,dii1,df,dff1 ! first nucleus
        real*8 tj,wsj !output from wigner 3j and wigner 6j soubroutine.
@@ -3012,7 +3025,7 @@ C      arguments here, so I can swap for testing purposes
        
        real*8 totprod    !total value of matrix element
        
-      h_2=0.0
+      h_2(:D,:D)=0.0 ! Herbers2026 D=size_SH is the size of all the j submatrices involved here, must be computed before calling this subroutine.
       
       call threej(two_I, 4, two_I
      $         ,-two_I, 0 , two_I, tji) !threej for i2 only has to be calculated one times here.
@@ -3292,9 +3305,6 @@ C    First adding the elements diagonal in j
        h_sizes(cm+1)=sizej
        sizepre=sum(h_sizes(:cm+1))-sizej
       
-
-
-
 CC           Diagonal Elements delta J=0
 C 
        if (dJ.eq.0) then
@@ -3740,12 +3750,6 @@ C            --- Sven 25-07-2024
       FxyK   = 0.0
       FxzK   = 0.0
       FyzK   = 0.0
-      
-      
-      
-      
-      
-      
       if (ib.le.2) then
         Gz =al(P_GZ12)
         Gy =al(P_GY12)
@@ -3759,9 +3763,9 @@ C            --- Sven 25-07-2024
         FxyK=al(P_FXYK1)
         FxzK=al(P_FXZK1)
         FyzK=al(P_FYZK1)
-        Chixy=al(P_test1)*(-1.0) !
-        Chiyz=al(P_test2)*(-1.0) !
-        Chixz=al(P_test3)*(-1.0) !
+C        Chixy=al(P_test1)*(-1.0) !
+C        Chiyz=al(P_test2)*(-1.0) !
+C        Chixz=al(P_test3)*(-1.0) !
       else if (ib.le.4) then
         Gz =al(P_GZ34)
         Gy =al(P_GY34)

@@ -68,8 +68,8 @@ C     real*8  ab(DIMPAR)
       write(*,'(2A)') 
      $'==============================================================',
      $'======='
-      write(*,'(A)') '                         XIAM-2NQ v1.00'
-      write(*,'(A)') '                           2026/09/06'
+      write(*,'(A)') '                         XIAM-2NQ v1.01'
+      write(*,'(A)') '                           2026/10/04'
       write(*,'(2A)') 
      $'==============================================================',
      $'======='
@@ -343,7 +343,7 @@ C--   set deriv to 3 at the the first time; deriv is set to 2 later on.
         if ((sigsq.lt.sigsqold).and.(myand(ctlint(C_XPR),XP_CC).ne.0))
      $       xcy=1
 
-        write(*,'(A,D12.6,A,F8.6,A,I2)')
+        write(*,'(A,D13.6,A,F8.6,A,I2)')
      $       ' Sigma:',sqrt(sigsq)
      $       ,'  Sigma/OldSigma:',sqrt(sigsq/sigsqold)
      $       ,'  conv:',iconv
@@ -423,7 +423,7 @@ C --  if convergence is achived: fstat=-1 to calc. the errors
           end if
         end do
  60     continue
-        write(*,'(/,A,I3,A,F6.4,A,D9.3,A,D9.3)')
+        write(*,'(/,A,I3,A,F6.4,A,D10.3,A,D10.3)')
      $       ' indep.par:',nsvfit,
      $       ' stepw:',stepw,
      $       ' lambda:',ctlpar(C_LMBDA),
@@ -434,7 +434,7 @@ C --  if convergence is achived: fstat=-1 to calc. the errors
           write(*,'(/,A,A,/)') ' Eigenvalues and '
      $         ,'Eigenvector Matrix of SVD-FIT '
           do i = 1, nfit
-            write(*,'(1D12.6,2X,30F6.3)') w(i),
+            write(*,'(1D13.6,2X,30F6.3)') w(i),
      $           (evec(j,i),j=1,nfit)
           end do
         end if        
@@ -573,7 +573,7 @@ C --  stop here if convergence
       write(*,'(/,A,A,/)') ' Eigenvalues and '
      $     ,'Eigenvector Matrix of SVD-FIT '
       do i = 1, nfit
-        write(*,'(1D12.6,2X,30F6.3)') w(i),
+        write(*,'(1D13.6,2X,30F6.3)') w(i),
      $       (evec(j,i),j=1,nfit)
       end do
 
